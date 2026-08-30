@@ -92,11 +92,12 @@
 
     .thumb-wrapper {
       position: relative;
-      width: 80px;
-      height: 60px;
-      border-radius: 4px;
+      width: 90px;
+      height: 65px;
+      border-radius: 6px;
       overflow: hidden;
       background: #000;
+      flex-shrink: 0;
     }
 
     .thumb-wrapper img {
@@ -111,10 +112,10 @@
       left: 4px;
       background: var(--accent);
       color: white;
-      font-size: 0.65rem;
+      font-size: 0.6rem;
       font-weight: bold;
-      padding: 2px 6px;
-      border-radius: 4px;
+      padding: 2px 5px;
+      border-radius: 3px;
       text-transform: uppercase;
     }
 
@@ -122,11 +123,15 @@
       display: flex;
       flex-direction: column;
       gap: 4px;
+      overflow: hidden;
     }
 
     .model-name {
       font-weight: bold;
-      font-size: 0.95rem;
+      font-size: 0.9rem;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
 
     .model-status {
@@ -159,7 +164,6 @@
   <div class="layout">
     <main>
       <div class="player-container" id="player">
-        <!-- Modèle chargé par défaut -->
         <iframe 
           src="https://chaturbate.com/embed/sweet_statue/" 
           allow="autoplay; fullscreen" 
@@ -169,30 +173,36 @@
     </main>
 
     <aside class="sidebar">
-      <h2>Sélectionner un Modèle</h2>
+      <h2>Modèles en vedette</h2>
       <div class="models-list">
 
-        <!-- Modèle 1 (Remplace par le pseudo réel) -->
+        <!-- Carte Modèle 1 -->
         <div class="model-card" onclick="loadModel('sweet_statue')">
           <div class="thumb-wrapper">
-            <img src="https://roomimg.stream.highwebmedia.com/ri/sweet_statue.jpg" alt="sweet_statue" onerror="this.src='https://ssl.cdn-chaturbate.com/static/default_profile.gif'">
+            <img 
+              src="https://cbjpeg.stream.highwebmedia.com/stream?room=sweet_statue" 
+              alt="sweet_statue"
+              onerror="handleImageError(this)">
             <span class="live-badge">Live</span>
           </div>
           <div class="model-info">
             <span class="model-name">sweet_statue</span>
-            <span class="model-status"><span class="status-dot"></span> Regarder le flux</span>
+            <span class="model-status"><span class="status-dot"></span> En direct</span>
           </div>
         </div>
 
-        <!-- shiny_lily -->
-        <div class="model-card" onclick="loadModel('shiny_lily)">
+        <!-- Carte Modèle 2 -->
+        <div class="model-card" onclick="loadModel('olsenspring)">
           <div class="thumb-wrapper">
-            <img src="https://roomimg.stream.highwebmedia.com/ri/shiny_lily.jpg" alt="shiny_lily" onerror="this.src='https://ssl.cdn-chaturbate.com/static/default_profile.gif'">
+            <img 
+              src="https://cbjpeg.stream.highwebmedia.com/stream?room=olsenspring" 
+              alt="olsenspring"
+              onerror="handleImageError(this)">
             <span class="live-badge">Live</span>
           </div>
           <div class="model-info">
-            <span class="model-name">shiny_lily</span>
-            <span class="model-status"><span class="status-dot"></span> Regarder le flux</span>
+            <span class="model-name">olsenspring</span>
+            <span class="model-status"><span class="status-dot"></span> En direct</span>
           </div>
         </div>
 
@@ -210,6 +220,16 @@
           allowfullscreen>
         </iframe>
       `;
+    }
+
+    // Gestion du fallback si l'image ne charge pas (ex: modèle hors ligne)
+    function handleImageError(img) {
+      img.src = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="90" height="65" viewBox="0 0 90 65"><rect width="90" height="65" fill="%231e293b"/><text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" fill="%2364748b" font-size="10">Hors ligne</text></svg>';
+      // Masque le badge "LIVE" si le modèle est indisponible
+      const badge = img.nextElementSibling;
+      if (badge && badge.classList.contains('live-badge')) {
+        badge.style.display = 'none';
+      }
     }
   </script>
 
