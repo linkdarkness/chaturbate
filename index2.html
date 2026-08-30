@@ -19,219 +19,120 @@
       background: var(--bg);
       color: var(--text);
       min-height: 100vh;
-      display: flex;
-      flex-direction: column;
+      padding: 20px;
     }
 
     header {
-      padding: 16px 24px;
-      background: var(--card-bg);
+      margin-bottom: 24px;
+      padding-bottom: 12px;
       border-bottom: 1px solid #334155;
     }
 
-    h1 { font-size: 1.4rem; }
+    h1 { font-size: 1.5rem; }
 
-    .layout {
+    .grid-container {
       display: grid;
-      grid-template-columns: 1fr 320px;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
       gap: 20px;
-      padding: 20px;
-      flex: 1;
-    }
-
-    .player-container {
-      width: 100%;
-      aspect-ratio: 16 / 9;
-      background: #000;
-      border-radius: 12px;
-      overflow: hidden;
-    }
-
-    .player-container iframe {
-      width: 100%;
-      height: 100%;
-      border: 0;
-    }
-
-    .sidebar {
-      background: var(--card-bg);
-      border-radius: 12px;
-      padding: 16px;
-      display: flex;
-      flex-direction: column;
-    }
-
-    .sidebar h2 {
-      font-size: 1.1rem;
-      margin-bottom: 12px;
-    }
-
-    .models-list {
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-      overflow-y: auto;
-      max-height: calc(100vh - 150px);
     }
 
     .model-card {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      padding: 8px;
-      background: #0f172a;
+      background: var(--card-bg);
       border: 1px solid #334155;
-      border-radius: 8px;
-      cursor: pointer;
-      transition: border-color 0.2s;
+      border-radius: 12px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      transition: transform 0.2s, border-color 0.2s;
     }
 
     .model-card:hover {
+      transform: translateY(-4px);
       border-color: var(--accent);
     }
 
-    .thumb-wrapper {
-      position: relative;
-      width: 90px;
-      height: 65px;
-      border-radius: 6px;
-      overflow: hidden;
-      background: #000;
-      flex-shrink: 0;
-    }
-
-    .thumb-wrapper img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-    }
-
-    .live-badge {
-      position: absolute;
-      top: 4px;
-      left: 4px;
-      background: var(--accent);
-      color: white;
-      font-size: 0.6rem;
-      font-weight: bold;
-      padding: 2px 5px;
-      border-radius: 3px;
-      text-transform: uppercase;
-    }
-
-    .model-info {
+    .card-header {
+      background: #0f172a;
+      padding: 16px;
       display: flex;
-      flex-direction: column;
-      gap: 4px;
-      overflow: hidden;
+      justify-content: space-between;
+      align-items: center;
     }
 
     .model-name {
       font-weight: bold;
-      font-size: 0.9rem;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
+      font-size: 1.1rem;
     }
 
-    .model-status {
+    .badge {
+      background: var(--accent);
+      color: white;
       font-size: 0.75rem;
-      color: #22c55e;
+      font-weight: bold;
+      padding: 4px 8px;
+      border-radius: 4px;
+    }
+
+    .card-body {
+      padding: 20px;
       display: flex;
-      align-items: center;
-      gap: 6px;
+      flex-direction: column;
+      gap: 12px;
     }
 
-    .status-dot {
-      width: 6px;
-      height: 6px;
-      background: #22c55e;
-      border-radius: 50%;
+    .btn-watch {
+      display: block;
+      width: 100%;
+      padding: 12px;
+      background: var(--accent);
+      color: white;
+      text-align: center;
+      text-decoration: none;
+      font-weight: bold;
+      border-radius: 6px;
+      transition: background 0.2s;
     }
 
-    @media (max-width: 850px) {
-      .layout { grid-template-columns: 1fr; }
-      .models-list { max-height: 350px; }
+    .btn-watch:hover {
+      background: #b91c1c;
     }
   </style>
 </head>
 <body>
 
   <header>
-    <h1>Directs Live</h1>
+    <h1>Directs Live Chaturbate</h1>
   </header>
 
-  <div class="layout">
-    <main>
-      <div class="player-container" id="player">
-        <iframe 
-          src="https://chaturbate.com/embed/sweet_statue/" 
-          allow="autoplay; fullscreen" 
-          allowfullscreen>
-        </iframe>
+  <div class="grid-container">
+
+    <!-- Modèle 1 -->
+    <div class="model-card">
+      <div class="card-header">
+        <span class="model-name">sweet_statue</span>
+        <span class="badge">EN DIRECT</span>
       </div>
-    </main>
-
-    <aside class="sidebar">
-      <h2>Modèles en vedette</h2>
-      <div class="models-list">
-
-        <!-- Carte Modèle 1 -->
-        <div class="model-card" onclick="loadModel('sweet_statue')">
-          <div class="thumb-wrapper">
-            <img 
-              src="https://cbjpeg.stream.highwebmedia.com/stream?room=sweet_statue" 
-              alt="sweet_statue"
-              onerror="handleImageError(this)">
-            <span class="live-badge">Live</span>
-          </div>
-          <div class="model-info">
-            <span class="model-name">sweet_statue</span>
-            <span class="model-status"><span class="status-dot"></span> En direct</span>
-          </div>
-        </div>
-
-        <!-- Carte Modèle 2 -->
-        <div class="model-card" onclick="loadModel('olsenspring)">
-          <div class="thumb-wrapper">
-            <img 
-              src="https://cbjpeg.stream.highwebmedia.com/stream?room=olsenspring" 
-              alt="olsenspring"
-              onerror="handleImageError(this)">
-            <span class="live-badge">Live</span>
-          </div>
-          <div class="model-info">
-            <span class="model-name">olsenspring</span>
-            <span class="model-status"><span class="status-dot"></span> En direct</span>
-          </div>
-        </div>
-
+      <div class="card-body">
+        <a href="https://chaturbate.com/in/?tour=mL83&camp=default&track=default&room=sweet_statue" target="_blank" rel="noopener" class="btn-watch">
+          Rejoindre le Live
+        </a>
       </div>
-    </aside>
+    </div>
+
+    <!-- Modèle 2 -->
+    <div class="model-card">
+      <div class="card-header">
+        <span class="model-name">olsenspring</span>
+        <span class="badge">EN DIRECT</span>
+      </div>
+      <div class="card-body">
+        <a href="https://chaturbate.com/in/?tour=mL83&camp=default&track=default&room=olsenspring" target="_blank" rel="noopener" class="btn-watch">
+          Rejoindre le Live
+        </a>
+      </div>
+    </div>
+
   </div>
-
-  <script>
-    function loadModel(username) {
-      const player = document.getElementById('player');
-      player.innerHTML = `
-        <iframe 
-          src="https://chaturbate.com/embed/${encodeURIComponent(username)}/" 
-          allow="autoplay; fullscreen"
-          allowfullscreen>
-        </iframe>
-      `;
-    }
-
-    // Gestion du fallback si l'image ne charge pas (ex: modèle hors ligne)
-    function handleImageError(img) {
-      img.src = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="90" height="65" viewBox="0 0 90 65"><rect width="90" height="65" fill="%231e293b"/><text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" fill="%2364748b" font-size="10">Hors ligne</text></svg>';
-      // Masque le badge "LIVE" si le modèle est indisponible
-      const badge = img.nextElementSibling;
-      if (badge && badge.classList.contains('live-badge')) {
-        badge.style.display = 'none';
-      }
-    }
-  </script>
 
 </body>
 </html>
