@@ -147,7 +147,7 @@
         <button class="model-btn" data-username="dreamsweetgirl" onclick="loadModel('dreamsweetgirl')">
           <span>Dreamsweetgirl</span>
           <div class="status-container">
-            <span class="status-text">Vérification...</span>
+            <span class="status-text">Test...</span>
             <span class="live-dot"></span>
           </div>
         </button>
@@ -155,7 +155,7 @@
         <button class="model-btn" data-username="cutefacebigass" onclick="loadModel('cutefacebigass')">
           <span>cutefacebigass</span>
           <div class="status-container">
-            <span class="status-text">Vérification...</span>
+            <span class="status-text">Test...</span>
             <span class="live-dot"></span>
           </div>
         </button>
@@ -163,7 +163,7 @@
         <button class="model-btn" data-username="sweet_sugar87" onclick="loadModel('sweet_sugar87')">
           <span>sweet_sugar87</span>
           <div class="status-container">
-            <span class="status-text">Vérification...</span>
+            <span class="status-text">Test...</span>
             <span class="live-dot"></span>
           </div>
         </button>
@@ -171,7 +171,7 @@
         <button class="model-btn" data-username="ellyrockstar" onclick="loadModel('ellyrockstar')">
           <span>ellyrockstar</span>
           <div class="status-container">
-            <span class="status-text">Vérification...</span>
+            <span class="status-text">Test...</span>
             <span class="live-dot"></span>
           </div>
         </button>
@@ -179,7 +179,7 @@
         <button class="model-btn" data-username="pinkcouplexo" onclick="loadModel('pinkcouplexo')">
           <span>pinkcouplexo</span>
           <div class="status-container">
-            <span class="status-text">Vérification...</span>
+            <span class="status-text">Test...</span>
             <span class="live-dot"></span>
           </div>
         </button>
@@ -187,7 +187,7 @@
         <button class="model-btn" data-username="julcy_peach" onclick="loadModel('julcy_peach')">
           <span>julcy_peach</span>
           <div class="status-container">
-            <span class="status-text">Vérification...</span>
+            <span class="status-text">Test...</span>
             <span class="live-dot"></span>
           </div>
         </button>
@@ -195,7 +195,7 @@
         <button class="model-btn" data-username="shiny_lily" onclick="loadModel('shiny_lily')">
           <span>shiny_lily</span>
           <div class="status-container">
-            <span class="status-text">Vérification...</span>
+            <span class="status-text">Test...</span>
             <span class="live-dot"></span>
           </div>
         </button>
@@ -203,7 +203,7 @@
         <button class="model-btn" data-username="olsenspring" onclick="loadModel('olsenspring')">
           <span>olsenspring</span>
           <div class="status-container">
-            <span class="status-text">Vérification...</span>
+            <span class="status-text">Test...</span>
             <span class="live-dot"></span>
           </div>
         </button>
@@ -224,7 +224,6 @@
       `;
     }
 
-    // Vérification automatique du statut de chaque modèle
     function checkModelsStatus() {
       const buttons = document.querySelectorAll('.model-btn');
 
@@ -236,8 +235,9 @@
         if (!username) return;
 
         const img = new Image();
-        // L'image de flux n'est accessible que si le modèle émet
-        img.src = `https://cbjpeg.stream.highwebmedia.com/stream?room=${username}&t=${Date.now()}`;
+        // Utilisation du relai weserv.nl pour passer la sécurité CORS du navigateur
+        const targetUrl = `https://cbjpeg.stream.highwebmedia.com/stream?room=${username}`;
+        img.src = `https://images.weserv.nl/?url=${encodeURIComponent(targetUrl)}&t=${Date.now()}`;
 
         img.onload = () => {
           dot.classList.add('online');
@@ -253,7 +253,6 @@
       });
     }
 
-    // Lancement de la vérification au chargement
     document.addEventListener('DOMContentLoaded', checkModelsStatus);
   </script>
 
