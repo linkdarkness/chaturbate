@@ -11,7 +11,6 @@
       --accent: #dc2626;
       --text: #f8fafc;
       --online: #22c55e;
-      --offline: #64748b;
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -96,24 +95,11 @@
       background: #1e293b;
     }
 
-    .status-container {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      font-size: 0.8rem;
-      font-weight: normal;
-    }
-
     .live-dot {
       width: 8px;
       height: 8px;
-      background-color: var(--offline);
-      border-radius: 50%;
-      transition: background-color 0.3s;
-    }
-
-    .live-dot.online {
       background-color: var(--online);
+      border-radius: 50%;
       box-shadow: 0 0 6px var(--online);
     }
 
@@ -144,68 +130,44 @@
       <h2>Modèles</h2>
       <div class="models-list">
 
-        <button class="model-btn" data-username="dreamsweetgirl" onclick="loadModel('dreamsweetgirl')">
+        <button class="model-btn" onclick="loadModel('dreamsweetgirl')">
           <span>Dreamsweetgirl</span>
-          <div class="status-container">
-            <span class="status-text">Test...</span>
-            <span class="live-dot"></span>
-          </div>
+          <span class="live-dot"></span>
         </button>
 
-        <button class="model-btn" data-username="cutefacebigass" onclick="loadModel('cutefacebigass')">
+        <button class="model-btn" onclick="loadModel('cutefacebigass')">
           <span>cutefacebigass</span>
-          <div class="status-container">
-            <span class="status-text">Test...</span>
-            <span class="live-dot"></span>
-          </div>
+          <span class="live-dot"></span>
         </button>
 
-        <button class="model-btn" data-username="sweet_sugar87" onclick="loadModel('sweet_sugar87')">
+        <button class="model-btn" onclick="loadModel('sweet_sugar87')">
           <span>sweet_sugar87</span>
-          <div class="status-container">
-            <span class="status-text">Test...</span>
-            <span class="live-dot"></span>
-          </div>
+          <span class="live-dot"></span>
         </button>
 
-        <button class="model-btn" data-username="ellyrockstar" onclick="loadModel('ellyrockstar')">
+        <button class="model-btn" onclick="loadModel('ellyrockstar')">
           <span>ellyrockstar</span>
-          <div class="status-container">
-            <span class="status-text">Test...</span>
-            <span class="live-dot"></span>
-          </div>
+          <span class="live-dot"></span>
         </button>
 
-        <button class="model-btn" data-username="pinkcouplexo" onclick="loadModel('pinkcouplexo')">
+        <button class="model-btn" onclick="loadModel('pinkcouplexo')">
           <span>pinkcouplexo</span>
-          <div class="status-container">
-            <span class="status-text">Test...</span>
-            <span class="live-dot"></span>
-          </div>
+          <span class="live-dot"></span>
         </button>
 
-        <button class="model-btn" data-username="julcy_peach" onclick="loadModel('julcy_peach')">
+        <button class="model-btn" onclick="loadModel('julcy_peach')">
           <span>julcy_peach</span>
-          <div class="status-container">
-            <span class="status-text">Test...</span>
-            <span class="live-dot"></span>
-          </div>
+          <span class="live-dot"></span>
         </button>
 
-        <button class="model-btn" data-username="shiny_lily" onclick="loadModel('shiny_lily')">
+        <button class="model-btn" onclick="loadModel('shiny_lily')">
           <span>shiny_lily</span>
-          <div class="status-container">
-            <span class="status-text">Test...</span>
-            <span class="live-dot"></span>
-          </div>
+          <span class="live-dot"></span>
         </button>
 
-        <button class="model-btn" data-username="olsenspring" onclick="loadModel('olsenspring')">
+        <button class="model-btn" onclick="loadModel('olsenspring')">
           <span>olsenspring</span>
-          <div class="status-container">
-            <span class="status-text">Test...</span>
-            <span class="live-dot"></span>
-          </div>
+          <span class="live-dot"></span>
         </button>
 
       </div>
@@ -223,37 +185,6 @@
         </iframe>
       `;
     }
-
-    function checkModelsStatus() {
-      const buttons = document.querySelectorAll('.model-btn');
-
-      buttons.forEach(btn => {
-        const username = btn.getAttribute('data-username');
-        const dot = btn.querySelector('.live-dot');
-        const statusText = btn.querySelector('.status-text');
-
-        if (!username) return;
-
-        const img = new Image();
-        // Utilisation du relai weserv.nl pour passer la sécurité CORS du navigateur
-        const targetUrl = `https://cbjpeg.stream.highwebmedia.com/stream?room=${username}`;
-        img.src = `https://images.weserv.nl/?url=${encodeURIComponent(targetUrl)}&t=${Date.now()}`;
-
-        img.onload = () => {
-          dot.classList.add('online');
-          statusText.textContent = 'En ligne';
-          statusText.style.color = '#22c55e';
-        };
-
-        img.onerror = () => {
-          dot.classList.remove('online');
-          statusText.textContent = 'Hors ligne';
-          statusText.style.color = '#64748b';
-        };
-      });
-    }
-
-    document.addEventListener('DOMContentLoaded', checkModelsStatus);
   </script>
 
 </body>
