@@ -10,7 +10,6 @@
       --card-bg: #1e293b;
       --accent: #dc2626;
       --text: #f8fafc;
-      --online: #22c55e;
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -34,7 +33,7 @@
 
     .layout {
       display: grid;
-      grid-template-columns: 1fr 320px;
+      grid-template-columns: 1fr 340px;
       gap: 20px;
       padding: 20px;
       flex: 1;
@@ -70,42 +69,52 @@
     .models-list {
       display: flex;
       flex-direction: column;
-      gap: 10px;
+      gap: 12px;
       overflow-y: auto;
       max-height: calc(100vh - 150px);
     }
 
-    .model-btn {
-      padding: 12px;
+    .model-card {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 8px;
       background: #0f172a;
       border: 1px solid #334155;
       border-radius: 8px;
-      color: white;
-      font-weight: bold;
-      text-align: left;
       cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      transition: background 0.2s, border-color 0.2s;
+      transition: border-color 0.2s, background 0.2s;
     }
 
-    .model-btn:hover {
+    .model-card:hover {
       border-color: var(--accent);
       background: #1e293b;
     }
 
-    .live-dot {
-      width: 8px;
-      height: 8px;
-      background-color: var(--online);
-      border-radius: 50%;
-      box-shadow: 0 0 6px var(--online);
+    .thumb-container {
+      width: 100px;
+      height: 70px;
+      border-radius: 6px;
+      overflow: hidden;
+      background: #000;
+      flex-shrink: 0;
+    }
+
+    .thumb-container img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .model-name {
+      font-weight: bold;
+      font-size: 0.95rem;
+      word-break: break-all;
     }
 
     @media (max-width: 850px) {
       .layout { grid-template-columns: 1fr; }
-      .models-list { max-height: 350px; }
+      .models-list { max-height: 400px; }
     }
   </style>
 </head>
@@ -130,45 +139,61 @@
       <h2>Modèles</h2>
       <div class="models-list">
 
-        <button class="model-btn" onclick="loadModel('dreamsweetgirl')">
-          <span>Dreamsweetgirl</span>
-          <span class="live-dot"></span>
-        </button>
+        <div class="model-card" onclick="loadModel('dreamsweetgirl')">
+          <div class="thumb-container">
+            <img src="https://roomimg.stream.highwebmedia.com/ri/dreamsweetgirl.jpg" alt="dreamsweetgirl">
+          </div>
+          <span class="model-name">dreamsweetgirl</span>
+        </div>
 
-        <button class="model-btn" onclick="loadModel('cutefacebigass')">
-          <span>cutefacebigass</span>
-          <span class="live-dot"></span>
-        </button>
+        <div class="model-card" onclick="loadModel('cutefacebigass')">
+          <div class="thumb-container">
+            <img src="https://roomimg.stream.highwebmedia.com/ri/cutefacebigass.jpg" alt="cutefacebigass">
+          </div>
+          <span class="model-name">cutefacebigass</span>
+        </div>
 
-        <button class="model-btn" onclick="loadModel('sweet_sugar87')">
-          <span>sweet_sugar87</span>
-          <span class="live-dot"></span>
-        </button>
+        <div class="model-card" onclick="loadModel('sweet_sugar87')">
+          <div class="thumb-container">
+            <img src="https://roomimg.stream.highwebmedia.com/ri/sweet_sugar87.jpg" alt="sweet_sugar87">
+          </div>
+          <span class="model-name">sweet_sugar87</span>
+        </div>
 
-        <button class="model-btn" onclick="loadModel('ellyrockstar')">
-          <span>ellyrockstar</span>
-          <span class="live-dot"></span>
-        </button>
+        <div class="model-card" onclick="loadModel('ellyrockstar')">
+          <div class="thumb-container">
+            <img src="https://roomimg.stream.highwebmedia.com/ri/ellyrockstar.jpg" alt="ellyrockstar">
+          </div>
+          <span class="model-name">ellyrockstar</span>
+        </div>
 
-        <button class="model-btn" onclick="loadModel('pinkcouplexo')">
-          <span>pinkcouplexo</span>
-          <span class="live-dot"></span>
-        </button>
+        <div class="model-card" onclick="loadModel('pinkcouplexo')">
+          <div class="thumb-container">
+            <img src="https://roomimg.stream.highwebmedia.com/ri/pinkcouplexo.jpg" alt="pinkcouplexo">
+          </div>
+          <span class="model-name">pinkcouplexo</span>
+        </div>
 
-        <button class="model-btn" onclick="loadModel('julcy_peach')">
-          <span>julcy_peach</span>
-          <span class="live-dot"></span>
-        </button>
+        <div class="model-card" onclick="loadModel('julcy_peach')">
+          <div class="thumb-container">
+            <img src="https://roomimg.stream.highwebmedia.com/ri/julcy_peach.jpg" alt="julcy_peach">
+          </div>
+          <span class="model-name">julcy_peach</span>
+        </div>
 
-        <button class="model-btn" onclick="loadModel('shiny_lily')">
-          <span>shiny_lily</span>
-          <span class="live-dot"></span>
-        </button>
+        <div class="model-card" onclick="loadModel('shiny_lily')">
+          <div class="thumb-container">
+            <img src="https://roomimg.stream.highwebmedia.com/ri/shiny_lily.jpg" alt="shiny_lily">
+          </div>
+          <span class="model-name">shiny_lily</span>
+        </div>
 
-        <button class="model-btn" onclick="loadModel('olsenspring')">
-          <span>olsenspring</span>
-          <span class="live-dot"></span>
-        </button>
+        <div class="model-card" onclick="loadModel('olsenspring')">
+          <div class="thumb-container">
+            <img src="https://roomimg.stream.highwebmedia.com/ri/olsenspring.jpg" alt="olsenspring">
+          </div>
+          <span class="model-name">olsenspring</span>
+        </div>
 
       </div>
     </aside>
