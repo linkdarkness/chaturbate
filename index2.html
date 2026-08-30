@@ -10,6 +10,8 @@
       --card-bg: #1e293b;
       --accent: #dc2626;
       --text: #f8fafc;
+      --online: #22c55e;
+      --offline: #64748b;
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -19,120 +21,241 @@
       background: var(--bg);
       color: var(--text);
       min-height: 100vh;
-      padding: 20px;
+      display: flex;
+      flex-direction: column;
     }
 
     header {
-      margin-bottom: 24px;
-      padding-bottom: 12px;
+      padding: 16px 24px;
+      background: var(--card-bg);
       border-bottom: 1px solid #334155;
     }
 
-    h1 { font-size: 1.5rem; }
+    h1 { font-size: 1.4rem; }
 
-    .grid-container {
+    .layout {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      grid-template-columns: 1fr 320px;
       gap: 20px;
+      padding: 20px;
+      flex: 1;
     }
 
-    .model-card {
-      background: var(--card-bg);
-      border: 1px solid #334155;
+    .player-container {
+      width: 100%;
+      aspect-ratio: 16 / 9;
+      background: #000;
       border-radius: 12px;
       overflow: hidden;
-      display: flex;
-      flex-direction: column;
-      transition: transform 0.2s, border-color 0.2s;
     }
 
-    .model-card:hover {
-      transform: translateY(-4px);
-      border-color: var(--accent);
+    .player-container iframe {
+      width: 100%;
+      height: 100%;
+      border: 0;
     }
 
-    .card-header {
-      background: #0f172a;
+    .sidebar {
+      background: var(--card-bg);
+      border-radius: 12px;
       padding: 16px;
       display: flex;
-      justify-content: space-between;
-      align-items: center;
+      flex-direction: column;
     }
 
-    .model-name {
-      font-weight: bold;
+    .sidebar h2 {
       font-size: 1.1rem;
+      margin-bottom: 12px;
     }
 
-    .badge {
-      background: var(--accent);
-      color: white;
-      font-size: 0.75rem;
-      font-weight: bold;
-      padding: 4px 8px;
-      border-radius: 4px;
-    }
-
-    .card-body {
-      padding: 20px;
+    .models-list {
       display: flex;
       flex-direction: column;
-      gap: 12px;
+      gap: 10px;
+      overflow-y: auto;
+      max-height: calc(100vh - 150px);
     }
 
-    .btn-watch {
-      display: block;
-      width: 100%;
+    .model-btn {
       padding: 12px;
-      background: var(--accent);
+      background: #0f172a;
+      border: 1px solid #334155;
+      border-radius: 8px;
       color: white;
-      text-align: center;
-      text-decoration: none;
       font-weight: bold;
-      border-radius: 6px;
-      transition: background 0.2s;
+      text-align: left;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      transition: background 0.2s, border-color 0.2s;
     }
 
-    .btn-watch:hover {
-      background: #b91c1c;
+    .model-btn:hover {
+      border-color: var(--accent);
+      background: #1e293b;
+    }
+
+    .status-container {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.8rem;
+      font-weight: normal;
+    }
+
+    .live-dot {
+      width: 8px;
+      height: 8px;
+      background-color: var(--offline);
+      border-radius: 50%;
+      transition: background-color 0.3s;
+    }
+
+    .live-dot.online {
+      background-color: var(--online);
+      box-shadow: 0 0 6px var(--online);
+    }
+
+    @media (max-width: 850px) {
+      .layout { grid-template-columns: 1fr; }
+      .models-list { max-height: 350px; }
     }
   </style>
 </head>
 <body>
 
   <header>
-    <h1>Directs Live Chaturbate</h1>
+    <h1>Directs Live</h1>
   </header>
 
-  <div class="grid-container">
+  <div class="layout">
+    <main>
+      <div class="player-container" id="player">
+        <iframe 
+          src="https://chaturbate.com/embed/dreamsweetgirl/" 
+          allow="autoplay; fullscreen" 
+          allowfullscreen>
+        </iframe>
+      </div>
+    </main>
 
-    <!-- Modèle 1 -->
-    <div class="model-card">
-      <div class="card-header">
-        <span class="model-name">sweet_statue</span>
-        <span class="badge">EN DIRECT</span>
-      </div>
-      <div class="card-body">
-        <a href="https://chaturbate.com/in/?tour=mL83&camp=default&track=default&room=sweet_statue" target="_blank" rel="noopener" class="btn-watch">
-          Rejoindre le Live
-        </a>
-      </div>
-    </div>
+    <aside class="sidebar">
+      <h2>Modèles</h2>
+      <div class="models-list">
 
-    <!-- Modèle 2 -->
-    <div class="model-card">
-      <div class="card-header">
-        <span class="model-name">olsenspring</span>
-        <span class="badge">EN DIRECT</span>
-      </div>
-      <div class="card-body">
-        <a href="https://chaturbate.com/in/?tour=mL83&camp=default&track=default&room=olsenspring" target="_blank" rel="noopener" class="btn-watch">
-          Rejoindre le Live
-        </a>
-      </div>
-    </div>
+        <button class="model-btn" data-username="dreamsweetgirl" onclick="loadModel('dreamsweetgirl')">
+          <span>Dreamsweetgirl</span>
+          <div class="status-container">
+            <span class="status-text">Vérification...</span>
+            <span class="live-dot"></span>
+          </div>
+        </button>
 
+        <button class="model-btn" data-username="cutefacebigass" onclick="loadModel('cutefacebigass')">
+          <span>cutefacebigass</span>
+          <div class="status-container">
+            <span class="status-text">Vérification...</span>
+            <span class="live-dot"></span>
+          </div>
+        </button>
+
+        <button class="model-btn" data-username="sweet_sugar87" onclick="loadModel('sweet_sugar87')">
+          <span>sweet_sugar87</span>
+          <div class="status-container">
+            <span class="status-text">Vérification...</span>
+            <span class="live-dot"></span>
+          </div>
+        </button>
+
+        <button class="model-btn" data-username="ellyrockstar" onclick="loadModel('ellyrockstar')">
+          <span>ellyrockstar</span>
+          <div class="status-container">
+            <span class="status-text">Vérification...</span>
+            <span class="live-dot"></span>
+          </div>
+        </button>
+
+        <button class="model-btn" data-username="pinkcouplexo" onclick="loadModel('pinkcouplexo')">
+          <span>pinkcouplexo</span>
+          <div class="status-container">
+            <span class="status-text">Vérification...</span>
+            <span class="live-dot"></span>
+          </div>
+        </button>
+
+        <button class="model-btn" data-username="julcy_peach" onclick="loadModel('julcy_peach')">
+          <span>julcy_peach</span>
+          <div class="status-container">
+            <span class="status-text">Vérification...</span>
+            <span class="live-dot"></span>
+          </div>
+        </button>
+
+        <button class="model-btn" data-username="shiny_lily" onclick="loadModel('shiny_lily')">
+          <span>shiny_lily</span>
+          <div class="status-container">
+            <span class="status-text">Vérification...</span>
+            <span class="live-dot"></span>
+          </div>
+        </button>
+
+        <button class="model-btn" data-username="olsenspring" onclick="loadModel('olsenspring')">
+          <span>olsenspring</span>
+          <div class="status-container">
+            <span class="status-text">Vérification...</span>
+            <span class="live-dot"></span>
+          </div>
+        </button>
+
+      </div>
+    </aside>
   </div>
+
+  <script>
+    function loadModel(username) {
+      const player = document.getElementById('player');
+      player.innerHTML = `
+        <iframe 
+          src="https://chaturbate.com/embed/${encodeURIComponent(username)}/" 
+          allow="autoplay; fullscreen"
+          allowfullscreen>
+        </iframe>
+      `;
+    }
+
+    // Vérification automatique du statut de chaque modèle
+    function checkModelsStatus() {
+      const buttons = document.querySelectorAll('.model-btn');
+
+      buttons.forEach(btn => {
+        const username = btn.getAttribute('data-username');
+        const dot = btn.querySelector('.live-dot');
+        const statusText = btn.querySelector('.status-text');
+
+        if (!username) return;
+
+        const img = new Image();
+        // L'image de flux n'est accessible que si le modèle émet
+        img.src = `https://cbjpeg.stream.highwebmedia.com/stream?room=${username}&t=${Date.now()}`;
+
+        img.onload = () => {
+          dot.classList.add('online');
+          statusText.textContent = 'En ligne';
+          statusText.style.color = '#22c55e';
+        };
+
+        img.onerror = () => {
+          dot.classList.remove('online');
+          statusText.textContent = 'Hors ligne';
+          statusText.style.color = '#64748b';
+        };
+      });
+    }
+
+    // Lancement de la vérification au chargement
+    document.addEventListener('DOMContentLoaded', checkModelsStatus);
+  </script>
 
 </body>
 </html>
