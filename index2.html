@@ -21,92 +21,75 @@
       min-height: 100vh;
       display: flex;
       flex-direction: column;
+      align-items: center;
+      padding: 20px;
     }
 
     header {
-      padding: 16px 24px;
-      background: var(--card-bg);
-      border-bottom: 1px solid #334155;
+      width: 100%;
+      max-width: 900px;
+      margin-bottom: 20px;
     }
 
-    h1 { font-size: 1.4rem; }
-
-    .layout {
-      display: grid;
-      grid-template-columns: 1fr 300px;
-      gap: 20px;
-      padding: 20px;
-      flex: 1;
+    h1 { 
+      font-size: 1.5rem; 
+      margin-bottom: 16px;
     }
 
-.player-container {
-  width: 100%;
-  aspect-ratio: 16 / 9;
-  background: #000;
-  border-radius: 12px;
-  overflow: hidden; /* Masque tout ce qui dépasse du cadre */
-  position: relative;
-}
-
-.player-container iframe {
-  position: absolute;
-  /* On agrandit l'iframe pour faire sortir le chat et les menus de l'écran */
-  width: 130%; 
-  height: 130%;
-  /* On décale l'iframe pour recentrer uniquement la vidéo */
-  top: -15%;
-  left: -15%;
-  border: 0;
-}
-
-
-    .sidebar {
-      background: var(--card-bg);
-      border-radius: 12px;
-      padding: 16px;
+    .controls-bar {
       display: flex;
       flex-direction: column;
+      gap: 8px;
     }
 
-    .sidebar h2 {
-      font-size: 1.1rem;
-      margin-bottom: 12px;
+    label {
+      font-size: 0.9rem;
+      color: #94a3b8;
     }
 
-    .models-list {
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-    }
-
-    .model-btn {
-      padding: 12px;
-      background: #0f172a;
+    /* Style de la liste déroulante */
+    .model-select {
+      width: 100%;
+      padding: 12px 16px;
+      background: var(--card-bg);
+      color: var(--text);
       border: 1px solid #334155;
       border-radius: 8px;
-      color: white;
+      font-size: 1rem;
       font-weight: bold;
-      text-align: left;
       cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
+      outline: none;
+      transition: border-color 0.2s;
     }
 
-    .model-btn:hover {
+    .model-select:focus, .model-select:hover {
       border-color: var(--accent);
-      background: #1e293b;
     }
 
-    .live-dot {
-      width: 8px;
-      height: 8px;
-      background-color: #22c55e;
-      border-radius: 50%;
+    .model-select option {
+      background: var(--card-bg);
+      color: var(--text);
+      padding: 10px;
     }
 
-    @media (max-width: 850px) {
-      .layout { grid-template-columns: 1fr; }
+    .main-container {
+      width: 100%;
+      max-width: 900px;
+    }
+
+    .player-container {
+      width: 100%;
+      aspect-ratio: 16 / 9;
+      background: #000;
+      border-radius: 12px;
+      overflow: hidden;
+      border: 1px solid #334155;
+    }
+
+    .player-container iframe {
+      width: 100%;
+      height: 100%;
+      border: 0;
     }
   </style>
 </head>
@@ -114,68 +97,35 @@
 
   <header>
     <h1>Directs Live</h1>
+    
+    <div class="controls-bar">
+      <label for="modelSelect">Choisir un modèle :</label>
+      <select id="modelSelect" class="model-select" onchange="changeModel(this.value)">
+        <option value="dreamsweetgirl">dreamsweetgirl</option>
+        <option value="cutefacebigass">cutefacebigass</option>
+        <option value="sweet_sugar87">sweet_sugar87</option>
+        <option value="ellyrockstar">ellyrockstar</option>
+        <option value="pinkcouplexo">pinkcouplexo</option>
+        <option value="julcy_peach">julcy_peach</option>
+        <option value="shiny_lily">shiny_lily</option>
+        <option value="olsenspring">olsenspring</option>
+      </select>
+    </div>
   </header>
 
-  <div class="layout">
-    <main>
-      <div class="player-container" id="player">
-        <!-- L'URL /embed/ est la SEULE acceptée dans un iframe -->
-        <iframe 
-          src="https://chaturbate.com/embed/dreamsweetgirl/" 
-          allow="autoplay; fullscreen" 
-          allowfullscreen>
-        </iframe>
-      </div>
-    </main>
-
-    <aside class="sidebar">
-      <h2>Modèles</h2>
-      <div class="models-list">
-        <!-- Remplace les pseudos par ceux que tu souhaites afficher -->
-        <button class="model-btn" onclick="loadModel('dreamsweetgirl')">
-          <span>Dreamsweetgirl</span>
-          <span class="live-dot"></span>
-        </button>
-        <button class="model-btn" onclick="loadModel('cutefacebigass')">
-          <span>cutefacebigass</span>
-          <span class="live-dot"></span>
-        </button>
-<button class="model-btn" onclick="loadModel('sweet_sugar87)">
-          <span>sweet_sugar87</span>
-          <span class="live-dot"></span>
-        </button>
-<button class="model-btn" onclick="loadModel('ellyrockstar')">
-          <span>ellyrockstar</span>
-          <span class="live-dot"></span>
-        </button>
-<button class="model-btn" onclick="loadModel('pinkcouplexo')">
-          <span>pinkcouplexo</span>
-          <span class="live-dot"></span>
-        </button>
-<button class="model-btn" onclick="loadModel('julcy_peach')">
-          <span>julcy_peach</span>
-          <span class="live-dot"></span>
-        </button>
-<button class="model-btn" onclick="loadModel('shiny_lily')">
-          <span>shiny_lily</span>
-          <span class="live-dot"></span>
-        </button>
-<button class="model-btn" onclick="loadModel('olsenspring')">
-          <span>olsenspring</span>
-          <span class="live-dot"></span>
-        </button>
- 
-         
-  
-        </div>
-      </div>
-    </aside>
-  </div>
+  <main class="main-container">
+    <div class="player-container" id="player">
+      <iframe 
+        src="https://chaturbate.com/embed/dreamsweetgirl/" 
+        allow="autoplay; fullscreen" 
+        allowfullscreen>
+      </iframe>
+    </div>
+  </main>
 
   <script>
-    function loadModel(username) {
+    function changeModel(username) {
       const player = document.getElementById('player');
-      // Intégration du lecteur vidéo officiel
       player.innerHTML = `
         <iframe 
           src="https://chaturbate.com/embed/${encodeURIComponent(username)}/" 
