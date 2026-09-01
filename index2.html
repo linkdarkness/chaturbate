@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+n<!DOCTYPE html>
 <html lang="fr" class="scroll-smooth">
 <head>
     <meta charset="UTF-8">
@@ -29,10 +29,10 @@
                 Bienvenue sur le site dédié à <span class="text-purple-400">Kudo Rara</span>
             </h2>
             <p class="text-gray-400 text-lg md:text-xl max-w-2xl mx-auto mb-8">
-                Retrouvez toutes les photos, vidéos, projets et actualités.
+                Retrouvez toutes les photos, vidéos, fiches projets et actualités.
             </p>
-            <a href="#gallery" class="bg-purple-600 hover:bg-purple-700 text-white font-semibold px-6 py-3 rounded-lg shadow-lg transition">
-                Voir la galerie
+            <a href="#filmography" class="bg-purple-600 hover:bg-purple-700 text-white font-semibold px-6 py-3 rounded-lg shadow-lg transition inline-block">
+                Découvrir la filmographie
             </a>
         </div>
     </section>
@@ -46,12 +46,12 @@
             <div class="grid md:grid-cols-2 gap-8 items-center bg-gray-900 p-6 rounded-xl border border-gray-800">
                 <div class="space-y-4 text-gray-300">
                     <p>
-                        Bienvenue sur cet espace consacré à Kudo Rara. Ce site réunit les informations clés, images et extraits vidéo de ses différents projets.
+                        Bienvenue sur cet espace consacré à Kudo Rara. Ce site réunit les informations clés, images, fiches de projets et liens vers ses apparitions.
                     </p>
                     <ul class="space-y-2 text-sm">
                         <li><strong class="text-white">Nom :</strong> Kudo Rara (工藤ララ)</li>
                         <li><strong class="text-white">Statut :</strong> Actif</li>
-                        <li><strong class="text-white">Contenu :</strong> Photos, Vidéos & Actualités</li>
+                        <li><strong class="text-white">Contenu :</strong> Photos, Fiches Projets & Liens Vidéo</li>
                     </ul>
                 </div>
                 <!-- Image d'aperçu distante -->
@@ -68,7 +68,7 @@
             <h3 class="text-2xl font-bold mb-6 text-purple-400 border-b border-gray-800 pb-2">Galerie Photos</h3>
             <div class="grid sm:grid-cols-2 md:grid-cols-3 gap-4">
                 
-                <!-- Photo 1 (Lien d'image externe) -->
+                <!-- Photo 1 -->
                 <div class="group relative overflow-hidden rounded-xl bg-gray-900 border border-gray-800">
                     <img src="https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=600&q=80" 
                          alt="Photo aperçu 1" 
@@ -78,7 +78,7 @@
                     </div>
                 </div>
 
-                <!-- Photo 2 (Lien d'image externe) -->
+                <!-- Photo 2 -->
                 <div class="group relative overflow-hidden rounded-xl bg-gray-900 border border-gray-800">
                     <img src="https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&w=600&q=80" 
                          alt="Photo aperçu 2" 
@@ -88,7 +88,7 @@
                     </div>
                 </div>
 
-                <!-- Photo 3 (Lien d'image externe) -->
+                <!-- Photo 3 -->
                 <div class="group relative overflow-hidden rounded-xl bg-gray-900 border border-gray-800">
                     <img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=600&q=80" 
                          alt="Photo aperçu 3" 
@@ -103,10 +103,10 @@
 
         <!-- Section Vidéos -->
         <section id="videos" class="scroll-mt-24">
-            <h3 class="text-2xl font-bold mb-6 text-purple-400 border-b border-gray-800 pb-2">Vidéos & Extrait</h3>
+            <h3 class="text-2xl font-bold mb-6 text-purple-400 border-b border-gray-800 pb-2">Vidéos & Lecteurs</h3>
             <div class="grid md:grid-cols-2 gap-8">
                 
-                <!-- Vidéo 1 : Intégration Iframe (Exemple YouTube / Plateforme externe) -->
+                <!-- Vidéo 1 : Intégration YouTube / Iframe -->
                 <div class="bg-gray-900 p-4 rounded-xl border border-gray-800">
                     <div class="aspect-video w-full rounded-lg overflow-hidden bg-black mb-4">
                         <iframe class="w-full h-full" 
@@ -117,23 +117,22 @@
                                 allowfullscreen>
                         </iframe>
                     </div>
-                    <h4 class="font-bold text-lg">Titre de la vidéo 1</h4>
-                    <p class="text-sm text-gray-400">Intégration via lecteur iframe externe.</p>
+                    <h4 class="font-bold text-lg">Présentation Vidéo</h4>
+                    <p class="text-sm text-gray-400">Lecteur vidéo intégré via iframe.</p>
                 </div>
 
-                <!-- Vidéo 2 : Fichier Vidéo Direct (.mp4 hébergé ailleurs) avec poster/aperçu -->
+                <!-- Vidéo 2 : Fichier MP4 Direct avec Poster -->
                 <div class="bg-gray-900 p-4 rounded-xl border border-gray-800">
                     <div class="aspect-video w-full rounded-lg overflow-hidden bg-black mb-4">
                         <video controls 
                                poster="https://images.unsplash.com/photo-1518173946687-a4c8a383392e?auto=format&fit=crop&w=800&q=80" 
                                class="w-full h-full object-cover">
-                            <!-- Remplace l'URL src par le lien MP4 direct de ton autre site -->
                             <source src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4" type="video/mp4">
                             Votre navigateur ne supporte pas la lecture de vidéos.
                         </video>
                     </div>
-                    <h4 class="font-bold text-lg">Extrait Vidéo 2</h4>
-                    <p class="text-sm text-gray-400">Fichier MP4 distant avec image d'aperçu (poster).</p>
+                    <h4 class="font-bold text-lg">Extrait Vidéo MP4</h4>
+                    <p class="text-sm text-gray-400">Fichier MP4 direct avec image de couverture.</p>
                 </div>
 
             </div>
@@ -143,24 +142,58 @@
         <section id="filmography" class="scroll-mt-24">
             <h3 class="text-2xl font-bold mb-6 text-purple-400 border-b border-gray-800 pb-2">Projets & Apparitions</h3>
             <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                <div class="bg-gray-900 p-5 rounded-xl border border-gray-800">
-                    <img src="https://images.unsplash.com/photo-1485846234645-a62644f84728?auto=format&fit=crop&w=400&q=80" 
-                         alt="Projet 1" class="w-full h-36 object-cover rounded-md mb-3">
-                    <h4 class="font-bold text-lg mb-1">Projet A</h4>
-                    <p class="text-sm text-gray-400">Description et détail du rôle.</p>
+
+                <!-- Carte Projet 1 : DNJR-077 -->
+                <div class="bg-gray-900 p-5 rounded-xl border border-gray-800 hover:border-purple-500/50 transition flex flex-col justify-between">
+                    <div>
+                        <div class="relative overflow-hidden rounded-lg mb-4 h-48 bg-gray-800">
+                            <img src="https://images.unsplash.com/photo-1578632767115-351597cf2477?auto=format&fit=crop&w=600&q=80" 
+                                 alt="DNJR-077 Kudo Rara" 
+                                 class="w-full h-full object-cover">
+                            <span class="absolute bottom-2 right-2 bg-purple-600 text-xs font-bold px-2 py-1 rounded text-white">
+                                DNJR-077
+                            </span>
+                        </div>
+                        <h4 class="font-bold text-lg mb-1 text-white">DNJR-077</h4>
+                        <p class="text-sm text-gray-400 mb-4">Actrice : Kudo Rara (工藤ララ)</p>
+                    </div>
+                    <a href="https://www.javmost.ws/DNJR-077-UNCENSORED-EDIT/" 
+                       target="_blank" 
+                       rel="noopener noreferrer" 
+                       class="inline-flex items-center justify-center w-full bg-purple-600 hover:bg-purple-700 text-white text-sm font-semibold py-2 px-4 rounded-lg transition">
+                        Voir la page externe
+                        <svg class="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
+                        </svg>
+                    </a>
                 </div>
-                <div class="bg-gray-900 p-5 rounded-xl border border-gray-800">
-                    <img src="https://images.unsplash.com/photo-1478720568477-152d9b164e26?auto=format&fit=crop&w=400&q=80" 
-                         alt="Projet 2" class="w-full h-36 object-cover rounded-md mb-3">
-                    <h4 class="font-bold text-lg mb-1">Projet B</h4>
-                    <p class="text-sm text-gray-400">Description et détail du rôle.</p>
+
+                <!-- Carte Projet 2 -->
+                <div class="bg-gray-900 p-5 rounded-xl border border-gray-800 hover:border-purple-500/50 transition flex flex-col justify-between">
+                    <div>
+                        <img src="https://images.unsplash.com/photo-1478720568477-152d9b164e26?auto=format&fit=crop&w=400&q=80" 
+                             alt="Projet 2" class="w-full h-48 object-cover rounded-lg mb-4">
+                        <h4 class="font-bold text-lg mb-1">Projet B</h4>
+                        <p class="text-sm text-gray-400 mb-4">Description et détails de l'apparition.</p>
+                    </div>
+                    <button class="w-full bg-gray-800 text-gray-400 text-sm py-2 px-4 rounded-lg cursor-not-allowed">
+                        À venir
+                    </button>
                 </div>
-                <div class="bg-gray-900 p-5 rounded-xl border border-gray-800">
-                    <img src="https://images.unsplash.com/photo-1517604931442-7e0c8ed2963c?auto=format&fit=crop&w=400&q=80" 
-                         alt="Projet 3" class="w-full h-36 object-cover rounded-md mb-3">
-                    <h4 class="font-bold text-lg mb-1">Projet C</h4>
-                    <p class="text-sm text-gray-400">Description et détail du rôle.</p>
+
+                <!-- Carte Projet 3 -->
+                <div class="bg-gray-900 p-5 rounded-xl border border-gray-800 hover:border-purple-500/50 transition flex flex-col justify-between">
+                    <div>
+                        <img src="https://images.unsplash.com/photo-1517604931442-7e0c8ed2963c?auto=format&fit=crop&w=400&q=80" 
+                             alt="Projet 3" class="w-full h-48 object-cover rounded-lg mb-4">
+                        <h4 class="font-bold text-lg mb-1">Projet C</h4>
+                        <p class="text-sm text-gray-400 mb-4">Description et détails de l'apparition.</p>
+                    </div>
+                    <button class="w-full bg-gray-800 text-gray-400 text-sm py-2 px-4 rounded-lg cursor-not-allowed">
+                        À venir
+                    </button>
                 </div>
+
             </div>
         </section>
 
