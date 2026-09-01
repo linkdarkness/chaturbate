@@ -33,25 +33,32 @@
 
     .layout {
       display: grid;
-      grid-template-columns: 1fr 320px;
+      grid-template-columns: 1fr 300px;
       gap: 20px;
       padding: 20px;
       flex: 1;
     }
 
-    .player-container {
-      width: 100%;
-      aspect-ratio: 16 / 9;
-      background: #000;
-      border-radius: 12px;
-      overflow: hidden;
-    }
+.player-container {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  background: #000;
+  border-radius: 12px;
+  overflow: hidden; /* Masque tout ce qui dépasse du cadre */
+  position: relative;
+}
 
-    .player-container iframe {
-      width: 100%;
-      height: 100%;
-      border: 0;
-    }
+.player-container iframe {
+  position: absolute;
+  /* On agrandit l'iframe pour faire sortir le chat et les menus de l'écran */
+  width: 130%; 
+  height: 130%;
+  /* On décale l'iframe pour recentrer uniquement la vidéo */
+  top: -15%;
+  left: -15%;
+  border: 0;
+}
+
 
     .sidebar {
       background: var(--card-bg);
@@ -70,12 +77,10 @@
       display: flex;
       flex-direction: column;
       gap: 10px;
-      overflow-y: auto;
-      max-height: calc(100vh - 150px);
     }
 
     .model-btn {
-      padding: 14px;
+      padding: 12px;
       background: #0f172a;
       border: 1px solid #334155;
       border-radius: 8px;
@@ -86,7 +91,6 @@
       display: flex;
       align-items: center;
       justify-content: space-between;
-      transition: background 0.2s, border-color 0.2s;
     }
 
     .model-btn:hover {
@@ -94,16 +98,15 @@
       background: #1e293b;
     }
 
-    .badge-live {
-      font-size: 0.75rem;
-      background: var(--accent);
-      padding: 3px 8px;
-      border-radius: 4px;
+    .live-dot {
+      width: 8px;
+      height: 8px;
+      background-color: #22c55e;
+      border-radius: 50%;
     }
 
     @media (max-width: 850px) {
       .layout { grid-template-columns: 1fr; }
-      .models-list { max-height: 350px; }
     }
   </style>
 </head>
@@ -116,8 +119,9 @@
   <div class="layout">
     <main>
       <div class="player-container" id="player">
+        <!-- L'URL /embed/ est la SEULE acceptée dans un iframe -->
         <iframe 
-          src="https://chaturbate.com/in/?tour=mL83&camp=default&track=default&room=dreamsweetgirl" 
+          src="https://chaturbate.com/embed/dreamsweetgirl/" 
           allow="autoplay; fullscreen" 
           allowfullscreen>
         </iframe>
@@ -127,47 +131,43 @@
     <aside class="sidebar">
       <h2>Modèles</h2>
       <div class="models-list">
-
+        <!-- Remplace les pseudos par ceux que tu souhaites afficher -->
         <button class="model-btn" onclick="loadModel('dreamsweetgirl')">
-          <span>dreamsweetgirl</span>
-          <span class="badge-live">LIVE</span>
+          <span>Dreamsweetgirl</span>
+          <span class="live-dot"></span>
         </button>
-
         <button class="model-btn" onclick="loadModel('cutefacebigass')">
           <span>cutefacebigass</span>
-          <span class="badge-live">LIVE</span>
+          <span class="live-dot"></span>
         </button>
-
-        <button class="model-btn" onclick="loadModel('sweet_sugar87')">
+<button class="model-btn" onclick="loadModel('sweet_sugar87)">
           <span>sweet_sugar87</span>
-          <span class="badge-live">LIVE</span>
+          <span class="live-dot"></span>
         </button>
-
-        <button class="model-btn" onclick="loadModel('ellyrockstar')">
+<button class="model-btn" onclick="loadModel('ellyrockstar')">
           <span>ellyrockstar</span>
-          <span class="badge-live">LIVE</span>
+          <span class="live-dot"></span>
         </button>
-
-        <button class="model-btn" onclick="loadModel('pinkcouplexo')">
+<button class="model-btn" onclick="loadModel('pinkcouplexo')">
           <span>pinkcouplexo</span>
-          <span class="badge-live">LIVE</span>
+          <span class="live-dot"></span>
         </button>
-
-        <button class="model-btn" onclick="loadModel('julcy_peach')">
+<button class="model-btn" onclick="loadModel('julcy_peach')">
           <span>julcy_peach</span>
-          <span class="badge-live">LIVE</span>
+          <span class="live-dot"></span>
         </button>
-
-        <button class="model-btn" onclick="loadModel('shiny_lily')">
+<button class="model-btn" onclick="loadModel('shiny_lily')">
           <span>shiny_lily</span>
-          <span class="badge-live">LIVE</span>
+          <span class="live-dot"></span>
         </button>
-
-        <button class="model-btn" onclick="loadModel('olsenspring')">
+<button class="model-btn" onclick="loadModel('olsenspring')">
           <span>olsenspring</span>
-          <span class="badge-live">LIVE</span>
+          <span class="live-dot"></span>
         </button>
-
+ 
+         
+  
+        </div>
       </div>
     </aside>
   </div>
@@ -175,10 +175,10 @@
   <script>
     function loadModel(username) {
       const player = document.getElementById('player');
-      // URL standard autorisée par la plateforme
+      // Intégration du lecteur vidéo officiel
       player.innerHTML = `
         <iframe 
-          src="https://chaturbate.com/in/?tour=mL83&camp=default&track=default&room=${encodeURIComponent(username)}" 
+          src="https://chaturbate.com/embed/${encodeURIComponent(username)}/" 
           allow="autoplay; fullscreen"
           allowfullscreen>
         </iframe>
