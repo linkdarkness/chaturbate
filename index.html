@@ -24,9 +24,15 @@
       flex-direction: column;
     }
     
+    /* Header fixe en haut de page */
     header {
+      position: sticky;
+      top: 0;
+      z-index: 100;
       padding: 12px 20px;
-      background: var(--card-bg);
+      background: rgba(30, 41, 59, 0.95);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
       border-bottom: 1px solid #334155;
       display: flex;
       justify-content: space-between;
@@ -282,6 +288,7 @@
 
     @media (max-width: 480px) {
       header {
+        position: sticky;
         flex-direction: column;
         align-items: stretch;
       }
