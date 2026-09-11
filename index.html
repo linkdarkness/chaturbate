@@ -33,7 +33,7 @@
     }
     h1 { font-size: 1.4rem; }
 
-    /* Style de la barre de recherche */
+    /* Barre de recherche */
     .search-container {
       position: relative;
       min-width: 240px;
@@ -75,7 +75,7 @@
       transition: opacity 0.2s ease;
     }
 
-    /* Classe utilitaire pour masquer les cartes filtrées */
+    /* Masquage des cartes filtrées */
     .model-card.hidden {
       display: none !important;
     }
@@ -110,22 +110,7 @@
       border-radius: 50%;
     }
 
-    .offline-status {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      font-size: 0.8rem;
-      color: #ef4444;
-      font-weight: bold;
-    }
-
-    .offline-dot {
-      width: 8px;
-      height: 8px;
-      background-color: #ef4444;
-      border-radius: 50%;
-    }
-
+    /* Player fixe et rogné */
     .player-container {
       width: 100%;
       aspect-ratio: 16 / 9;
@@ -133,9 +118,6 @@
       position: relative;
       overflow: hidden;
       touch-action: none;
-      display: flex;
-      align-items: center;
-      justify-content: center;
     }
 
     .player-container iframe {
@@ -147,6 +129,7 @@
       border: 0;
     }
 
+    /* Anti drag-and-drop */
     .drag-preventer {
       position: absolute;
       top: 0;
@@ -156,12 +139,6 @@
       z-index: 10;
       background: transparent;
       pointer-events: none;
-    }
-
-    .offline-placeholder {
-      color: #64748b;
-      font-size: 0.9rem;
-      text-align: center;
     }
 
     @media (max-width: 480px) {
@@ -197,6 +174,7 @@
   <main class="grid-container" id="grid"></main>
 
   <script>
+    // Liste des modèles à intégrer
     const models = [
       'dreamsweetgirl',
       'cutefacebigass',
@@ -213,7 +191,7 @@
     const grid = document.getElementById('grid');
     const searchInput = document.getElementById('searchInput');
 
-    // 1. Génération de la grille avec attribut data-username
+    // Génération instantanée des cartes HTML
     models.forEach(username => {
       const card = document.createElement('div');
       card.className = 'model-card';
@@ -222,18 +200,23 @@
       card.innerHTML = `
         <div class="model-header">
           <span class="model-name">${username}</span>
-          <span class="status-container" id="status-${username}">
-            <span class="offline-status" style="color:#94a3b8"><span class="offline-dot" style="background-color:#94a3b8"></span> VÉRIFICATION...</span>
-          </span>
+          <span class="live-status"><span class="live-dot"></span> EN DIRECT</span>
         </div>
-        <div class="player-container" id="player-${username}">
-          <span class="offline-placeholder">Chargement...</span>
+        <div class="player-container">
+          <iframe 
+            src="https://chaturbate.com/embed/${encodeURIComponent(username)}/" 
+            allow="autoplay; fullscreen" 
+            sandbox="allow-scripts allow-same-origin allow-forms"
+            referrerpolicy="no-referrer-when-downgrade"
+            allowfullscreen>
+          </iframe>
+          <div class="drag-preventer"></div>
         </div>
       `;
       grid.appendChild(card);
     });
 
-    // 2. Filtrage dynamique au fur et à mesure de la saisie
+    // Filtre de recherche dynamique
     searchInput.addEventListener('input', (e) => {
       const query = e.target.value.trim().toLowerCase();
       const cards = grid.querySelectorAll('.model-card');
@@ -248,42 +231,7 @@
       });
     });
 
-    // 3. Connexion au serveur Node.js local
-    async function updateModelsStatus() {
-      try {
-        const response = await fetch(`http://localhost:3000/api/check-status?models=${models.join(',')}`);
-        const statuses = await response.json();
-
-        models.forEach(username => {
-          const isOnline = statuses[username.toLowerCase()];
-          const statusEl = document.getElementById(`status-${username}`);
-          const playerEl = document.getElementById(`player-${username}`);
-
-          if (isOnline) {
-            statusEl.innerHTML = `<span class="live-status"><span class="live-dot"></span> EN DIRECT</span>`;
-            playerEl.innerHTML = `
-              <iframe 
-                src="https://chaturbate.com/embed/${encodeURIComponent(username)}/" 
-                allow="autoplay; fullscreen" 
-                sandbox="allow-scripts allow-same-origin allow-forms"
-                referrerpolicy="no-referrer-when-downgrade"
-                allowfullscreen>
-              </iframe>
-              <div class="drag-preventer"></div>
-            `;
-          } else {
-            statusEl.innerHTML = `<span class="offline-status"><span class="offline-dot"></span> HORS LIGNE</span>`;
-            playerEl.innerHTML = `<span class="offline-placeholder">Modèle actuellement hors ligne</span>`;
-          }
-        });
-      } catch (err) {
-        console.error('Erreur de connexion au serveur Node :', err);
-      }
-    }
-
-    updateModelsStatus();
-    setInterval(updateModelsStatus, 120000);
-
+    // Sécurité glisser-déposer
     window.addEventListener('dragstart', (e) => e.preventDefault());
   </script>
 </body>
