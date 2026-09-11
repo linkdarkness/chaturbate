@@ -43,7 +43,7 @@
       flex-wrap: wrap;
     }
 
-    /* Formulaires de saisie */
+    /* Formulaires et boutons d'action */
     .input-form {
       display: flex;
       gap: 6px;
@@ -77,6 +77,23 @@
 
     .btn-add:hover {
       background: #0369a1;
+    }
+
+    .btn-reset {
+      background: transparent;
+      border: 1px solid #334155;
+      color: #94a3b8;
+      padding: 8px 12px;
+      border-radius: 8px;
+      font-size: 0.9rem;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .btn-reset:hover {
+      color: var(--danger);
+      border-color: var(--danger);
+      background: rgba(239, 68, 68, 0.1);
     }
 
     /* Boutons de disposition */
@@ -266,6 +283,9 @@
         <button type="submit" class="btn-add">+ Ajouter</button>
       </form>
 
+      <!-- Bouton de réinitialisation -->
+      <button id="resetBtn" class="btn-reset" title="Réinitialiser la liste d'origine">&#8634; Zero</button>
+
       <!-- Barre de recherche -->
       <input 
         type="text" 
@@ -289,7 +309,7 @@
   <main class="grid-container" id="grid"></main>
 
   <script>
-    // Liste par défaut si aucun localStorage
+    // Liste d'origine fixe
     const defaultModels = [
       'dreamsweetgirl',
       'cutefacebigass',
@@ -304,11 +324,12 @@
     ];
 
     // Chargement de la liste depuis le localStorage
-    let models = JSON.parse(localStorage.getItem('cb_dashboard_models')) || defaultModels;
+    let models = JSON.parse(localStorage.getItem('cb_dashboard_models')) || [...defaultModels];
 
     const grid = document.getElementById('grid');
     const addModelForm = document.getElementById('addModelForm');
     const newModelInput = document.getElementById('newModelInput');
+    const resetBtn = document.getElementById('resetBtn');
     const searchInput = document.getElementById('searchInput');
     const layoutBtns = document.querySelectorAll('.layout-btn');
 
@@ -360,7 +381,7 @@
       const username = newModelInput.value.trim();
 
       if (username && !models.map(m => m.toLowerCase()).includes(username.toLowerCase())) {
-        models.unshift(username); // Ajoute au début de la liste
+        models.unshift(username);
         saveModels();
         renderGrid();
         newModelInput.value = '';
@@ -373,6 +394,15 @@
       saveModels();
       renderGrid();
     };
+
+    // Réinitialiser la liste par défaut
+    resetBtn.addEventListener('click', () => {
+      if (confirm('Réinitialiser la liste avec les modèles par défaut ?')) {
+        models = [...defaultModels];
+        localStorage.removeItem('cb_dashboard_models');
+        renderGrid();
+      }
+    });
 
     // Filtre de recherche dynamique
     function applySearchFilter() {
