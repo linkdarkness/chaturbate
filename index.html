@@ -9,6 +9,7 @@
       --bg: #0f172a;
       --card-bg: #1e293b;
       --accent: #38bdf8;
+      --star: #fbbf24;
       --text: #f8fafc;
       --danger: #ef4444;
       --grid-cols: repeat(auto-fill, minmax(360px, 1fr));
@@ -35,7 +36,6 @@
     }
     h1 { font-size: 1.4rem; }
 
-    /* Zone des contrôles */
     .controls-group {
       display: flex;
       align-items: center;
@@ -43,7 +43,6 @@
       flex-wrap: wrap;
     }
 
-    /* Formulaires et boutons d'action */
     .input-form {
       display: flex;
       gap: 6px;
@@ -79,7 +78,7 @@
       background: #0369a1;
     }
 
-    .btn-reset {
+    .btn-reset, .btn-fav-filter {
       background: transparent;
       border: 1px solid #334155;
       color: #94a3b8;
@@ -96,7 +95,13 @@
       background: rgba(239, 68, 68, 0.1);
     }
 
-    /* Boutons de disposition */
+    .btn-fav-filter.active {
+      background: rgba(251, 191, 36, 0.15);
+      border-color: var(--star);
+      color: var(--star);
+      font-weight: 600;
+    }
+
     .layout-selector {
       display: flex;
       background: #0f172a;
@@ -127,7 +132,6 @@
       color: var(--accent);
     }
     
-    /* Grille dynamique */
     .grid-container {
       display: grid;
       grid-template-columns: var(--grid-cols);
@@ -188,7 +192,27 @@
       border-radius: 50%;
     }
 
-    /* Bouton de suppression sur la carte */
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    /* Bouton Étoile Favori */
+    .btn-fav {
+      background: transparent;
+      border: none;
+      color: #64748b;
+      font-size: 1.2rem;
+      cursor: pointer;
+      line-height: 1;
+      transition: color 0.2s ease;
+    }
+
+    .btn-fav.is-favorite {
+      color: var(--star);
+    }
+
     .btn-delete {
       background: transparent;
       border: none;
@@ -196,7 +220,7 @@
       font-size: 1.3rem;
       line-height: 1;
       cursor: pointer;
-      padding: 2px 6px;
+      padding: 2px 4px;
       border-radius: 4px;
       transition: all 0.2s ease;
     }
@@ -206,7 +230,6 @@
       background: #1e293b;
     }
 
-    /* Player fixe et rogné */
     .player-container {
       width: 100%;
       aspect-ratio: 16 / 9;
@@ -225,7 +248,6 @@
       border: 0;
     }
 
-    /* Anti drag-and-drop */
     .drag-preventer {
       position: absolute;
       top: 0;
@@ -284,7 +306,10 @@
       </form>
 
       <!-- Bouton de réinitialisation -->
-      <button id="resetBtn" class="btn-reset" title="Réinitialiser la liste d'origine">&#8634; Zero</button>
+      <button id="resetBtn" class="btn-reset" title="Réinitialiser la liste d'origine">&#8634;</button>
+
+      <!-- Bouton Filtre Favoris -->
+      <button id="favFilterBtn" class="btn-fav-filter" title="Afficher uniquement les favoris">&#9733; Favoris</button>
 
       <!-- Barre de recherche -->
       <input 
@@ -309,7 +334,6 @@
   <main class="grid-container" id="grid"></main>
 
   <script>
-    // Liste d'origine fixe
     const defaultModels = [
       'dreamsweetgirl',
       'cutefacebigass',
@@ -323,26 +347,47 @@
       'naughty_pearls'
     ];
 
-    // Chargement de la liste depuis le localStorage
     let models = JSON.parse(localStorage.getItem('cb_dashboard_models')) || [...defaultModels];
+    let favorites = JSON.parse(localStorage.getItem('cb_dashboard_favs')) || [];
+    let showOnlyFavorites = false;
 
     const grid = document.getElementById('grid');
     const addModelForm = document.getElementById('addModelForm');
     const newModelInput = document.getElementById('newModelInput');
     const resetBtn = document.getElementById('resetBtn');
+    const favFilterBtn = document.getElementById('favFilterBtn');
     const searchInput = document.getElementById('searchInput');
     const layoutBtns = document.querySelectorAll('.layout-btn');
 
-    // Sauvegarder la liste dans le localStorage
     function saveModels() {
       localStorage.setItem('cb_dashboard_models', JSON.stringify(models));
     }
 
-    // Créer le DOM d'une carte
+    function saveFavorites() {
+      localStorage.setItem('cb_dashboard_favs', JSON.stringify(favorites));
+    }
+
+    // Basculer l'état favori d'un modèle
+    window.toggleFavorite = function(username) {
+      const lower = username.toLowerCase();
+      if (favorites.includes(lower)) {
+        favorites = favorites.filter(f => f !== lower);
+      } else {
+        favorites.push(lower);
+      }
+      saveFavorites();
+      renderGrid();
+    };
+
+    // Création d'une carte
     function createCard(username) {
+      const lower = username.toLowerCase();
+      const isFav = favorites.includes(lower);
+
       const card = document.createElement('div');
       card.className = 'model-card';
-      card.setAttribute('data-username', username.toLowerCase());
+      card.setAttribute('data-username', lower);
+      card.setAttribute('data-fav', isFav ? 'true' : 'false');
 
       card.innerHTML = `
         <div class="model-header">
@@ -350,7 +395,10 @@
             <span class="model-name">${username}</span>
             <span class="live-status"><span class="live-dot"></span> EN DIRECT</span>
           </div>
-          <button class="btn-delete" title="Supprimer" onclick="removeModel('${username}')">&times;</button>
+          <div class="header-actions">
+            <button class="btn-fav ${isFav ? 'is-favorite' : ''}" title="Favori" onclick="toggleFavorite('${username}')">&#9733;</button>
+            <button class="btn-delete" title="Supprimer" onclick="removeModel('${username}')">&times;</button>
+          </div>
         </div>
         <div class="player-container">
           <iframe 
@@ -366,16 +414,25 @@
       return card;
     }
 
-    // Rendu de toute la grille
+    // Rendu de la grille (triée : favoris d'abord)
     function renderGrid() {
       grid.innerHTML = '';
-      models.forEach(username => {
+      
+      // On trie les modèles pour que les favoris apparaissent en haut
+      const sortedModels = [...models].sort((a, b) => {
+        const aFav = favorites.includes(a.toLowerCase());
+        const bFav = favorites.includes(b.toLowerCase());
+        return bFav - aFav;
+      });
+
+      sortedModels.forEach(username => {
         grid.appendChild(createCard(username));
       });
-      applySearchFilter();
+
+      applyFilters();
     }
 
-    // Ajouter un nouveau modèle
+    // Ajout d'un modèle
     addModelForm.addEventListener('submit', (e) => {
       e.preventDefault();
       const username = newModelInput.value.trim();
@@ -388,30 +445,47 @@
       }
     });
 
-    // Supprimer un modèle
+    // Suppression d'un modèle
     window.removeModel = function(username) {
-      models = models.filter(m => m.toLowerCase() !== username.toLowerCase());
+      const lower = username.toLowerCase();
+      models = models.filter(m => m.toLowerCase() !== lower);
+      favorites = favorites.filter(f => f !== lower);
       saveModels();
+      saveFavorites();
       renderGrid();
     };
 
-    // Réinitialiser la liste par défaut
+    // Réinitialisation
     resetBtn.addEventListener('click', () => {
       if (confirm('Réinitialiser la liste avec les modèles par défaut ?')) {
         models = [...defaultModels];
+        favorites = [];
         localStorage.removeItem('cb_dashboard_models');
+        localStorage.removeItem('cb_dashboard_favs');
         renderGrid();
       }
     });
 
-    // Filtre de recherche dynamique
-    function applySearchFilter() {
+    // Bouton filtre favoris
+    favFilterBtn.addEventListener('click', () => {
+      showOnlyFavorites = !showOnlyFavorites;
+      favFilterBtn.classList.toggle('active', showOnlyFavorites);
+      applyFilters();
+    });
+
+    // Filtres combinés (Recherche texte + Filtre favoris)
+    function applyFilters() {
       const query = searchInput.value.trim().toLowerCase();
       const cards = grid.querySelectorAll('.model-card');
 
       cards.forEach(card => {
         const username = card.getAttribute('data-username');
-        if (username.includes(query)) {
+        const isFav = card.getAttribute('data-fav') === 'true';
+
+        const matchesSearch = username.includes(query);
+        const matchesFav = !showOnlyFavorites || isFav;
+
+        if (matchesSearch && matchesFav) {
           card.classList.remove('hidden');
         } else {
           card.classList.add('hidden');
@@ -419,9 +493,9 @@
       });
     }
 
-    searchInput.addEventListener('input', applySearchFilter);
+    searchInput.addEventListener('input', applyFilters);
 
-    // Gestion de la disposition (colonnes)
+    // Disposition des colonnes
     layoutBtns.forEach(btn => {
       btn.addEventListener('click', () => {
         layoutBtns.forEach(b => b.classList.remove('active'));
@@ -436,10 +510,8 @@
       });
     });
 
-    // Sécurité glisser-déposer
     window.addEventListener('dragstart', (e) => e.preventDefault());
 
-    // Chargement initial
     renderGrid();
   </script>
 </body>
