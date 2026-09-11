@@ -8,8 +8,9 @@
     :root {
       --bg: #0f172a;
       --card-bg: #1e293b;
-      --accent: #dc2626;
+      --accent: #38bdf8;
       --text: #f8fafc;
+      --grid-cols: repeat(auto-fill, minmax(360px, 1fr));
     }
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
@@ -33,10 +34,18 @@
     }
     h1 { font-size: 1.4rem; }
 
+    /* Zone des contrôles */
+    .controls-group {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+
     /* Barre de recherche */
     .search-container {
       position: relative;
-      min-width: 240px;
+      min-width: 200px;
     }
 
     .search-input {
@@ -52,12 +61,44 @@
     }
 
     .search-input:focus {
-      border-color: #38bdf8;
+      border-color: var(--accent);
+    }
+
+    /* Boutons de disposition */
+    .layout-selector {
+      display: flex;
+      background: #0f172a;
+      border: 1px solid #334155;
+      border-radius: 8px;
+      padding: 3px;
+      gap: 2px;
+    }
+
+    .layout-btn {
+      background: transparent;
+      border: none;
+      color: #94a3b8;
+      padding: 6px 12px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .layout-btn:hover {
+      color: var(--text);
+    }
+
+    .layout-btn.active {
+      background: #334155;
+      color: var(--accent);
     }
     
+    /* Grille dynamique */
     .grid-container {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+      grid-template-columns: var(--grid-cols);
       gap: 20px;
       padding: 20px;
       flex: 1;
@@ -141,16 +182,25 @@
       pointer-events: none;
     }
 
+    @media (max-width: 768px) {
+      .layout-selector {
+        display: none; /* Masqué sur petits écrans où 1 seule colonne s'impose */
+      }
+    }
+
     @media (max-width: 480px) {
       header {
         flex-direction: column;
         align-items: stretch;
       }
+      .controls-group {
+        width: 100%;
+      }
       .search-container {
         width: 100%;
       }
       .grid-container {
-        grid-template-columns: 1fr;
+        grid-template-columns: 1fr !important;
         padding: 10px;
         gap: 12px;
       }
@@ -160,21 +210,29 @@
 <body>
   <header>
     <h1>Directs Live</h1>
-    <div class="search-container">
-      <input 
-        type="text" 
-        id="searchInput" 
-        class="search-input" 
-        placeholder="Rechercher un modèle..."
-        autocomplete="off"
-      >
+    <div class="controls-group">
+      <div class="layout-selector">
+        <button class="layout-btn active" data-cols="auto">Auto</button>
+        <button class="layout-btn" data-cols="1">1 Col</button>
+        <button class="layout-btn" data-cols="2">2 Col</button>
+        <button class="layout-btn" data-cols="3">3 Col</button>
+        <button class="layout-btn" data-cols="4">4 Col</button>
+      </div>
+      <div class="search-container">
+        <input 
+          type="text" 
+          id="searchInput" 
+          class="search-input" 
+          placeholder="Rechercher un modèle..."
+          autocomplete="off"
+        >
+      </div>
     </div>
   </header>
 
   <main class="grid-container" id="grid"></main>
 
   <script>
-    // Liste des modèles à intégrer
     const models = [
       'dreamsweetgirl',
       'cutefacebigass',
@@ -190,6 +248,7 @@
 
     const grid = document.getElementById('grid');
     const searchInput = document.getElementById('searchInput');
+    const layoutBtns = document.querySelectorAll('.layout-btn');
 
     // Génération instantanée des cartes HTML
     models.forEach(username => {
@@ -216,7 +275,22 @@
       grid.appendChild(card);
     });
 
-    // Filtre de recherche dynamique
+    // Gestion du changement de disposition (nombre de colonnes)
+    layoutBtns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        layoutBtns.forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+
+        const cols = btn.getAttribute('data-cols');
+        if (cols === 'auto') {
+          grid.style.setProperty('--grid-cols', 'repeat(auto-fill, minmax(360px, 1fr))');
+        } else {
+          grid.style.setProperty('--grid-cols', `repeat(${cols}, 1fr)`);
+        }
+      });
+    });
+
+    // Filtrage dynamique lors de la saisie
     searchInput.addEventListener('input', (e) => {
       const query = e.target.value.trim().toLowerCase();
       const cards = grid.querySelectorAll('.model-card');
