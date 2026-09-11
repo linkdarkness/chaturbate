@@ -3,11 +3,12 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Directs Live - Vidéo Rognée</title>
+  <title>Directs Live - Vidéo Uniquement</title>
   <style>
     :root {
       --bg: #0f172a;
       --card-bg: #1e293b;
+      --accent: #dc2626;
       --text: #f8fafc;
     }
     * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -73,7 +74,7 @@
       border-radius: 50%;
     }
 
-    /* Le conteneur coupe tout ce qui dépasse */
+    /* Le conteneur coupe tout ce qui déborde de sa zone */
     .player-container {
       width: 100%;
       aspect-ratio: 16 / 9;
@@ -82,13 +83,13 @@
       overflow: hidden;
     }
 
-    /* Zoom et décalage pour masquer le chat et la barre de boutons */
+    /* Zoom et décalage précis pour isoler uniquement le lecteur vidéo */
     .player-container iframe {
       position: absolute;
-      top: -10%;
-      left: -2%;
+      top: -11%;
+      left: -1%;
       width: 138%;
-      height: 120%;
+      height: 122%;
       border: 0;
     }
 
@@ -130,6 +131,7 @@
 
     models.forEach(username => {
       const img = new Image();
+      // Test de présence de la miniature officielle
       img.src = `https://cbmg.b-cdn.net/thumbs/chaturbate/${username}.jpg?t=${Date.now()}`;
 
       img.onload = () => {
