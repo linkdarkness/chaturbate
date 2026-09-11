@@ -3,8 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Directs Live - Flux Pur</title>
-  <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+  <title>Directs Live - Vidéo Rognée</title>
   <style>
     :root {
       --bg: #0f172a;
@@ -74,16 +73,23 @@
       border-radius: 50%;
     }
 
+    /* Le conteneur coupe tout ce qui dépasse */
     .player-container {
       width: 100%;
       aspect-ratio: 16 / 9;
       background: #000;
+      position: relative;
+      overflow: hidden;
     }
 
-    .player-container video {
-      width: 100%;
-      height: 100%;
-      object-fit: contain;
+    /* Zoom et décalage pour masquer le chat et la barre de boutons */
+    .player-container iframe {
+      position: absolute;
+      top: -10%;
+      left: -2%;
+      width: 138%;
+      height: 120%;
+      border: 0;
     }
 
     @media (max-width: 480px) {
@@ -97,8 +103,8 @@
 </head>
 <body>
   <header>
-    <h1>Directs Live (Flux Vidéo Brut)</h1>
-    <span id="loading-status" style="color: #94a3b8; font-size: 0.9rem;">Analyse des serveurs...</span>
+    <h1>Directs Live</h1>
+    <span id="loading-status" style="color: #94a3b8; font-size: 0.9rem;">Vérification des flux...</span>
   </header>
 
   <main class="grid-container" id="grid"></main>
@@ -120,91 +126,53 @@
     const grid = document.getElementById('grid');
     const statusText = document.getElementById('loading-status');
     let liveCount = 0;
-    let processed = 0;
+    let checkedCount = 0;
 
-    // Fonction pour interroger le serveur WebSocket de la room
-    function getStreamUrl(username) {
-      return new Promise((resolve, reject) => {
-        const ws = new WebSocket(`wss://edge1-external.chaturbate.com/ws/${username}/`);
-        const timeout = setTimeout(() => {
-          ws.close();
-          reject('Timeout');
-        }, 4000);
+    models.forEach(username => {
+      const img = new Image();
+      img.src = `https://cbmg.b-cdn.net/thumbs/chaturbate/${username}.jpg?t=${Date.now()}`;
 
-        ws.onopen = () => {
-          ws.send(JSON.stringify({ exec: 'subscribe', data: { room: username } }));
-        };
+      img.onload = () => {
+        liveCount++;
+        renderCard(username);
+        updateStatus();
+      };
 
-        ws.onmessage = (event) => {
-          try {
-            const msg = JSON.parse(event.data);
-            if (msg.data && msg.data.hls_source) {
-              clearTimeout(timeout);
-              ws.close();
-              resolve(msg.data.hls_source);
-            }
-          } catch (e) {}
-        };
+      img.onerror = () => {
+        updateStatus();
+      };
+    });
 
-        ws.onerror = (err) => {
-          clearTimeout(timeout);
-          reject(err);
-        };
-      });
-    }
-
-    async function init() {
-      grid.innerHTML = '';
-
-      for (const username of models) {
-        try {
-          const m3u8Url = await getStreamUrl(username);
-          if (m3u8Url) {
-            liveCount++;
-            createVideoCard(username, m3u8Url);
-          }
-        } catch (err) {
-          // Si l'erreur est levée, le modèle est hors ligne ou l'accès est refusé
-        }
-        processed++;
-        statusText.textContent = `Vérification : ${processed}/${models.length}...`;
-      }
-
-      statusText.textContent = `${liveCount} modèle(s) en direct`;
-
-      if (liveCount === 0) {
-        grid.innerHTML = `<p style="grid-column: 1/-1; text-align: center; color: #94a3b8;">Aucun modèle de la liste n'est en direct actuellement (ou accès restreint).</p>`;
-      }
-    }
-
-    function createVideoCard(username, streamUrl) {
+    function renderCard(username) {
       const card = document.createElement('div');
       card.className = 'model-card';
-      const videoId = `video-${username}`;
-
       card.innerHTML = `
         <div class="model-header">
           <span class="model-name">${username}</span>
           <span class="live-status"><span class="live-dot"></span> EN DIRECT</span>
         </div>
         <div class="player-container">
-          <video id="${videoId}" controls autoplay muted playsinline></video>
+          <iframe 
+            src="https://chaturbate.com/embed/${encodeURIComponent(username)}/" 
+            allow="autoplay; fullscreen" 
+            sandbox="allow-scripts allow-same-origin allow-forms"
+            referrerpolicy="no-referrer-when-downgrade"
+            allowfullscreen>
+          </iframe>
         </div>
       `;
-
       grid.appendChild(card);
-      const videoElement = document.getElementById(videoId);
-
-      if (Hls.isSupported()) {
-        const hls = new Hls();
-        hls.loadSource(streamUrl);
-        hls.attachMedia(videoElement);
-      } else if (videoElement.canPlayType('application/vnd.apple.mpegurl')) {
-        videoElement.src = streamUrl;
-      }
     }
 
-    init();
+    function updateStatus() {
+      checkedCount++;
+      if (checkedCount === models.length) {
+        statusText.textContent = `${liveCount} modèle(s) en direct`;
+        if (liveCount === 0) {
+          grid.innerHTML = `<p style="grid-column: 1/-1; text-align: center; color: #94a3b8;">Aucun modèle en direct pour le moment.</p>`;
+        }
+      }
+    }
   </script>
 </body>
 </html>
