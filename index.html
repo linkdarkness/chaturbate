@@ -3,12 +3,13 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Directs Live</title>
+  <title>Directs Live - Lecteur Vidéo Pur</title>
+  <!-- Chargement de la bibliothèque HLS.js pour lire le flux vidéo .m3u8 -->
+  <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
   <style>
     :root {
       --bg: #0f172a;
       --card-bg: #1e293b;
-      --accent: #dc2626;
       --text: #f8fafc;
     }
     * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -24,6 +25,9 @@
       padding: 16px 24px;
       background: var(--card-bg);
       border-bottom: 1px solid #334155;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
     }
     h1 { font-size: 1.4rem; }
     
@@ -53,17 +57,15 @@
       border-bottom: 1px solid #334155;
     }
 
-    .model-name {
-      font-weight: bold;
-      font-size: 1rem;
-    }
+    .model-name { font-weight: bold; }
 
     .live-status {
       display: flex;
       align-items: center;
       gap: 6px;
       font-size: 0.8rem;
-      color: #94a3b8;
+      color: #22c55e;
+      font-weight: bold;
     }
 
     .live-dot {
@@ -79,10 +81,11 @@
       background: #000;
     }
 
-    .player-container iframe {
+    /* Le lecteur vidéo HTML5 épuré */
+    .player-container video {
       width: 100%;
       height: 100%;
-      border: 0;
+      object-fit: contain;
     }
 
     @media (max-width: 480px) {
@@ -96,121 +99,93 @@
 </head>
 <body>
   <header>
-    <h1>Directs Live</h1>
+    <h1>Directs Live (Flux Vidéo Brut)</h1>
+    <span id="loading-status" style="color: #94a3b8; font-size: 0.9rem;">Chargement des flux...</span>
   </header>
 
-  <main class="grid-container">
+  <main class="grid-container" id="grid"></main>
 
-    <!-- Modèle 1 -->
-    <div class="model-card">
-      <div class="model-header">
-        <span class="model-name">Dreamsweetgirl</span>
-        <span class="live-status"><span class="live-dot"></span> EN DIRECT</span>
-      </div>
-      <div class="player-container">
-        <iframe src="https://chaturbate.com/embed/dreamsweetgirl/" allow="autoplay; fullscreen" sandbox="allow-scripts allow-same-origin allow-forms" referrerpolicy="no-referrer-when-downgrade" allowfullscreen></iframe>
-      </div>
-    </div>
+  <script>
+    const models = [
+      'dreamsweetgirl',
+      'cutefacebigass',
+      'sweet_sugar87',
+      'ellyrockstar',
+      'pinkcouplexo',
+      'julcy_peach',
+      'shiny_lily',
+      'olsenspring',
+      'holly_and_honey_69',
+      'naughty_pearls'
+    ];
 
-    <!-- Modèle 2 -->
-    <div class="model-card">
-      <div class="model-header">
-        <span class="model-name">cutefacebigass</span>
-        <span class="live-status"><span class="live-dot"></span> EN DIRECT</span>
-      </div>
-      <div class="player-container">
-        <iframe src="https://chaturbate.com/embed/cutefacebigass/" allow="autoplay; fullscreen" sandbox="allow-scripts allow-same-origin allow-forms" referrerpolicy="no-referrer-when-downgrade" allowfullscreen></iframe>
-      </div>
-    </div>
+    const grid = document.getElementById('grid');
+    const statusText = document.getElementById('loading-status');
+    let liveCount = 0;
 
-    <!-- Modèle 3 -->
-    <div class="model-card">
-      <div class="model-header">
-        <span class="model-name">sweet_sugar87</span>
-        <span class="live-status"><span class="live-dot"></span> EN DIRECT</span>
-      </div>
-      <div class="player-container">
-        <iframe src="https://chaturbate.com/embed/sweet_sugar87/" allow="autoplay; fullscreen" sandbox="allow-scripts allow-same-origin allow-forms" referrerpolicy="no-referrer-when-downgrade" allowfullscreen></iframe>
-      </div>
-    </div>
+    async function initPlayers() {
+      grid.innerHTML = '';
 
-    <!-- Modèle 4 -->
-    <div class="model-card">
-      <div class="model-header">
-        <span class="model-name">ellyrockstar</span>
-        <span class="live-status"><span class="live-dot"></span> EN DIRECT</span>
-      </div>
-      <div class="player-container">
-        <iframe src="https://chaturbate.com/embed/ellyrockstar/" allow="autoplay; fullscreen" sandbox="allow-scripts allow-same-origin allow-forms" referrerpolicy="no-referrer-when-downgrade" allowfullscreen></iframe>
-      </div>
-    </div>
+      for (const username of models) {
+        try {
+          // Requête via un proxy CORS vers la page du modèle
+          const response = await fetch(`https://api.allorigins.win/get?url=${encodeURIComponent(`https://chaturbate.com/${username}/`)}`);
+          const data = await response.json();
+          
+          // Recherche du lien .m3u8 dans le code source de la page
+          const m3u8Match = data.contents.match(/https:\/\/[^"]+\.m3u8/);
 
-    <!-- Modèle 5 -->
-    <div class="model-card">
-      <div class="model-header">
-        <span class="model-name">pinkcouplexo</span>
-        <span class="live-status"><span class="live-dot"></span> EN DIRECT</span>
-      </div>
-      <div class="player-container">
-        <iframe src="https://chaturbate.com/embed/pinkcouplexo/" allow="autoplay; fullscreen" sandbox="allow-scripts allow-same-origin allow-forms" referrerpolicy="no-referrer-when-downgrade" allowfullscreen></iframe>
-      </div>
-    </div>
+          if (m3u8Match && m3u8Match[0]) {
+            const hlsUrl = m3u8Match[0].replace(/\\u002D/g, '-'); // Nettoyage de l'URL
+            liveCount++;
+            createVideoCard(username, hlsUrl);
+          }
+        } catch (err) {
+          console.error(`Erreur pour le modèle ${username}:`, err);
+        }
+      }
 
-    <!-- Modèle 6 -->
-    <div class="model-card">
-      <div class="model-header">
-        <span class="model-name">julcy_peach</span>
-        <span class="live-status"><span class="live-dot"></span> EN DIRECT</span>
-      </div>
-      <div class="player-container">
-        <iframe src="https://chaturbate.com/embed/julcy_peach/" allow="autoplay; fullscreen" sandbox="allow-scripts allow-same-origin allow-forms" referrerpolicy="no-referrer-when-downgrade" allowfullscreen></iframe>
-      </div>
-    </div>
+      statusText.textContent = `${liveCount} modèle(s) en direct`;
 
-    <!-- Modèle 7 -->
-    <div class="model-card">
-      <div class="model-header">
-        <span class="model-name">shiny_lily</span>
-        <span class="live-status"><span class="live-dot"></span> EN DIRECT</span>
-      </div>
-      <div class="player-container">
-        <iframe src="https://chaturbate.com/embed/shiny_lily/" allow="autoplay; fullscreen" sandbox="allow-scripts allow-same-origin allow-forms" referrerpolicy="no-referrer-when-downgrade" allowfullscreen></iframe>
-      </div>
-    </div>
+      if (liveCount === 0) {
+        grid.innerHTML = `<p style="grid-column: 1/-1; text-align: center; color: #94a3b8;">Aucun modèle en direct actuellement.</p>`;
+      }
+    }
 
-    <!-- Modèle 8 -->
-    <div class="model-card">
-      <div class="model-header">
-        <span class="model-name">olsenspring</span>
-        <span class="live-status"><span class="live-dot"></span> EN DIRECT</span>
-      </div>
-      <div class="player-container">
-        <iframe src="https://chaturbate.com/embed/olsenspring/" allow="autoplay; fullscreen" sandbox="allow-scripts allow-same-origin allow-forms" referrerpolicy="no-referrer-when-downgrade" allowfullscreen></iframe>
-      </div>
-    </div>
+    function createVideoCard(username, streamUrl) {
+      const card = document.createElement('div');
+      card.className = 'model-card';
+      
+      const videoId = `video-${username}`;
 
-    <!-- Modèle 9 -->
-    <div class="model-card">
-      <div class="model-header">
-        <span class="model-name">holly_and_honey_69</span>
-        <span class="live-status"><span class="live-dot"></span> EN DIRECT</span>
-      </div>
-      <div class="player-container">
-        <iframe src="https://chaturbate.com/embed/holly_and_honey_69/" allow="autoplay; fullscreen" sandbox="allow-scripts allow-same-origin allow-forms" referrerpolicy="no-referrer-when-downgrade" allowfullscreen></iframe>
-      </div>
-    </div>
+      card.innerHTML = `
+        <div class="model-header">
+          <span class="model-name">${username}</span>
+          <span class="live-status"><span class="live-dot"></span> EN DIRECT</span>
+        </div>
+        <div class="player-container">
+          <video id="${videoId}" controls autoplay muted playsinline></video>
+        </div>
+      `;
 
-    <!-- Modèle 10 -->
-    <div class="model-card">
-      <div class="model-header">
-        <span class="model-name">naughty_pearls</span>
-        <span class="live-status"><span class="live-dot"></span> EN DIRECT</span>
-      </div>
-      <div class="player-container">
-        <iframe src="https://chaturbate.com/embed/naughty_pearls/" allow="autoplay; fullscreen" sandbox="allow-scripts allow-same-origin allow-forms" referrerpolicy="no-referrer-when-downgrade" allowfullscreen></iframe>
-      </div>
-    </div>
+      grid.appendChild(card);
 
-  </main>
+      const videoElement = document.getElementById(videoId);
+
+      // Utilisation de HLS.js si supporté
+      if (Hls.isSupported()) {
+        const hls = new Hls();
+        hls.loadSource(streamUrl);
+        hls.attachMedia(videoElement);
+      } 
+      // Fallback natif pour Safari / iOS
+      else if (videoElement.canPlayType('application/vnd.apple.mpegurl')) {
+        videoElement.src = streamUrl;
+      }
+    }
+
+    // Démarrage du script
+    initPlayers();
+  </script>
 </body>
 </html>
