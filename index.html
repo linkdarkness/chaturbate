@@ -3,11 +3,12 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Directs Live - Local</title>
+  <title>Directs Live</title>
   <style>
     :root {
       --bg: #0f172a;
       --card-bg: #1e293b;
+      --accent: #dc2626;
       --text: #f8fafc;
     }
     * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -55,7 +56,10 @@
       border-bottom: 1px solid #334155;
     }
 
-    .model-name { font-weight: bold; }
+    .model-name {
+      font-weight: bold;
+      font-size: 1rem;
+    }
 
     .live-status {
       display: flex;
@@ -84,17 +88,33 @@
       height: 100%;
       border: 0;
     }
+
+    .no-live {
+      text-align: center;
+      grid-column: 1 / -1;
+      color: #94a3b8;
+      margin-top: 40px;
+    }
+
+    @media (max-width: 480px) {
+      .grid-container {
+        grid-template-columns: 1fr;
+        padding: 10px;
+        gap: 12px;
+      }
+    }
   </style>
 </head>
 <body>
   <header>
     <h1>Directs Live</h1>
-    <span id="loading-status" style="color: #94a3b8; font-size: 0.9rem;">Vérification des flux...</span>
+    <span id="loading-status" style="color: #94a3b8; font-size: 0.9rem;">Vérification des lives...</span>
   </header>
 
   <main class="grid-container" id="grid"></main>
 
   <script>
+    // Liste des pseudos à surveiller
     const models = [
       'dreamsweetgirl',
       'cutefacebigass',
@@ -108,59 +128,56 @@
       'naughty_pearls'
     ];
 
-    const grid = document.getElementById('grid');
-    const statusText = document.getElementById('loading-status');
-    let liveCount = 0;
-    let checkedCount = 0;
+    async function checkAndRenderLives() {
+      const grid = document.getElementById('grid');
+      const statusText = document.getElementById('loading-status');
+      grid.innerHTML = '';
+      
+      let liveCount = 0;
 
-    models.forEach(username => {
-      const img = new Image();
-      // On teste le chargement de l'image miniature officielle du live
-      img.src = `https://cbmg.b-cdn.net/thumbs/chaturbate/${username}.jpg?t=${Date.now()}`;
+      for (const username of models) {
+        try {
+          // Utilisation d'un proxy CORS gratuit pour interroger l'API Chaturbate
+          const res = await fetch(`https://api.allorigins.win/get?url=${encodeURIComponent(`https://chaturbate.com/api/chaturbateloaddata/?username=${username}`)}`);
+          const data = await res.json();
+          const parsedData = JSON.parse(data.contents);
 
-      img.onload = () => {
-        // L'image existe : la personne est en direct
-        liveCount++;
-        renderCard(username);
-        updateStatus();
-      };
-
-      img.onerror = () => {
-        // L'image ne charge pas : la personne est hors ligne
-        updateStatus();
-      };
-    });
-
-    function renderCard(username) {
-      const card = document.createElement('div');
-      card.className = 'model-card';
-      card.innerHTML = `
-        <div class="model-header">
-          <span class="model-name">${username}</span>
-          <span class="live-status"><span class="live-dot"></span> EN DIRECT</span>
-        </div>
-        <div class="player-container">
-          <iframe 
-            src="https://chaturbate.com/embed/${encodeURIComponent(username)}/" 
-            allow="autoplay; fullscreen" 
-            sandbox="allow-scripts allow-same-origin allow-forms"
-            referrerpolicy="no-referrer-when-downgrade"
-            allowfullscreen>
-          </iframe>
-        </div>
-      `;
-      grid.appendChild(card);
-    }
-
-    function updateStatus() {
-      checkedCount++;
-      if (checkedCount === models.length) {
-        statusText.textContent = `${liveCount} modèle(s) en direct`;
-        if (liveCount === 0) {
-          grid.innerHTML = `<p style="grid-column: 1/-1; text-align: center; color: #94a3b8;">Aucun modèle en direct pour le moment.</p>`;
+          // Si le modèle est en ligne, on crée et affiche son lecteur
+          if (parsedData && parsedData.room_status === 'public') {
+            liveCount++;
+            const card = document.createElement('div');
+            card.className = 'model-card';
+            card.innerHTML = `
+              <div class="model-header">
+                <span class="model-name">${username}</span>
+                <span class="live-status"><span class="live-dot"></span> EN DIRECT</span>
+              </div>
+              <div class="player-container">
+                <iframe 
+                  src="https://chaturbate.com/embed/${encodeURIComponent(username)}/" 
+                  allow="autoplay; fullscreen" 
+                  sandbox="allow-scripts allow-same-origin allow-forms"
+                  referrerpolicy="no-referrer-when-downgrade"
+                  allowfullscreen>
+                </iframe>
+              </div>
+            `;
+            grid.appendChild(card);
+          }
+        } catch (err) {
+          console.error(`Erreur pour ${username}:`, err);
         }
       }
+
+      statusText.textContent = `${liveCount} modèle(s) en direct`;
+      
+      if (liveCount === 0) {
+        grid.innerHTML = `<p class="no-live">Aucun modèle de la liste n'est en direct pour le moment.</p>`;
+      }
     }
+
+    // Lancement au chargement de la page
+    checkAndRenderLives();
   </script>
 </body>
 </html>
