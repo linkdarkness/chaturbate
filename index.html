@@ -20,12 +20,40 @@
       display: flex;
       flex-direction: column;
     }
+    
     header {
       padding: 16px 24px;
       background: var(--card-bg);
       border-bottom: 1px solid #334155;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+      flex-wrap: wrap;
     }
     h1 { font-size: 1.4rem; }
+
+    /* Style de la barre de recherche */
+    .search-container {
+      position: relative;
+      min-width: 240px;
+    }
+
+    .search-input {
+      width: 100%;
+      padding: 8px 16px;
+      border-radius: 8px;
+      border: 1px solid #334155;
+      background: #0f172a;
+      color: var(--text);
+      font-size: 0.9rem;
+      outline: none;
+      transition: border-color 0.2s ease;
+    }
+
+    .search-input:focus {
+      border-color: #38bdf8;
+    }
     
     .grid-container {
       display: grid;
@@ -44,6 +72,12 @@
       flex-direction: column;
       user-select: none;
       -webkit-user-select: none;
+      transition: opacity 0.2s ease;
+    }
+
+    /* Classe utilitaire pour masquer les cartes filtrées */
+    .model-card.hidden {
+      display: none !important;
     }
 
     .model-header {
@@ -76,7 +110,22 @@
       border-radius: 50%;
     }
 
-    /* Player fixe et rogné */
+    .offline-status {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.8rem;
+      color: #ef4444;
+      font-weight: bold;
+    }
+
+    .offline-dot {
+      width: 8px;
+      height: 8px;
+      background-color: #ef4444;
+      border-radius: 50%;
+    }
+
     .player-container {
       width: 100%;
       aspect-ratio: 16 / 9;
@@ -84,6 +133,9 @@
       position: relative;
       overflow: hidden;
       touch-action: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
 
     .player-container iframe {
@@ -95,7 +147,6 @@
       border: 0;
     }
 
-    /* Overlay transparent pour bloquer le glisser-déposer tout en maintenant la vidéo fixe */
     .drag-preventer {
       position: absolute;
       top: 0;
@@ -104,10 +155,23 @@
       height: 100%;
       z-index: 10;
       background: transparent;
-      pointer-events: none; /* Permet le clic si besoin, tout en bloquant le glissement */
+      pointer-events: none;
+    }
+
+    .offline-placeholder {
+      color: #64748b;
+      font-size: 0.9rem;
+      text-align: center;
     }
 
     @media (max-width: 480px) {
+      header {
+        flex-direction: column;
+        align-items: stretch;
+      }
+      .search-container {
+        width: 100%;
+      }
       .grid-container {
         grid-template-columns: 1fr;
         padding: 10px;
@@ -119,12 +183,20 @@
 <body>
   <header>
     <h1>Directs Live</h1>
+    <div class="search-container">
+      <input 
+        type="text" 
+        id="searchInput" 
+        class="search-input" 
+        placeholder="Rechercher un modèle..."
+        autocomplete="off"
+      >
+    </div>
   </header>
 
   <main class="grid-container" id="grid"></main>
 
   <script>
-    // Liste des modèles
     const models = [
       'dreamsweetgirl',
       'cutefacebigass',
@@ -139,32 +211,79 @@
     ];
 
     const grid = document.getElementById('grid');
+    const searchInput = document.getElementById('searchInput');
 
-    // Génération directe des iFrames
+    // 1. Génération de la grille avec attribut data-username
     models.forEach(username => {
       const card = document.createElement('div');
       card.className = 'model-card';
+      card.setAttribute('data-username', username.toLowerCase());
 
       card.innerHTML = `
         <div class="model-header">
           <span class="model-name">${username}</span>
-          <span class="live-status"><span class="live-dot"></span> EN DIRECT</span>
+          <span class="status-container" id="status-${username}">
+            <span class="offline-status" style="color:#94a3b8"><span class="offline-dot" style="background-color:#94a3b8"></span> VÉRIFICATION...</span>
+          </span>
         </div>
-        <div class="player-container">
-          <iframe 
-            src="https://chaturbate.com/embed/${encodeURIComponent(username)}/" 
-            allow="autoplay; fullscreen" 
-            sandbox="allow-scripts allow-same-origin allow-forms"
-            referrerpolicy="no-referrer-when-downgrade"
-            allowfullscreen>
-          </iframe>
-          <div class="drag-preventer"></div>
+        <div class="player-container" id="player-${username}">
+          <span class="offline-placeholder">Chargement...</span>
         </div>
       `;
       grid.appendChild(card);
     });
 
-    // Sécurité globale anti-glisser/déposer
+    // 2. Filtrage dynamique au fur et à mesure de la saisie
+    searchInput.addEventListener('input', (e) => {
+      const query = e.target.value.trim().toLowerCase();
+      const cards = grid.querySelectorAll('.model-card');
+
+      cards.forEach(card => {
+        const username = card.getAttribute('data-username');
+        if (username.includes(query)) {
+          card.classList.remove('hidden');
+        } else {
+          card.classList.add('hidden');
+        }
+      });
+    });
+
+    // 3. Connexion au serveur Node.js local
+    async function updateModelsStatus() {
+      try {
+        const response = await fetch(`http://localhost:3000/api/check-status?models=${models.join(',')}`);
+        const statuses = await response.json();
+
+        models.forEach(username => {
+          const isOnline = statuses[username.toLowerCase()];
+          const statusEl = document.getElementById(`status-${username}`);
+          const playerEl = document.getElementById(`player-${username}`);
+
+          if (isOnline) {
+            statusEl.innerHTML = `<span class="live-status"><span class="live-dot"></span> EN DIRECT</span>`;
+            playerEl.innerHTML = `
+              <iframe 
+                src="https://chaturbate.com/embed/${encodeURIComponent(username)}/" 
+                allow="autoplay; fullscreen" 
+                sandbox="allow-scripts allow-same-origin allow-forms"
+                referrerpolicy="no-referrer-when-downgrade"
+                allowfullscreen>
+              </iframe>
+              <div class="drag-preventer"></div>
+            `;
+          } else {
+            statusEl.innerHTML = `<span class="offline-status"><span class="offline-dot"></span> HORS LIGNE</span>`;
+            playerEl.innerHTML = `<span class="offline-placeholder">Modèle actuellement hors ligne</span>`;
+          }
+        });
+      } catch (err) {
+        console.error('Erreur de connexion au serveur Node :', err);
+      }
+    }
+
+    updateModelsStatus();
+    setInterval(updateModelsStatus, 120000);
+
     window.addEventListener('dragstart', (e) => e.preventDefault());
   </script>
 </body>
