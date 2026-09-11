@@ -176,22 +176,6 @@
       font-size: 1rem;
     }
 
-    .live-status {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      font-size: 0.8rem;
-      color: #22c55e;
-      font-weight: bold;
-    }
-
-    .live-dot {
-      width: 8px;
-      height: 8px;
-      background-color: #22c55e;
-      border-radius: 50%;
-    }
-
     .header-actions {
       display: flex;
       align-items: center;
@@ -379,7 +363,7 @@
       renderGrid();
     };
 
-    // Création d'une carte
+    // Création d'une carte sans le statut "EN DIRECT"
     function createCard(username) {
       const lower = username.toLowerCase();
       const isFav = favorites.includes(lower);
@@ -393,7 +377,6 @@
         <div class="model-header">
           <div class="header-left">
             <span class="model-name">${username}</span>
-            <span class="live-status"><span class="live-dot"></span> EN DIRECT</span>
           </div>
           <div class="header-actions">
             <button class="btn-fav ${isFav ? 'is-favorite' : ''}" title="Favori" onclick="toggleFavorite('${username}')">&#9733;</button>
@@ -418,7 +401,6 @@
     function renderGrid() {
       grid.innerHTML = '';
       
-      // On trie les modèles pour que les favoris apparaissent en haut
       const sortedModels = [...models].sort((a, b) => {
         const aFav = favorites.includes(a.toLowerCase());
         const bFav = favorites.includes(b.toLowerCase());
