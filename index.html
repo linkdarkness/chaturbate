@@ -60,7 +60,7 @@
       font-size: 1rem;
     }
 
-    /* Style du statut en direct (vert) */
+    /* Statuts */
     .live-status {
       display: flex;
       align-items: center;
@@ -77,7 +77,6 @@
       border-radius: 50%;
     }
 
-    /* Style du statut hors ligne (rouge) */
     .offline-status {
       display: flex;
       align-items: center;
@@ -94,7 +93,7 @@
       border-radius: 50%;
     }
 
-    /* Conteneur du lecteur */
+    /* Conteneur et iframe fixe */
     .player-container {
       width: 100%;
       aspect-ratio: 16 / 9;
@@ -107,7 +106,6 @@
       justify-content: center;
     }
 
-    /* Zoom et rognage CSS de l'iframe */
     .player-container iframe {
       position: absolute;
       top: -11%;
@@ -117,7 +115,6 @@
       border: 0;
     }
 
-    /* Message affiché à la place de l'iframe si hors ligne */
     .offline-placeholder {
       color: #64748b;
       font-size: 0.9rem;
@@ -157,7 +154,6 @@
     const grid = document.getElementById('grid');
 
     models.forEach(username => {
-      // Structure initiale de la carte
       const card = document.createElement('div');
       card.className = 'model-card';
       card.setAttribute('draggable', 'false');
@@ -166,26 +162,12 @@
         <div class="model-header">
           <span class="model-name">${username}</span>
           <span class="status-container" id="status-${username}">
-            <span class="offline-status"><span class="offline-dot"></span> VÉRIFICATION...</span>
+            <span class="live-status"><span class="live-dot"></span> EN DIRECT</span>
           </span>
         </div>
         <div class="player-container" id="player-${username}">
-          <span class="offline-placeholder">Chargement du flux...</span>
-        </div>
-      `;
-      grid.appendChild(card);
-
-      // Test de disponibilité via l'image miniature officielle
-      const img = new Image();
-      img.src = `https://cbmg.b-cdn.net/thumbs/chaturbate/${username}.jpg?t=${Date.now()}`;
-
-      img.onload = () => {
-        // SUCCÈS : Le modèle est en ligne -> Intégration de l'iframe
-        document.getElementById(`status-${username}`).innerHTML = `
-          <span class="live-status"><span class="live-dot"></span> EN DIRECT</span>
-        `;
-        document.getElementById(`player-${username}`).innerHTML = `
           <iframe 
+            id="iframe-${username}"
             src="https://chaturbate.com/embed/${encodeURIComponent(username)}/" 
             allow="autoplay; fullscreen" 
             sandbox="allow-scripts allow-same-origin allow-forms"
@@ -193,21 +175,29 @@
             allowfullscreen
             draggable="false">
           </iframe>
-        `;
-      };
+        </div>
+      `;
+      grid.appendChild(card);
 
-      img.onerror = () => {
-        // ÉCHEC : Le modèle est hors ligne -> Affichage du statut Rouge
-        document.getElementById(`status-${username}`).innerHTML = `
-          <span class="offline-status"><span class="offline-dot"></span> HORS LIGNE</span>
-        `;
-        document.getElementById(`player-${username}`).innerHTML = `
-          <span class="offline-placeholder">Modèle actuellement hors ligne</span>
-        `;
-      };
+      const iframe = document.getElementById(`iframe-${username}`);
+      
+      // Gestion de l'erreur de chargement
+      iframe.onerror = () => markOffline(username);
     });
 
-    // Désactive le glisser-déposer sur toute la page
+    function markOffline(username) {
+      const statusEl = document.getElementById(`status-${username}`);
+      const playerEl = document.getElementById(`player-${username}`);
+      
+      if (statusEl) {
+        statusEl.innerHTML = `<span class="offline-status"><span class="offline-dot"></span> HORS LIGNE</span>`;
+      }
+      if (playerEl) {
+        playerEl.innerHTML = `<span class="offline-placeholder">Modèle actuellement hors ligne</span>`;
+      }
+    }
+
+    // Sécurité : empêche le glisser-déposer sur la page
     window.addEventListener('dragstart', (e) => e.preventDefault());
   </script>
 </body>
