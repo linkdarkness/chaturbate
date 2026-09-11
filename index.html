@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Directs Live</title>
+  <title>Directs Live - Dashboard</title>
   <style>
     :root {
       --bg: #0f172a;
@@ -11,12 +11,20 @@
       --accent: #38bdf8;
       --star: #fbbf24;
       --text: #f8fafc;
+      --text-muted: #94a3b8;
       --danger: #ef4444;
+      --border: #334155;
       --grid-cols: repeat(auto-fill, minmax(360px, 1fr));
     }
-    * { box-sizing: border-box; margin: 0; padding: 0; }
+    
+    * { 
+      box-sizing: border-box; 
+      margin: 0; 
+      padding: 0; 
+    }
+
     body {
-      font-family: system-ui, -apple-system, sans-serif;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
       background: var(--bg);
       color: var(--text);
       min-height: 100vh;
@@ -25,36 +33,42 @@
     }
     
     header {
-      padding: 16px 24px;
+      padding: 10px 16px;
       background: var(--card-bg);
-      border-bottom: 1px solid #334155;
+      border-bottom: 1px solid var(--border);
       display: flex;
       justify-content: space-between;
-      align-items: center;
-      gap: 16px;
-      flex-wrap: wrap;
-    }
-    h1 { font-size: 1.4rem; }
-
-    .controls-group {
-      display: flex;
       align-items: center;
       gap: 12px;
       flex-wrap: wrap;
     }
 
+    h1 { 
+      font-size: 1.15rem; 
+      font-weight: 700; 
+      letter-spacing: -0.02em;
+      white-space: nowrap;
+    }
+
+    .controls-group {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
     .input-form {
       display: flex;
-      gap: 6px;
+      gap: 4px;
     }
 
     .custom-input {
-      padding: 8px 12px;
-      border-radius: 8px;
-      border: 1px solid #334155;
+      padding: 5px 10px;
+      border-radius: 6px;
+      border: 1px solid var(--border);
       background: #0f172a;
       color: var(--text);
-      font-size: 0.9rem;
+      font-size: 0.82rem;
       outline: none;
       transition: border-color 0.2s ease;
     }
@@ -67,10 +81,12 @@
       background: #0284c7;
       color: #fff;
       border: none;
-      padding: 8px 14px;
-      border-radius: 8px;
+      padding: 5px 10px;
+      border-radius: 6px;
+      font-size: 0.82rem;
       font-weight: 600;
       cursor: pointer;
+      white-space: nowrap;
       transition: background 0.2s ease;
     }
 
@@ -78,15 +94,27 @@
       background: #0369a1;
     }
 
-    .btn-reset, .btn-fav-filter {
+    .btn-mini {
       background: transparent;
-      border: 1px solid #334155;
-      color: #94a3b8;
-      padding: 8px 12px;
-      border-radius: 8px;
-      font-size: 0.9rem;
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+      padding: 5px 8px;
+      border-radius: 6px;
+      font-size: 0.78rem;
+      font-weight: 500;
       cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+      height: 29px;
       transition: all 0.2s ease;
+    }
+
+    .btn-mini:hover {
+      color: var(--text);
+      border-color: var(--accent);
+      background: rgba(56, 189, 248, 0.08);
     }
 
     .btn-reset:hover {
@@ -102,23 +130,31 @@
       font-weight: 600;
     }
 
+    .btn-sort.active {
+      background: rgba(56, 189, 248, 0.15);
+      border-color: var(--accent);
+      color: var(--accent);
+      font-weight: 600;
+    }
+
+    /* Sélecteur de colonnes compact */
     .layout-selector {
       display: flex;
       background: #0f172a;
-      border: 1px solid #334155;
-      border-radius: 8px;
-      padding: 3px;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 2px;
       gap: 2px;
     }
 
     .layout-btn {
       background: transparent;
       border: none;
-      color: #94a3b8;
-      padding: 6px 10px;
-      font-size: 0.85rem;
+      color: var(--text-muted);
+      padding: 3px 7px;
+      font-size: 0.75rem;
       font-weight: 600;
-      border-radius: 6px;
+      border-radius: 4px;
       cursor: pointer;
       transition: all 0.2s ease;
     }
@@ -128,28 +164,28 @@
     }
 
     .layout-btn.active {
-      background: #334155;
+      background: var(--border);
       color: var(--accent);
     }
     
     .grid-container {
       display: grid;
       grid-template-columns: var(--grid-cols);
-      gap: 20px;
-      padding: 20px;
+      gap: 16px;
+      padding: 16px;
       flex: 1;
     }
 
     .model-card {
       background: var(--card-bg);
-      border-radius: 12px;
+      border-radius: 10px;
       overflow: hidden;
-      border: 1px solid #334155;
+      border: 1px solid var(--border);
       display: flex;
       flex-direction: column;
       user-select: none;
       -webkit-user-select: none;
-      transition: opacity 0.2s ease;
+      transition: opacity 0.2s ease, transform 0.2s ease;
     }
 
     .model-card.hidden {
@@ -157,40 +193,45 @@
     }
 
     .model-header {
-      padding: 10px 16px;
+      padding: 8px 12px;
       display: flex;
       justify-content: space-between;
       align-items: center;
       background: #0f172a;
-      border-bottom: 1px solid #334155;
+      border-bottom: 1px solid var(--border);
     }
 
     .header-left {
       display: flex;
       align-items: center;
-      gap: 10px;
+      gap: 8px;
     }
 
     .model-name {
-      font-weight: bold;
-      font-size: 1rem;
+      font-weight: 600;
+      font-size: 0.88rem;
+      color: var(--text);
     }
 
     .header-actions {
       display: flex;
       align-items: center;
-      gap: 8px;
+      gap: 6px;
     }
 
-    /* Bouton Étoile Favori */
+    /* Bouton favori et supprimer */
     .btn-fav {
       background: transparent;
       border: none;
       color: #64748b;
-      font-size: 1.2rem;
+      font-size: 1.1rem;
       cursor: pointer;
       line-height: 1;
-      transition: color 0.2s ease;
+      transition: color 0.2s ease, transform 0.1s ease;
+    }
+
+    .btn-fav:active {
+      transform: scale(1.2);
     }
 
     .btn-fav.is-favorite {
@@ -201,7 +242,7 @@
       background: transparent;
       border: none;
       color: #64748b;
-      font-size: 1.3rem;
+      font-size: 1.2rem;
       line-height: 1;
       cursor: pointer;
       padding: 2px 4px;
@@ -211,9 +252,10 @@
 
     .btn-delete:hover {
       color: var(--danger);
-      background: #1e293b;
+      background: var(--card-bg);
     }
 
+    /* Player Iframe avec Rognage strict */
     .player-container {
       width: 100%;
       aspect-ratio: 16 / 9;
@@ -243,20 +285,20 @@
       pointer-events: none;
     }
 
+    /* Design Réponsif */
     @media (max-width: 768px) {
       .layout-selector {
         display: none;
       }
     }
 
-    @media (max-width: 480px) {
+    @media (max-width: 520px) {
       header {
         flex-direction: column;
         align-items: stretch;
       }
       .controls-group {
-        flex-direction: column;
-        align-items: stretch;
+        justify-content: space-between;
       }
       .input-form {
         width: 100%;
@@ -275,6 +317,7 @@
 <body>
   <header>
     <h1>Directs Live</h1>
+    
     <div class="controls-group">
       <!-- Formulaire d'ajout -->
       <form id="addModelForm" class="input-form">
@@ -289,11 +332,20 @@
         <button type="submit" class="btn-add">+ Ajouter</button>
       </form>
 
-      <!-- Bouton de réinitialisation -->
-      <button id="resetBtn" class="btn-reset" title="Réinitialiser la liste d'origine">&#8634;</button>
+      <!-- Mini-bouton Réinitialiser (Reset) -->
+      <button id="resetBtn" class="btn-mini btn-reset" title="Réinitialiser la liste (Reset)">
+        ↺
+      </button>
 
-      <!-- Bouton Filtre Favoris -->
-      <button id="favFilterBtn" class="btn-fav-filter" title="Afficher uniquement les favoris">&#9733; Favoris</button>
+      <!-- Mini-bouton Tri Alphabétique -->
+      <button id="sortBtn" class="btn-mini btn-sort" title="Changer l'ordre de tri">
+        <span id="sortLabel">A-Z</span>
+      </button>
+
+      <!-- Mini-bouton Filtre Favoris -->
+      <button id="favFilterBtn" class="btn-mini btn-fav-filter" title="Afficher uniquement les favoris">
+        ★
+      </button>
 
       <!-- Barre de recherche -->
       <input 
@@ -302,11 +354,12 @@
         class="custom-input" 
         placeholder="Filtrer..."
         autocomplete="off"
+        style="width: 110px;"
       >
 
-      <!-- Boutons de disposition -->
+      <!-- Sélecteur de colonnes -->
       <div class="layout-selector">
-        <button class="layout-btn active" data-cols="auto">Auto</button>
+        <button class="layout-btn" data-cols="auto">Auto</button>
         <button class="layout-btn" data-cols="1">1</button>
         <button class="layout-btn" data-cols="2">2</button>
         <button class="layout-btn" data-cols="3">3</button>
@@ -315,6 +368,7 @@
     </div>
   </header>
 
+  <!-- Grille principale -->
   <main class="grid-container" id="grid"></main>
 
   <script>
@@ -331,14 +385,20 @@
       'naughty_pearls'
     ];
 
+    // Persistence du state local
     let models = JSON.parse(localStorage.getItem('cb_dashboard_models')) || [...defaultModels];
     let favorites = JSON.parse(localStorage.getItem('cb_dashboard_favs')) || [];
+    let sortDirection = localStorage.getItem('cb_dashboard_sort') || 'asc'; // 'asc' = A-Z, 'desc' = Z-A
+    let selectedLayout = localStorage.getItem('cb_dashboard_cols') || 'auto';
     let showOnlyFavorites = false;
 
+    // Éléments du DOM
     const grid = document.getElementById('grid');
     const addModelForm = document.getElementById('addModelForm');
     const newModelInput = document.getElementById('newModelInput');
     const resetBtn = document.getElementById('resetBtn');
+    const sortBtn = document.getElementById('sortBtn');
+    const sortLabel = document.getElementById('sortLabel');
     const favFilterBtn = document.getElementById('favFilterBtn');
     const searchInput = document.getElementById('searchInput');
     const layoutBtns = document.querySelectorAll('.layout-btn');
@@ -351,7 +411,14 @@
       localStorage.setItem('cb_dashboard_favs', JSON.stringify(favorites));
     }
 
-    // Basculer l'état favori d'un modèle
+    function saveSort() {
+      localStorage.setItem('cb_dashboard_sort', sortDirection);
+    }
+
+    function saveLayout(cols) {
+      localStorage.setItem('cb_dashboard_cols', cols);
+    }
+
     window.toggleFavorite = function(username) {
       const lower = username.toLowerCase();
       if (favorites.includes(lower)) {
@@ -363,7 +430,7 @@
       renderGrid();
     };
 
-    // Création d'une carte sans le statut "EN DIRECT"
+    // Création de la carte modèle avec rognage strict
     function createCard(username) {
       const lower = username.toLowerCase();
       const isFav = favorites.includes(lower);
@@ -379,7 +446,7 @@
             <span class="model-name">${username}</span>
           </div>
           <div class="header-actions">
-            <button class="btn-fav ${isFav ? 'is-favorite' : ''}" title="Favori" onclick="toggleFavorite('${username}')">&#9733;</button>
+            <button class="btn-fav ${isFav ? 'is-favorite' : ''}" title="Favori" onclick="toggleFavorite('${username}')">★</button>
             <button class="btn-delete" title="Supprimer" onclick="removeModel('${username}')">&times;</button>
           </div>
         </div>
@@ -397,14 +464,20 @@
       return card;
     }
 
-    // Rendu de la grille (triée : favoris d'abord)
     function renderGrid() {
       grid.innerHTML = '';
-      
+
       const sortedModels = [...models].sort((a, b) => {
         const aFav = favorites.includes(a.toLowerCase());
         const bFav = favorites.includes(b.toLowerCase());
-        return bFav - aFav;
+
+        // 1. Les favoris restent toujours en premier
+        if (aFav && !bFav) return -1;
+        if (!aFav && bFav) return 1;
+
+        // 2. Tri alphabétique (asc = A-Z, desc = Z-A)
+        const comp = a.localeCompare(b, undefined, { sensitivity: 'base' });
+        return sortDirection === 'asc' ? comp : -comp;
       });
 
       sortedModels.forEach(username => {
@@ -414,13 +487,26 @@
       applyFilters();
     }
 
+    // Basculer le sens du tri alphabétique A-Z / Z-A
+    sortBtn.addEventListener('click', () => {
+      sortDirection = sortDirection === 'asc' ? 'desc' : 'asc';
+      updateSortUI();
+      saveSort();
+      renderGrid();
+    });
+
+    function updateSortUI() {
+      sortLabel.textContent = sortDirection === 'asc' ? 'A-Z' : 'Z-A';
+      sortBtn.classList.toggle('active', sortDirection === 'desc');
+    }
+
     // Ajout d'un modèle
     addModelForm.addEventListener('submit', (e) => {
       e.preventDefault();
       const username = newModelInput.value.trim();
 
       if (username && !models.map(m => m.toLowerCase()).includes(username.toLowerCase())) {
-        models.unshift(username);
+        models.push(username);
         saveModels();
         renderGrid();
         newModelInput.value = '';
@@ -437,25 +523,30 @@
       renderGrid();
     };
 
-    // Réinitialisation
+    // Réinitialisation de la liste
     resetBtn.addEventListener('click', () => {
-      if (confirm('Réinitialiser la liste avec les modèles par défaut ?')) {
-        models = [...defaultModels];
-        favorites = [];
-        localStorage.removeItem('cb_dashboard_models');
-        localStorage.removeItem('cb_dashboard_favs');
-        renderGrid();
-      }
+      models = [...defaultModels];
+      favorites = [];
+      sortDirection = 'asc';
+      showOnlyFavorites = false;
+      favFilterBtn.classList.remove('active');
+      searchInput.value = '';
+
+      localStorage.removeItem('cb_dashboard_models');
+      localStorage.removeItem('cb_dashboard_favs');
+      localStorage.removeItem('cb_dashboard_sort');
+      
+      updateSortUI();
+      renderGrid();
     });
 
-    // Bouton filtre favoris
+    // Filtrage favoris
     favFilterBtn.addEventListener('click', () => {
       showOnlyFavorites = !showOnlyFavorites;
       favFilterBtn.classList.toggle('active', showOnlyFavorites);
       applyFilters();
     });
 
-    // Filtres combinés (Recherche texte + Filtre favoris)
     function applyFilters() {
       const query = searchInput.value.trim().toLowerCase();
       const cards = grid.querySelectorAll('.model-card');
@@ -477,23 +568,36 @@
 
     searchInput.addEventListener('input', applyFilters);
 
-    // Disposition des colonnes
+    function applyLayout(cols) {
+      layoutBtns.forEach(b => {
+        if (b.getAttribute('data-cols') === cols) {
+          b.classList.add('active');
+        } else {
+          b.classList.remove('active');
+        }
+      });
+
+      if (cols === 'auto') {
+        grid.style.setProperty('--grid-cols', 'repeat(auto-fill, minmax(360px, 1fr))');
+      } else {
+        grid.style.setProperty('--grid-cols', `repeat(${cols}, 1fr)`);
+      }
+    }
+
     layoutBtns.forEach(btn => {
       btn.addEventListener('click', () => {
-        layoutBtns.forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-
         const cols = btn.getAttribute('data-cols');
-        if (cols === 'auto') {
-          grid.style.setProperty('--grid-cols', 'repeat(auto-fill, minmax(360px, 1fr))');
-        } else {
-          grid.style.setProperty('--grid-cols', `repeat(${cols}, 1fr)`);
-        }
+        selectedLayout = cols;
+        saveLayout(cols);
+        applyLayout(cols);
       });
     });
 
+    // Empêcher le drag intempestif
     window.addEventListener('dragstart', (e) => e.preventDefault());
 
+    updateSortUI();
+    applyLayout(selectedLayout);
     renderGrid();
   </script>
 </body>
