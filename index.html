@@ -76,22 +76,7 @@
       border-radius: 50%;
     }
 
-    .offline-status {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      font-size: 0.8rem;
-      color: #ef4444;
-      font-weight: bold;
-    }
-
-    .offline-dot {
-      width: 8px;
-      height: 8px;
-      background-color: #ef4444;
-      border-radius: 50%;
-    }
-
+    /* Player fixe et rogné */
     .player-container {
       width: 100%;
       aspect-ratio: 16 / 9;
@@ -99,9 +84,6 @@
       position: relative;
       overflow: hidden;
       touch-action: none;
-      display: flex;
-      align-items: center;
-      justify-content: center;
     }
 
     .player-container iframe {
@@ -113,7 +95,7 @@
       border: 0;
     }
 
-    /* Masque transparent empêchant le déplacement ou le drag de l'iframe */
+    /* Overlay transparent pour bloquer le glisser-déposer tout en maintenant la vidéo fixe */
     .drag-preventer {
       position: absolute;
       top: 0;
@@ -122,12 +104,7 @@
       height: 100%;
       z-index: 10;
       background: transparent;
-    }
-
-    .offline-placeholder {
-      color: #64748b;
-      font-size: 0.9rem;
-      text-align: center;
+      pointer-events: none; /* Permet le clic si besoin, tout en bloquant le glissement */
     }
 
     @media (max-width: 480px) {
@@ -147,6 +124,7 @@
   <main class="grid-container" id="grid"></main>
 
   <script>
+    // Liste des modèles
     const models = [
       'dreamsweetgirl',
       'cutefacebigass',
@@ -162,6 +140,7 @@
 
     const grid = document.getElementById('grid');
 
+    // Génération directe des iFrames
     models.forEach(username => {
       const card = document.createElement('div');
       card.className = 'model-card';
@@ -169,11 +148,9 @@
       card.innerHTML = `
         <div class="model-header">
           <span class="model-name">${username}</span>
-          <span class="status-container" id="status-${username}">
-            <span class="live-status"><span class="live-dot"></span> EN DIRECT</span>
-          </span>
+          <span class="live-status"><span class="live-dot"></span> EN DIRECT</span>
         </div>
-        <div class="player-container" id="player-${username}">
+        <div class="player-container">
           <iframe 
             src="https://chaturbate.com/embed/${encodeURIComponent(username)}/" 
             allow="autoplay; fullscreen" 
@@ -185,24 +162,9 @@
         </div>
       `;
       grid.appendChild(card);
-
-      // Vérification du statut en arrière-plan via la playlist HLS native (sans proxy)
-      const videoTest = document.createElement('video');
-      videoTest.src = `https://edge-hls.chaturbate.com/live-hls/stream_${username}/playlist.m3u8`;
-      
-      // Si la playlist HLS renvoie une erreur 404, le modèle est hors ligne
-      videoTest.onerror = () => {
-        const statusEl = document.getElementById(`status-${username}`);
-        const playerEl = document.getElementById(`player-${username}`);
-        if (statusEl) {
-          statusEl.innerHTML = `<span class="offline-status"><span class="offline-dot"></span> HORS LIGNE</span>`;
-        }
-        if (playerEl) {
-          playerEl.innerHTML = `<span class="offline-placeholder">Modèle actuellement hors ligne</span>`;
-        }
-      };
     });
 
+    // Sécurité globale anti-glisser/déposer
     window.addEventListener('dragstart', (e) => e.preventDefault());
   </script>
 </body>
