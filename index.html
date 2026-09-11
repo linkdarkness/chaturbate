@@ -42,7 +42,6 @@
       border: 1px solid #334155;
       display: flex;
       flex-direction: column;
-      /* Empêche la sélection de texte et le glisser-déposer de la carte */
       user-select: none;
       -webkit-user-select: none;
     }
@@ -61,6 +60,7 @@
       font-size: 1rem;
     }
 
+    /* Style du statut en direct (vert) */
     .live-status {
       display: flex;
       align-items: center;
@@ -77,17 +77,37 @@
       border-radius: 50%;
     }
 
-    /* Conteneur strictement verrouillé */
+    /* Style du statut hors ligne (rouge) */
+    .offline-status {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.8rem;
+      color: #ef4444;
+      font-weight: bold;
+    }
+
+    .offline-dot {
+      width: 8px;
+      height: 8px;
+      background-color: #ef4444;
+      border-radius: 50%;
+    }
+
+    /* Conteneur du lecteur */
     .player-container {
       width: 100%;
       aspect-ratio: 16 / 9;
       background: #000;
       position: relative;
-      overflow: hidden; /* Empêche tout défilement ou dépassement */
-      touch-action: none; /* Bloque le scroll tactile indésirable sur mobile */
+      overflow: hidden;
+      touch-action: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
 
-    /* Position fixe et rognage CSS */
+    /* Zoom et rognage CSS de l'iframe */
     .player-container iframe {
       position: absolute;
       top: -11%;
@@ -95,7 +115,13 @@
       width: 138%;
       height: 122%;
       border: 0;
-      pointer-events: auto; /* Maintient le clic actif si nécessaire */
+    }
+
+    /* Message affiché à la place de l'iframe si hors ligne */
+    .offline-placeholder {
+      color: #64748b;
+      font-size: 0.9rem;
+      text-align: center;
     }
 
     @media (max-width: 480px) {
@@ -131,18 +157,34 @@
     const grid = document.getElementById('grid');
 
     models.forEach(username => {
+      // Structure initiale de la carte
       const card = document.createElement('div');
       card.className = 'model-card';
-      
-      // Bloque le drag and drop natif de l'élément HTML
       card.setAttribute('draggable', 'false');
-      
+
       card.innerHTML = `
         <div class="model-header">
           <span class="model-name">${username}</span>
-          <span class="live-status"><span class="live-dot"></span> EN DIRECT</span>
+          <span class="status-container" id="status-${username}">
+            <span class="offline-status"><span class="offline-dot"></span> VÉRIFICATION...</span>
+          </span>
         </div>
-        <div class="player-container">
+        <div class="player-container" id="player-${username}">
+          <span class="offline-placeholder">Chargement du flux...</span>
+        </div>
+      `;
+      grid.appendChild(card);
+
+      // Test de disponibilité via l'image miniature officielle
+      const img = new Image();
+      img.src = `https://cbmg.b-cdn.net/thumbs/chaturbate/${username}.jpg?t=${Date.now()}`;
+
+      img.onload = () => {
+        // SUCCÈS : Le modèle est en ligne -> Intégration de l'iframe
+        document.getElementById(`status-${username}`).innerHTML = `
+          <span class="live-status"><span class="live-dot"></span> EN DIRECT</span>
+        `;
+        document.getElementById(`player-${username}`).innerHTML = `
           <iframe 
             src="https://chaturbate.com/embed/${encodeURIComponent(username)}/" 
             allow="autoplay; fullscreen" 
@@ -151,12 +193,21 @@
             allowfullscreen
             draggable="false">
           </iframe>
-        </div>
-      `;
-      grid.appendChild(card);
+        `;
+      };
+
+      img.onerror = () => {
+        // ÉCHEC : Le modèle est hors ligne -> Affichage du statut Rouge
+        document.getElementById(`status-${username}`).innerHTML = `
+          <span class="offline-status"><span class="offline-dot"></span> HORS LIGNE</span>
+        `;
+        document.getElementById(`player-${username}`).innerHTML = `
+          <span class="offline-placeholder">Modèle actuellement hors ligne</span>
+        `;
+      };
     });
 
-    // Désactive le comportement de glisser-déposer sur toute la page
+    // Désactive le glisser-déposer sur toute la page
     window.addEventListener('dragstart', (e) => e.preventDefault());
   </script>
 </body>
