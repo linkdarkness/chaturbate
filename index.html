@@ -24,9 +24,6 @@
       padding: 16px 24px;
       background: var(--card-bg);
       border-bottom: 1px solid #334155;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
     }
     h1 { font-size: 1.4rem; }
     
@@ -66,8 +63,7 @@
       align-items: center;
       gap: 6px;
       font-size: 0.8rem;
-      color: #22c55e;
-      font-weight: bold;
+      color: #94a3b8;
     }
 
     .live-dot {
@@ -89,13 +85,6 @@
       border: 0;
     }
 
-    .no-live {
-      text-align: center;
-      grid-column: 1 / -1;
-      color: #94a3b8;
-      margin-top: 40px;
-    }
-
     @media (max-width: 480px) {
       .grid-container {
         grid-template-columns: 1fr;
@@ -108,76 +97,120 @@
 <body>
   <header>
     <h1>Directs Live</h1>
-    <span id="loading-status" style="color: #94a3b8; font-size: 0.9rem;">Vérification des lives...</span>
   </header>
 
-  <main class="grid-container" id="grid"></main>
+  <main class="grid-container">
 
-  <script>
-    // Liste des pseudos à surveiller
-    const models = [
-      'dreamsweetgirl',
-      'cutefacebigass',
-      'sweet_sugar87',
-      'ellyrockstar',
-      'pinkcouplexo',
-      'julcy_peach',
-      'shiny_lily',
-      'olsenspring',
-      'holly_and_honey_69',
-      'naughty_pearls'
-    ];
+    <!-- Modèle 1 -->
+    <div class="model-card">
+      <div class="model-header">
+        <span class="model-name">Dreamsweetgirl</span>
+        <span class="live-status"><span class="live-dot"></span> EN DIRECT</span>
+      </div>
+      <div class="player-container">
+        <iframe src="https://chaturbate.com/embed/dreamsweetgirl/" allow="autoplay; fullscreen" sandbox="allow-scripts allow-same-origin allow-forms" referrerpolicy="no-referrer-when-downgrade" allowfullscreen></iframe>
+      </div>
+    </div>
 
-    async function checkAndRenderLives() {
-      const grid = document.getElementById('grid');
-      const statusText = document.getElementById('loading-status');
-      grid.innerHTML = '';
-      
-      let liveCount = 0;
+    <!-- Modèle 2 -->
+    <div class="model-card">
+      <div class="model-header">
+        <span class="model-name">cutefacebigass</span>
+        <span class="live-status"><span class="live-dot"></span> EN DIRECT</span>
+      </div>
+      <div class="player-container">
+        <iframe src="https://chaturbate.com/embed/cutefacebigass/" allow="autoplay; fullscreen" sandbox="allow-scripts allow-same-origin allow-forms" referrerpolicy="no-referrer-when-downgrade" allowfullscreen></iframe>
+      </div>
+    </div>
 
-      for (const username of models) {
-        try {
-          // Utilisation d'un proxy CORS gratuit pour interroger l'API Chaturbate
-          const res = await fetch(`https://api.allorigins.win/get?url=${encodeURIComponent(`https://chaturbate.com/api/chaturbateloaddata/?username=${username}`)}`);
-          const data = await res.json();
-          const parsedData = JSON.parse(data.contents);
+    <!-- Modèle 3 -->
+    <div class="model-card">
+      <div class="model-header">
+        <span class="model-name">sweet_sugar87</span>
+        <span class="live-status"><span class="live-dot"></span> EN DIRECT</span>
+      </div>
+      <div class="player-container">
+        <iframe src="https://chaturbate.com/embed/sweet_sugar87/" allow="autoplay; fullscreen" sandbox="allow-scripts allow-same-origin allow-forms" referrerpolicy="no-referrer-when-downgrade" allowfullscreen></iframe>
+      </div>
+    </div>
 
-          // Si le modèle est en ligne, on crée et affiche son lecteur
-          if (parsedData && parsedData.room_status === 'public') {
-            liveCount++;
-            const card = document.createElement('div');
-            card.className = 'model-card';
-            card.innerHTML = `
-              <div class="model-header">
-                <span class="model-name">${username}</span>
-                <span class="live-status"><span class="live-dot"></span> EN DIRECT</span>
-              </div>
-              <div class="player-container">
-                <iframe 
-                  src="https://chaturbate.com/embed/${encodeURIComponent(username)}/" 
-                  allow="autoplay; fullscreen" 
-                  sandbox="allow-scripts allow-same-origin allow-forms"
-                  referrerpolicy="no-referrer-when-downgrade"
-                  allowfullscreen>
-                </iframe>
-              </div>
-            `;
-            grid.appendChild(card);
-          }
-        } catch (err) {
-          console.error(`Erreur pour ${username}:`, err);
-        }
-      }
+    <!-- Modèle 4 -->
+    <div class="model-card">
+      <div class="model-header">
+        <span class="model-name">ellyrockstar</span>
+        <span class="live-status"><span class="live-dot"></span> EN DIRECT</span>
+      </div>
+      <div class="player-container">
+        <iframe src="https://chaturbate.com/embed/ellyrockstar/" allow="autoplay; fullscreen" sandbox="allow-scripts allow-same-origin allow-forms" referrerpolicy="no-referrer-when-downgrade" allowfullscreen></iframe>
+      </div>
+    </div>
 
-      statusText.textContent = `${liveCount} modèle(s) en direct`;
-      
-      if (liveCount === 0) {
-        grid.innerHTML = `<p class="no-live">Aucun modèle de la liste n'est en direct pour le moment.</p>`;
-      }
-    }
+    <!-- Modèle 5 -->
+    <div class="model-card">
+      <div class="model-header">
+        <span class="model-name">pinkcouplexo</span>
+        <span class="live-status"><span class="live-dot"></span> EN DIRECT</span>
+      </div>
+      <div class="player-container">
+        <iframe src="https://chaturbate.com/embed/pinkcouplexo/" allow="autoplay; fullscreen" sandbox="allow-scripts allow-same-origin allow-forms" referrerpolicy="no-referrer-when-downgrade" allowfullscreen></iframe>
+      </div>
+    </div>
 
-    // Lancement au chargement de la page
-    checkAndRenderLives();
-  </script>
+    <!-- Modèle 6 -->
+    <div class="model-card">
+      <div class="model-header">
+        <span class="model-name">julcy_peach</span>
+        <span class="live-status"><span class="live-dot"></span> EN DIRECT</span>
+      </div>
+      <div class="player-container">
+        <iframe src="https://chaturbate.com/embed/julcy_peach/" allow="autoplay; fullscreen" sandbox="allow-scripts allow-same-origin allow-forms" referrerpolicy="no-referrer-when-downgrade" allowfullscreen></iframe>
+      </div>
+    </div>
+
+    <!-- Modèle 7 -->
+    <div class="model-card">
+      <div class="model-header">
+        <span class="model-name">shiny_lily</span>
+        <span class="live-status"><span class="live-dot"></span> EN DIRECT</span>
+      </div>
+      <div class="player-container">
+        <iframe src="https://chaturbate.com/embed/shiny_lily/" allow="autoplay; fullscreen" sandbox="allow-scripts allow-same-origin allow-forms" referrerpolicy="no-referrer-when-downgrade" allowfullscreen></iframe>
+      </div>
+    </div>
+
+    <!-- Modèle 8 -->
+    <div class="model-card">
+      <div class="model-header">
+        <span class="model-name">olsenspring</span>
+        <span class="live-status"><span class="live-dot"></span> EN DIRECT</span>
+      </div>
+      <div class="player-container">
+        <iframe src="https://chaturbate.com/embed/olsenspring/" allow="autoplay; fullscreen" sandbox="allow-scripts allow-same-origin allow-forms" referrerpolicy="no-referrer-when-downgrade" allowfullscreen></iframe>
+      </div>
+    </div>
+
+    <!-- Modèle 9 -->
+    <div class="model-card">
+      <div class="model-header">
+        <span class="model-name">holly_and_honey_69</span>
+        <span class="live-status"><span class="live-dot"></span> EN DIRECT</span>
+      </div>
+      <div class="player-container">
+        <iframe src="https://chaturbate.com/embed/holly_and_honey_69/" allow="autoplay; fullscreen" sandbox="allow-scripts allow-same-origin allow-forms" referrerpolicy="no-referrer-when-downgrade" allowfullscreen></iframe>
+      </div>
+    </div>
+
+    <!-- Modèle 10 -->
+    <div class="model-card">
+      <div class="model-header">
+        <span class="model-name">naughty_pearls</span>
+        <span class="live-status"><span class="live-dot"></span> EN DIRECT</span>
+      </div>
+      <div class="player-container">
+        <iframe src="https://chaturbate.com/embed/naughty_pearls/" allow="autoplay; fullscreen" sandbox="allow-scripts allow-same-origin allow-forms" referrerpolicy="no-referrer-when-downgrade" allowfullscreen></iframe>
+      </div>
+    </div>
+
+  </main>
 </body>
 </html>
