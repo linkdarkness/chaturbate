@@ -10,6 +10,7 @@
       --card-bg: #1e293b;
       --accent: #38bdf8;
       --text: #f8fafc;
+      --danger: #ef4444;
       --grid-cols: repeat(auto-fill, minmax(360px, 1fr));
     }
     * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -38,19 +39,18 @@
     .controls-group {
       display: flex;
       align-items: center;
-      gap: 16px;
+      gap: 12px;
       flex-wrap: wrap;
     }
 
-    /* Barre de recherche */
-    .search-container {
-      position: relative;
-      min-width: 200px;
+    /* Formulaires de saisie */
+    .input-form {
+      display: flex;
+      gap: 6px;
     }
 
-    .search-input {
-      width: 100%;
-      padding: 8px 16px;
+    .custom-input {
+      padding: 8px 12px;
       border-radius: 8px;
       border: 1px solid #334155;
       background: #0f172a;
@@ -60,8 +60,23 @@
       transition: border-color 0.2s ease;
     }
 
-    .search-input:focus {
+    .custom-input:focus {
       border-color: var(--accent);
+    }
+
+    .btn-add {
+      background: #0284c7;
+      color: #fff;
+      border: none;
+      padding: 8px 14px;
+      border-radius: 8px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s ease;
+    }
+
+    .btn-add:hover {
+      background: #0369a1;
     }
 
     /* Boutons de disposition */
@@ -78,7 +93,7 @@
       background: transparent;
       border: none;
       color: #94a3b8;
-      padding: 6px 12px;
+      padding: 6px 10px;
       font-size: 0.85rem;
       font-weight: 600;
       border-radius: 6px;
@@ -116,18 +131,23 @@
       transition: opacity 0.2s ease;
     }
 
-    /* Masquage des cartes filtrées */
     .model-card.hidden {
       display: none !important;
     }
 
     .model-header {
-      padding: 12px 16px;
+      padding: 10px 16px;
       display: flex;
       justify-content: space-between;
       align-items: center;
       background: #0f172a;
       border-bottom: 1px solid #334155;
+    }
+
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 10px;
     }
 
     .model-name {
@@ -149,6 +169,24 @@
       height: 8px;
       background-color: #22c55e;
       border-radius: 50%;
+    }
+
+    /* Bouton de suppression sur la carte */
+    .btn-delete {
+      background: transparent;
+      border: none;
+      color: #64748b;
+      font-size: 1.3rem;
+      line-height: 1;
+      cursor: pointer;
+      padding: 2px 6px;
+      border-radius: 4px;
+      transition: all 0.2s ease;
+    }
+
+    .btn-delete:hover {
+      color: var(--danger);
+      background: #1e293b;
     }
 
     /* Player fixe et rogné */
@@ -184,7 +222,7 @@
 
     @media (max-width: 768px) {
       .layout-selector {
-        display: none; /* Masqué sur petits écrans où 1 seule colonne s'impose */
+        display: none;
       }
     }
 
@@ -194,10 +232,14 @@
         align-items: stretch;
       }
       .controls-group {
+        flex-direction: column;
+        align-items: stretch;
+      }
+      .input-form {
         width: 100%;
       }
-      .search-container {
-        width: 100%;
+      .custom-input {
+        flex: 1;
       }
       .grid-container {
         grid-template-columns: 1fr !important;
@@ -211,21 +253,35 @@
   <header>
     <h1>Directs Live</h1>
     <div class="controls-group">
-      <div class="layout-selector">
-        <button class="layout-btn active" data-cols="auto">Auto</button>
-        <button class="layout-btn" data-cols="1">1 Col</button>
-        <button class="layout-btn" data-cols="2">2 Col</button>
-        <button class="layout-btn" data-cols="3">3 Col</button>
-        <button class="layout-btn" data-cols="4">4 Col</button>
-      </div>
-      <div class="search-container">
+      <!-- Formulaire d'ajout -->
+      <form id="addModelForm" class="input-form">
         <input 
           type="text" 
-          id="searchInput" 
-          class="search-input" 
-          placeholder="Rechercher un modèle..."
+          id="newModelInput" 
+          class="custom-input" 
+          placeholder="Pseudo du modèle..." 
+          required
           autocomplete="off"
         >
+        <button type="submit" class="btn-add">+ Ajouter</button>
+      </form>
+
+      <!-- Barre de recherche -->
+      <input 
+        type="text" 
+        id="searchInput" 
+        class="custom-input" 
+        placeholder="Filtrer..."
+        autocomplete="off"
+      >
+
+      <!-- Boutons de disposition -->
+      <div class="layout-selector">
+        <button class="layout-btn active" data-cols="auto">Auto</button>
+        <button class="layout-btn" data-cols="1">1</button>
+        <button class="layout-btn" data-cols="2">2</button>
+        <button class="layout-btn" data-cols="3">3</button>
+        <button class="layout-btn" data-cols="4">4</button>
       </div>
     </div>
   </header>
@@ -233,7 +289,8 @@
   <main class="grid-container" id="grid"></main>
 
   <script>
-    const models = [
+    // Liste par défaut si aucun localStorage
+    const defaultModels = [
       'dreamsweetgirl',
       'cutefacebigass',
       'sweet_sugar87',
@@ -246,20 +303,33 @@
       'naughty_pearls'
     ];
 
+    // Chargement de la liste depuis le localStorage
+    let models = JSON.parse(localStorage.getItem('cb_dashboard_models')) || defaultModels;
+
     const grid = document.getElementById('grid');
+    const addModelForm = document.getElementById('addModelForm');
+    const newModelInput = document.getElementById('newModelInput');
     const searchInput = document.getElementById('searchInput');
     const layoutBtns = document.querySelectorAll('.layout-btn');
 
-    // Génération instantanée des cartes HTML
-    models.forEach(username => {
+    // Sauvegarder la liste dans le localStorage
+    function saveModels() {
+      localStorage.setItem('cb_dashboard_models', JSON.stringify(models));
+    }
+
+    // Créer le DOM d'une carte
+    function createCard(username) {
       const card = document.createElement('div');
       card.className = 'model-card';
       card.setAttribute('data-username', username.toLowerCase());
 
       card.innerHTML = `
         <div class="model-header">
-          <span class="model-name">${username}</span>
-          <span class="live-status"><span class="live-dot"></span> EN DIRECT</span>
+          <div class="header-left">
+            <span class="model-name">${username}</span>
+            <span class="live-status"><span class="live-dot"></span> EN DIRECT</span>
+          </div>
+          <button class="btn-delete" title="Supprimer" onclick="removeModel('${username}')">&times;</button>
         </div>
         <div class="player-container">
           <iframe 
@@ -272,10 +342,56 @@
           <div class="drag-preventer"></div>
         </div>
       `;
-      grid.appendChild(card);
+      return card;
+    }
+
+    // Rendu de toute la grille
+    function renderGrid() {
+      grid.innerHTML = '';
+      models.forEach(username => {
+        grid.appendChild(createCard(username));
+      });
+      applySearchFilter();
+    }
+
+    // Ajouter un nouveau modèle
+    addModelForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const username = newModelInput.value.trim();
+
+      if (username && !models.map(m => m.toLowerCase()).includes(username.toLowerCase())) {
+        models.unshift(username); // Ajoute au début de la liste
+        saveModels();
+        renderGrid();
+        newModelInput.value = '';
+      }
     });
 
-    // Gestion du changement de disposition (nombre de colonnes)
+    // Supprimer un modèle
+    window.removeModel = function(username) {
+      models = models.filter(m => m.toLowerCase() !== username.toLowerCase());
+      saveModels();
+      renderGrid();
+    };
+
+    // Filtre de recherche dynamique
+    function applySearchFilter() {
+      const query = searchInput.value.trim().toLowerCase();
+      const cards = grid.querySelectorAll('.model-card');
+
+      cards.forEach(card => {
+        const username = card.getAttribute('data-username');
+        if (username.includes(query)) {
+          card.classList.remove('hidden');
+        } else {
+          card.classList.add('hidden');
+        }
+      });
+    }
+
+    searchInput.addEventListener('input', applySearchFilter);
+
+    // Gestion de la disposition (colonnes)
     layoutBtns.forEach(btn => {
       btn.addEventListener('click', () => {
         layoutBtns.forEach(b => b.classList.remove('active'));
@@ -290,23 +406,11 @@
       });
     });
 
-    // Filtrage dynamique lors de la saisie
-    searchInput.addEventListener('input', (e) => {
-      const query = e.target.value.trim().toLowerCase();
-      const cards = grid.querySelectorAll('.model-card');
-
-      cards.forEach(card => {
-        const username = card.getAttribute('data-username');
-        if (username.includes(query)) {
-          card.classList.remove('hidden');
-        } else {
-          card.classList.add('hidden');
-        }
-      });
-    });
-
     // Sécurité glisser-déposer
     window.addEventListener('dragstart', (e) => e.preventDefault());
+
+    // Chargement initial
+    renderGrid();
   </script>
 </body>
 </html>
