@@ -42,6 +42,9 @@
       border: 1px solid #334155;
       display: flex;
       flex-direction: column;
+      /* Empêche la sélection de texte et le glisser-déposer de la carte */
+      user-select: none;
+      -webkit-user-select: none;
     }
 
     .model-header {
@@ -74,15 +77,17 @@
       border-radius: 50%;
     }
 
-    /* Rognage CSS du lecteur pour masquer le chat et les barres */
+    /* Conteneur strictement verrouillé */
     .player-container {
       width: 100%;
       aspect-ratio: 16 / 9;
       background: #000;
       position: relative;
-      overflow: hidden;
+      overflow: hidden; /* Empêche tout défilement ou dépassement */
+      touch-action: none; /* Bloque le scroll tactile indésirable sur mobile */
     }
 
+    /* Position fixe et rognage CSS */
     .player-container iframe {
       position: absolute;
       top: -11%;
@@ -90,6 +95,7 @@
       width: 138%;
       height: 122%;
       border: 0;
+      pointer-events: auto; /* Maintient le clic actif si nécessaire */
     }
 
     @media (max-width: 480px) {
@@ -109,7 +115,6 @@
   <main class="grid-container" id="grid"></main>
 
   <script>
-    // Ajoute ou retire tes modèles directement ici :
     const models = [
       'dreamsweetgirl',
       'cutefacebigass',
@@ -125,10 +130,13 @@
 
     const grid = document.getElementById('grid');
 
-    // Génération automatique des cartes dans le DOM
     models.forEach(username => {
       const card = document.createElement('div');
       card.className = 'model-card';
+      
+      // Bloque le drag and drop natif de l'élément HTML
+      card.setAttribute('draggable', 'false');
+      
       card.innerHTML = `
         <div class="model-header">
           <span class="model-name">${username}</span>
@@ -140,12 +148,16 @@
             allow="autoplay; fullscreen" 
             sandbox="allow-scripts allow-same-origin allow-forms"
             referrerpolicy="no-referrer-when-downgrade"
-            allowfullscreen>
+            allowfullscreen
+            draggable="false">
           </iframe>
         </div>
       `;
       grid.appendChild(card);
     });
+
+    // Désactive le comportement de glisser-déposer sur toute la page
+    window.addEventListener('dragstart', (e) => e.preventDefault());
   </script>
 </body>
 </html>
