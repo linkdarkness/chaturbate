@@ -117,7 +117,7 @@
       position: relative;
     }
 
-    /* Correction du Menu déroulant pour éviter le dépassement de l'écran */
+    /* Menu déroulant ajusté */
     .dropdown-menu {
       display: none;
       position: absolute;
@@ -135,7 +135,6 @@
       z-index: 110;
     }
 
-    /* Adaptabilité mobile/écrans réduits pour réaligner à gauche si nécessaire */
     @media (max-width: 600px) {
       .dropdown-menu {
         right: auto;
@@ -312,16 +311,16 @@
           type="text" 
           id="newModelInput" 
           class="custom-input" 
-          placeholder="Pseudo du modèle..." 
+          placeholder="Pseudo..." 
           required
         >
-        <button type="submit" class="btn-action btn-add">+ Ajouter</button>
+        <button type="submit" class="btn-action btn-add" title="Ajouter ce modèle">+</button>
       </form>
 
       <!-- Menu Historique -->
       <div class="dropdown">
-        <button id="historyBtn" class="btn-action" title="Voir l'historique des modèles ajoutés">
-          📜 Historique <span id="historyCount">(0)</span>
+        <button id="historyBtn" class="btn-action" title="Historique des modèles">
+          📜 <span id="historyCount">(0)</span>
         </button>
         <div id="historyMenu" class="dropdown-menu">
           <div class="dropdown-header">Pseudos récents</div>
@@ -331,10 +330,10 @@
       </div>
 
       <!-- Bouton Filtre Favoris -->
-      <button id="favFilterBtn" class="btn-action btn-fav-filter" title="Afficher uniquement les favoris">&#9733; Favoris</button>
+      <button id="favFilterBtn" class="btn-action btn-fav-filter" title="Afficher uniquement les favoris">&#9733;</button>
 
       <!-- Bouton Réinitialiser (Ne garde que les favoris) -->
-      <button id="resetBtn" class="btn-action btn-reset" title="Supprimer tous les modèles sauf les favoris">&#8634; Nettoyer les non-favoris</button>
+      <button id="resetBtn" class="btn-action btn-reset" title="Supprimer tous les modèles non-favoris">🧹 Nettoyer</button>
     </div>
   </header>
 
@@ -469,15 +468,12 @@
       });
     }
 
-    // Basculer l'affichage du menu et ajuster sa position si nécessaire
     historyBtn.addEventListener('click', (e) => {
       e.stopPropagation();
-      
       const isVisible = historyMenu.classList.contains('show');
       historyMenu.classList.toggle('show');
 
       if (!isVisible) {
-        // Détecte si la popup dépasse le bord gauche de l'écran
         const rect = historyMenu.getBoundingClientRect();
         if (rect.left < 10) {
           historyMenu.style.right = 'auto';
