@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Directs Live Dashboard</title>
+  <title>Directs Live</title>
   <style>
     :root {
       --bg: #0f172a;
@@ -12,49 +12,32 @@
       --text: #f8fafc;
       --danger: #ef4444;
       --star: #fbbf24;
-      --border: #334155;
     }
-
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
-
+    * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
-      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+      font-family: system-ui, -apple-system, sans-serif;
       background: var(--bg);
       color: var(--text);
       min-height: 100vh;
       display: flex;
       flex-direction: column;
-      overflow-x: hidden;
     }
-
+    
     header {
       position: sticky;
       top: 0;
-      z-index: 1000;
-      padding: 10px 14px;
+      z-index: 100;
+      padding: 10px 16px;
       background: rgba(30, 41, 59, 0.95);
-      backdrop-filter: blur(10px);
-      -webkit-backdrop-filter: blur(10px);
-      border-bottom: 1px solid var(--border);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      border-bottom: 1px solid #334155;
       display: flex;
       justify-content: space-between;
       align-items: center;
-      gap: 10px;
+      gap: 12px;
     }
-
-    h1 {
-      font-size: 1.05rem;
-      font-weight: 700;
-      white-space: nowrap;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      color: var(--text);
-    }
+    h1 { font-size: 1.1rem; white-space: nowrap; }
 
     .controls-group {
       display: flex;
@@ -63,33 +46,33 @@
       flex-wrap: nowrap;
     }
 
-    /* Combined Search Input Form */
     .input-form {
       display: flex;
       align-items: center;
+      gap: 0;
     }
 
     .custom-input {
       padding: 6px 10px;
       border-radius: 6px 0 0 6px;
-      border: 1px solid var(--border);
+      border: 1px solid #334155;
       border-right: none;
       background: #0f172a;
       color: var(--text);
       font-size: 0.85rem;
       outline: none;
-      width: 120px;
+      width: 110px;
       transition: width 0.2s ease, border-color 0.2s ease;
     }
 
     .custom-input:focus {
       border-color: var(--accent);
-      width: 145px;
+      width: 140px;
     }
 
     .btn-action {
       background: transparent;
-      border: 1px solid var(--border);
+      border: 1px solid #334155;
       color: #94a3b8;
       padding: 6px 10px;
       border-radius: 6px;
@@ -102,12 +85,11 @@
       transition: all 0.2s ease;
       user-select: none;
       white-space: nowrap;
-      height: 32px;
     }
 
     .btn-action:hover {
       color: var(--text);
-      background: var(--border);
+      background: #334155;
     }
 
     .btn-add {
@@ -115,9 +97,8 @@
       color: #fff;
       border: 1px solid #0284c7;
       border-radius: 0 6px 6px 0;
-      font-weight: 700;
-      padding: 6px 12px;
-      height: 32px;
+      font-weight: 600;
+      padding: 6px 10px;
     }
 
     .btn-add:hover {
@@ -138,49 +119,51 @@
       font-weight: 600;
     }
 
-    .dropdown {
-      position: relative;
+    .select-tag {
+      background: transparent;
+      border: 1px solid #334155;
+      color: #94a3b8;
+      padding: 6px 8px;
+      border-radius: 6px;
+      font-size: 0.85rem;
+      cursor: pointer;
+      outline: none;
+    }
+
+    .select-tag:hover, .select-tag:focus {
+      color: var(--text);
+      background: #334155;
     }
 
     .dropdown-menu {
       display: none;
-      position: fixed; /* Fixed relative to viewport to completely eliminate screen escape */
-      width: 280px;
+      position: fixed;
+      width: 260px;
       max-width: calc(100vw - 20px);
-      max-height: 380px;
+      max-height: 320px;
       overflow-y: auto;
       background: #1e293b;
-      border: 1px solid var(--border);
+      border: 1px solid #334155;
       border-radius: 8px;
-      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.7);
-      z-index: 2000;
-      flex-direction: column;
+      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.6);
+      z-index: 1000;
     }
 
     .dropdown-menu.show {
-      display: flex;
+      display: block;
     }
 
     .dropdown-header {
-      padding: 10px 12px;
+      padding: 8px 12px;
       font-size: 0.75rem;
-      font-weight: 700;
-      color: #94a3b8;
-      border-bottom: 1px solid var(--border);
+      font-weight: 600;
+      color: #64748b;
+      border-bottom: 1px solid #334155;
       text-transform: uppercase;
       letter-spacing: 0.05em;
       display: flex;
       justify-content: space-between;
       align-items: center;
-      background: #0f172a;
-      position: sticky;
-      top: 0;
-      z-index: 5;
-    }
-
-    .history-list-container {
-      flex: 1;
-      overflow-y: auto;
     }
 
     .history-item {
@@ -234,7 +217,6 @@
       line-height: 1;
       padding: 2px 4px;
       border-radius: 4px;
-      transition: color 0.15s ease, background 0.15s ease;
     }
 
     .btn-remove-hist:hover {
@@ -244,27 +226,23 @@
 
     .btn-clear-history {
       width: 100%;
-      padding: 10px;
-      background: #0f172a;
+      padding: 8px;
+      background: transparent;
       border: none;
-      border-top: 1px solid var(--border);
+      border-top: 1px solid #334155;
       color: var(--danger);
       font-size: 0.75rem;
-      font-weight: 600;
       cursor: pointer;
       text-align: center;
-      position: sticky;
-      bottom: 0;
-      z-index: 5;
     }
 
     .btn-clear-history:hover {
-      background: rgba(239, 68, 68, 0.15);
+      background: rgba(239, 68, 68, 0.1);
     }
 
     .grid-container {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
       gap: 16px;
       padding: 16px;
       flex: 1;
@@ -273,19 +251,18 @@
     .empty-message {
       grid-column: 1 / -1;
       text-align: center;
-      padding: 80px 20px;
+      padding: 60px 20px;
       color: #64748b;
-      font-size: 0.95rem;
+      font-size: 1rem;
     }
 
     .model-card {
       background: var(--card-bg);
       border-radius: 10px;
       overflow: hidden;
-      border: 1px solid var(--border);
+      border: 1px solid #334155;
       display: flex;
       flex-direction: column;
-      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
     }
 
     .model-header {
@@ -294,18 +271,60 @@
       justify-content: space-between;
       align-items: center;
       background: #0f172a;
-      border-bottom: 1px solid var(--border);
+      border-bottom: 1px solid #334155;
+    }
+
+    .model-title-area {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      overflow: hidden;
     }
 
     .model-name {
       font-weight: 600;
       font-size: 0.9rem;
+      white-space: nowrap;
+    }
+
+    .tags-container {
+      display: flex;
+      gap: 4px;
+      flex-wrap: wrap;
+    }
+
+    .tag-badge {
+      font-size: 0.7rem;
+      background: #334155;
+      color: var(--accent);
+      padding: 1px 5px;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    .tag-badge:hover {
+      background: var(--accent);
+      color: #0f172a;
     }
 
     .header-actions {
       display: flex;
       align-items: center;
       gap: 6px;
+    }
+
+    .btn-icon-subtle {
+      background: transparent;
+      border: none;
+      color: #64748b;
+      font-size: 1rem;
+      cursor: pointer;
+      padding: 2px 4px;
+      line-height: 1;
+    }
+
+    .btn-icon-subtle:hover {
+      color: var(--text);
     }
 
     .btn-fav {
@@ -353,24 +372,11 @@
       border: 0;
     }
 
-    /* Responsive adjustments for narrow screens */
-    @media (max-width: 520px) {
-      header {
-        padding: 8px 10px;
-      }
-      h1 {
-        display: none; /* Hide main title on mobile to preserve single-row layout */
-      }
-      .custom-input {
-        width: 100px;
-      }
-      .custom-input:focus {
-        width: 120px;
-      }
-      .grid-container {
-        grid-template-columns: 1fr;
-        padding: 10px;
-      }
+    @media (max-width: 500px) {
+      header { padding: 8px 10px; }
+      h1 { display: none; }
+      .custom-input { width: 90px; }
+      .custom-input:focus { width: 110px; }
     }
   </style>
 </head>
@@ -378,7 +384,6 @@
   <header>
     <h1>Directs Live</h1>
     <div class="controls-group">
-      <!-- Add Model Form -->
       <form id="addModelForm" class="input-form">
         <input 
           type="text" 
@@ -390,56 +395,57 @@
         <button type="submit" class="btn-action btn-add" title="Ajouter ce modèle">+</button>
       </form>
 
-      <!-- History Dropdown Menu -->
+      <!-- Filtrage par Étiquette -->
+      <select id="tagFilterSelect" class="select-tag" title="Filtrer par étiquette">
+        <option value="">🏷️ (Tous)</option>
+      </select>
+
       <div class="dropdown">
         <button id="historyBtn" class="btn-action" title="Historique des modèles">
           📜 <span id="historyCount">(0)</span>
         </button>
         <div id="historyMenu" class="dropdown-menu">
           <div class="dropdown-header">Pseudos récents</div>
-          <div id="historyList" class="history-list-container"></div>
-          <button id="clearHistoryBtn" class="btn-clear-history">Vider l'historique</button>
+          <div id="historyList"></div>
+          <button id="clearHistoryBtn" class="btn-clear-history">Vider l'historique complet</button>
         </div>
       </div>
 
-      <!-- Favorites Filter Button -->
-      <button id="favFilterBtn" class="btn-action btn-fav-filter" title="Afficher uniquement les favoris">★</button>
-
-      <!-- Clean Non-Favorites Button -->
-      <button id="resetBtn" class="btn-action btn-reset" title="Supprimer tous les modèles non-favoris">🧹</button>
+      <button id="favFilterBtn" class="btn-action btn-fav-filter" title="Afficher uniquement les favoris">&#9733;</button>
+      <button id="resetBtn" class="btn-action btn-reset" title="Supprimer tous les modèles non-favoris">🧹 Nettoyer</button>
     </div>
   </header>
 
   <main class="grid-container" id="grid"></main>
 
   <script>
-    // LocalStorage State Initialization
     let models = JSON.parse(localStorage.getItem('cb_dashboard_models')) || [];
     let favorites = JSON.parse(localStorage.getItem('cb_dashboard_favs')) || [];
     let history = JSON.parse(localStorage.getItem('cb_dashboard_history')) || [];
+    let tags = JSON.parse(localStorage.getItem('cb_dashboard_tags')) || {};
     let showOnlyFavorites = false;
+    let selectedTagFilter = '';
 
-    // DOM Elements
     const grid = document.getElementById('grid');
     const addModelForm = document.getElementById('addModelForm');
     const newModelInput = document.getElementById('newModelInput');
     const resetBtn = document.getElementById('resetBtn');
     const favFilterBtn = document.getElementById('favFilterBtn');
+    const tagFilterSelect = document.getElementById('tagFilterSelect');
     const historyBtn = document.getElementById('historyBtn');
     const historyMenu = document.getElementById('historyMenu');
     const historyList = document.getElementById('historyList');
     const historyCount = document.getElementById('historyCount');
     const clearHistoryBtn = document.getElementById('clearHistoryBtn');
 
-    // Persistence Helpers
     function saveModels() { localStorage.setItem('cb_dashboard_models', JSON.stringify(models)); }
     function saveFavorites() { localStorage.setItem('cb_dashboard_favs', JSON.stringify(favorites)); }
     function saveHistory() { 
       localStorage.setItem('cb_dashboard_history', JSON.stringify(history)); 
       updateHistoryMenu();
     }
+    function saveTags() { localStorage.setItem('cb_dashboard_tags', JSON.stringify(tags)); }
 
-    // Add model to state and history
     function addModelToState(username) {
       const lower = username.toLowerCase();
       if (!models.map(m => m.toLowerCase()).includes(lower)) {
@@ -451,7 +457,6 @@
       renderGrid();
     }
 
-    // Toggle Favorite
     window.toggleFavorite = function(username) {
       const lower = username.toLowerCase();
       if (favorites.includes(lower)) {
@@ -463,18 +468,55 @@
       renderGrid();
     };
 
-    // Card Builder
+    window.editTags = function(username) {
+      const lower = username.toLowerCase();
+      const currentTags = (tags[lower] || []).join(', ');
+      const input = prompt(`Étiquettes pour ${username} (séparées par des virgules) :`, currentTags);
+      
+      if (input !== null) {
+        const parsedTags = input.split(',').map(t => t.trim()).filter(t => t.length > 0);
+        if (parsedTags.length > 0) {
+          tags[lower] = parsedTags;
+        } else {
+          delete tags[lower];
+        }
+        saveTags();
+        renderGrid();
+      }
+    };
+
+    function updateTagFilterOptions() {
+      const allTags = new Set();
+      Object.values(tags).forEach(list => list.forEach(t => allTags.add(t)));
+      
+      tagFilterSelect.innerHTML = '<option value="">🏷️ (Tous)</option>';
+      Array.from(allTags).sort().forEach(t => {
+        const opt = document.createElement('option');
+        opt.value = t;
+        opt.textContent = `🏷️ ${t}`;
+        if (t === selectedTagFilter) opt.selected = true;
+        tagFilterSelect.appendChild(opt);
+      });
+    }
+
     function createCard(username) {
       const lower = username.toLowerCase();
       const isFav = favorites.includes(lower);
+      const modelTags = tags[lower] || [];
 
       const card = document.createElement('div');
       card.className = 'model-card';
 
+      const tagsHtml = modelTags.map(t => `<span class="tag-badge" onclick="filterByTag('${t}')">${t}</span>`).join('');
+
       card.innerHTML = `
         <div class="model-header">
-          <span class="model-name">${username}</span>
+          <div class="model-title-area">
+            <span class="model-name">${username}</span>
+            <div class="tags-container">${tagsHtml}</div>
+          </div>
           <div class="header-actions">
+            <button class="btn-icon-subtle" title="Gérer les étiquettes" onclick="editTags('${username}')">🏷️</button>
             <button class="btn-fav ${isFav ? 'is-favorite' : ''}" title="Mettre en favori" onclick="toggleFavorite('${username}')">&#9733;</button>
             <button class="btn-delete" title="Supprimer" onclick="removeModel('${username}')">&times;</button>
           </div>
@@ -490,8 +532,15 @@
       return card;
     }
 
+    window.filterByTag = function(tag) {
+      selectedTagFilter = tag;
+      tagFilterSelect.value = tag;
+      renderGrid();
+    };
+
     function renderGrid() {
       grid.innerHTML = '';
+      updateTagFilterOptions();
       
       let displayModels = [...models].sort((a, b) => {
         const aFav = favorites.includes(a.toLowerCase());
@@ -503,8 +552,15 @@
         displayModels = displayModels.filter(m => favorites.includes(m.toLowerCase()));
       }
 
+      if (selectedTagFilter) {
+        displayModels = displayModels.filter(m => {
+          const mTags = tags[m.toLowerCase()] || [];
+          return mTags.includes(selectedTagFilter);
+        });
+      }
+
       if (displayModels.length === 0) {
-        grid.innerHTML = `<div class="empty-message">${showOnlyFavorites ? 'Aucun favori enregistré.' : 'Aucun modèle affiché. Entrez un pseudo pour commencer.'}</div>`;
+        grid.innerHTML = `<div class="empty-message">Aucun modèle ne correspond aux filtres actuels.</div>`;
         updateHistoryMenu();
         return;
       }
@@ -527,7 +583,7 @@
       historyList.innerHTML = '';
 
       if (history.length === 0) {
-        historyList.innerHTML = '<div style="padding: 16px; font-size: 0.8rem; color: #64748b; text-align: center;">Historique vide</div>';
+        historyList.innerHTML = '<div style="padding: 12px; font-size: 0.8rem; color: #64748b; text-align: center;">Historique vide</div>';
         return;
       }
 
@@ -563,49 +619,35 @@
       });
     }
 
-    function positionHistoryMenuStrictly() {
-      if (!historyMenu.classList.contains('show')) return;
-
+    function positionHistoryMenu() {
       const btnRect = historyBtn.getBoundingClientRect();
-      const padding = 10; // Screen boundary margin
-      const viewportWidth = window.innerWidth;
-      const viewportHeight = window.innerHeight;
-
-      // Reset menu inline dimensions to recalculate standard bounding box
-      historyMenu.style.top = '0px';
-      historyMenu.style.left = '0px';
-      historyMenu.style.maxHeight = `${viewportHeight - 20}px`;
-
-      const menuRect = historyMenu.getBoundingClientRect();
-
-      // Calculate vertical position (prefer below button, shift above if overflowing bottom)
-      let top = btnRect.bottom + 6;
-      if (top + menuRect.height > viewportHeight - padding) {
-        top = Math.max(padding, btnRect.top - menuRect.height - 6);
+      const padding = 10;
+      const menuWidth = Math.min(260, window.innerWidth - (padding * 2));
+      
+      let left = btnRect.right - menuWidth;
+      if (left < padding) left = padding;
+      if (left + menuWidth > window.innerWidth - padding) {
+        left = window.innerWidth - menuWidth - padding;
       }
 
-      // Calculate horizontal position
-      let left = btnRect.right - menuRect.width; // Align right with button by default
-      if (left < padding) {
-        left = padding; // Clamp left edge
-      }
-      if (left + menuRect.width > viewportWidth - padding) {
-        left = viewportWidth - padding - menuRect.width; // Clamp right edge
+      let top = btnRect.bottom + 8;
+      const expectedHeight = 300;
+      if (top + expectedHeight > window.innerHeight - padding) {
+        top = Math.max(padding, btnRect.top - expectedHeight - 8);
       }
 
-      // Apply clamped absolute viewport positions
       historyMenu.style.top = `${top}px`;
       historyMenu.style.left = `${left}px`;
+      historyMenu.style.width = `${menuWidth}px`;
     }
 
-    // Event Listeners for Popup and Controls
     historyBtn.addEventListener('click', (e) => {
       e.stopPropagation();
       const isVisible = historyMenu.classList.contains('show');
       
       if (!isVisible) {
         historyMenu.classList.add('show');
-        positionHistoryMenuStrictly();
+        positionHistoryMenu();
       } else {
         historyMenu.classList.remove('show');
       }
@@ -619,13 +661,10 @@
       e.stopPropagation();
     });
 
-    window.addEventListener('resize', () => {
-      positionHistoryMenuStrictly();
+    tagFilterSelect.addEventListener('change', (e) => {
+      selectedTagFilter = e.target.value;
+      renderGrid();
     });
-
-    window.addEventListener('scroll', () => {
-      positionHistoryMenuStrictly();
-    }, true);
 
     addModelForm.addEventListener('submit', (e) => {
       e.preventDefault();
@@ -652,19 +691,32 @@
 
     resetBtn.addEventListener('click', () => {
       const nonFavsCount = models.filter(m => !favorites.includes(m.toLowerCase())).length;
-      if (nonFavsCount === 0) return;
 
-      models = models.filter(m => favorites.includes(m.toLowerCase()));
-      saveModels();
-      renderGrid();
+      if (nonFavsCount === 0) {
+        alert('Aucun modèle non-favori à supprimer.');
+        return;
+      }
+
+      if (confirm('Voulez-vous supprimer tous les modèles qui ne sont pas marqués en favoris ?')) {
+        models = models.filter(m => favorites.includes(m.toLowerCase()));
+        saveModels();
+        renderGrid();
+      }
     });
 
     clearHistoryBtn.addEventListener('click', () => {
-      history = [];
-      saveHistory();
+      if (confirm('Voulez-vous effacer l\'historique complet des pseudos enregistrés ?')) {
+        history = [];
+        saveHistory();
+      }
     });
 
-    // Initial render
+    window.addEventListener('resize', () => {
+      if (historyMenu.classList.contains('show')) {
+        positionHistoryMenu();
+      }
+    });
+
     renderGrid();
   </script>
 </body>
