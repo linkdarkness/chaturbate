@@ -23,6 +23,7 @@
       flex-direction: column;
     }
     
+    /* Header adaptatif */
     header {
       position: sticky;
       top: 0;
@@ -36,20 +37,27 @@
       justify-content: space-between;
       align-items: center;
       gap: 12px;
+      flex-wrap: wrap; /* Permet au groupe d'aller sous le titre si l'écran est trop étroit */
     }
     h1 { font-size: 1.1rem; white-space: nowrap; }
 
+    /* Tous les contrôles alignés sur une ligne quand la largeur le permet */
     .controls-group {
       display: flex;
       align-items: center;
       gap: 6px;
-      flex-wrap: nowrap;
+      flex-wrap: nowrap; /* Conserve tous les boutons sur la même ligne au sein du groupe */
+      max-width: 100%;
+      overflow-x: auto; /* Sécurité si l'écran est minuscule */
+      scrollbar-width: none;
     }
+    .controls-group::-webkit-scrollbar { display: none; }
 
     .input-form {
       display: flex;
       align-items: center;
       gap: 0;
+      flex-shrink: 0;
     }
 
     .custom-input {
@@ -85,6 +93,7 @@
       transition: all 0.2s ease;
       user-select: none;
       white-space: nowrap;
+      flex-shrink: 0;
     }
 
     .btn-action:hover {
@@ -128,6 +137,7 @@
       font-size: 0.85rem;
       cursor: pointer;
       outline: none;
+      flex-shrink: 0;
     }
 
     .select-tag:hover, .select-tag:focus {
@@ -135,6 +145,7 @@
       background: #334155;
     }
 
+    /* Popup d'historique en position fixe (anti-débordement) */
     .dropdown-menu {
       display: none;
       position: fixed;
@@ -372,9 +383,19 @@
       border: 0;
     }
 
-    @media (max-width: 500px) {
-      header { padding: 8px 10px; }
-      h1 { display: none; }
+    /* Adaptation mobile : le groupe se place sous le titre pour éviter tout débordement */
+    @media (max-width: 600px) {
+      header {
+        justify-content: center;
+        padding: 8px 10px;
+      }
+      h1 {
+        font-size: 1rem;
+      }
+      .controls-group {
+        width: 100%;
+        justify-content: center;
+      }
       .custom-input { width: 90px; }
       .custom-input:focus { width: 110px; }
     }
@@ -400,21 +421,25 @@
         <option value="">🏷️ (Tous)</option>
       </select>
 
-      <div class="dropdown">
-        <button id="historyBtn" class="btn-action" title="Historique des modèles">
-          📜 <span id="historyCount">(0)</span>
-        </button>
-        <div id="historyMenu" class="dropdown-menu">
-          <div class="dropdown-header">Pseudos récents</div>
-          <div id="historyList"></div>
-          <button id="clearHistoryBtn" class="btn-clear-history">Vider l'historique complet</button>
-        </div>
-      </div>
+      <!-- Bouton Historique -->
+      <button id="historyBtn" class="btn-action" title="Historique des modèles">
+        📜 <span id="historyCount">(0)</span>
+      </button>
 
+      <!-- Bouton Filtre Favoris -->
       <button id="favFilterBtn" class="btn-action btn-fav-filter" title="Afficher uniquement les favoris">&#9733;</button>
+
+      <!-- Bouton Nettoyer (Ne garde que les favoris) -->
       <button id="resetBtn" class="btn-action btn-reset" title="Supprimer tous les modèles non-favoris">🧹 Nettoyer</button>
     </div>
   </header>
+
+  <!-- Popup Historique attaché au body pour un positionnement absolu dans l'écran -->
+  <div id="historyMenu" class="dropdown-menu">
+    <div class="dropdown-header">Pseudos récents</div>
+    <div id="historyList"></div>
+    <button id="clearHistoryBtn" class="btn-clear-history">Vider l'historique complet</button>
+  </div>
 
   <main class="grid-container" id="grid"></main>
 
