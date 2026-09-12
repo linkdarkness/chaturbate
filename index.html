@@ -185,7 +185,20 @@
       border-bottom: 1px solid #334155;
       text-transform: uppercase;
       letter-spacing: 0.05em;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
     }
+
+    .dropdown-header-action {
+      background: transparent;
+      border: none;
+      color: var(--accent);
+      cursor: pointer;
+      font-size: 0.75rem;
+      text-transform: none;
+    }
+    .dropdown-header-action:hover { text-decoration: underline; }
 
     .history-item {
       padding: 8px 12px;
@@ -375,7 +388,6 @@
 
     .btn-delete:hover { color: var(--danger); }
 
-    /* Hauteur doublée et interdiction de scrolling (overflow caché) */
     .player-container {
       width: 100%;
       aspect-ratio: 16 / 18;
@@ -513,7 +525,10 @@
   </header>
 
   <div id="historyMenu" class="dropdown-menu">
-    <div class="dropdown-header">Pseudos récents</div>
+    <div class="dropdown-header">
+      <span>Pseudos récents</span>
+      <button id="unhideAllBtn" class="dropdown-header-action" title="Démasquer tous les modèles">Tout démasquer</button>
+    </div>
     <div id="historyList"></div>
     <button id="clearHistoryBtn" class="btn-clear-history">Vider l'historique complet</button>
   </div>
@@ -565,6 +580,7 @@
     const historyList = document.getElementById('historyList');
     const historyCount = document.getElementById('historyCount');
     const clearHistoryBtn = document.getElementById('clearHistoryBtn');
+    const unhideAllBtn = document.getElementById('unhideAllBtn');
     const contextMenu = document.getElementById('contextMenu');
 
     const tagModal = document.getElementById('tagModal');
@@ -941,6 +957,17 @@
     hideToggleBtn.addEventListener('click', () => {
       showHiddenModels = !showHiddenModels;
       hideToggleBtn.classList.toggle('active', showHiddenModels);
+      renderGrid();
+    });
+
+    unhideAllBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      if (hiddenModels.length === 0) {
+        alert('Aucun modèle masqué actuellement.');
+        return;
+      }
+      hiddenModels = [];
+      saveHidden();
       renderGrid();
     });
 
