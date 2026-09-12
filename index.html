@@ -3,45 +3,36 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Directs Live Dashboard</title>
+  <title>Directs Live - Dashboard Optimisé</title>
   <style>
     :root {
       --bg: #0f172a;
       --card-bg: #1e293b;
       --accent: #38bdf8;
-      --accent-hover: #0284c7;
       --text: #f8fafc;
-      --text-muted: #94a3b8;
       --danger: #ef4444;
       --star: #fbbf24;
-      --border: #334155;
+      --hidden: #94a3b8;
     }
-
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
-
+    * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
-      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      font-family: system-ui, -apple-system, sans-serif;
       background: var(--bg);
       color: var(--text);
       min-height: 100vh;
       display: flex;
       flex-direction: column;
-      overflow-x: hidden;
     }
-
+    
     header {
       position: sticky;
       top: 0;
-      z-index: 1000;
+      z-index: 100;
       padding: 12px 16px;
       background: rgba(30, 41, 59, 0.95);
-      backdrop-filter: blur(10px);
-      -webkit-backdrop-filter: blur(10px);
-      border-bottom: 1px solid var(--border);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      border-bottom: 1px solid #334155;
       display: flex;
       flex-direction: column;
       gap: 10px;
@@ -54,6 +45,54 @@
       width: 100%;
     }
 
+    h1 {
+      font-size: 1.1rem;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+
+    .input-form {
+      display: flex;
+      align-items: center;
+      gap: 0;
+      flex: 1; /* Remplit l'écran */
+    }
+
+    .custom-input {
+      padding: 8px 12px;
+      border-radius: 6px 0 0 6px;
+      border: 1px solid #334155;
+      border-right: none;
+      background: #0f172a;
+      color: var(--text);
+      font-size: 0.9rem;
+      outline: none;
+      width: 100%;
+      flex: 1;
+      transition: border-color 0.2s ease;
+    }
+
+    .custom-input:focus {
+      border-color: var(--accent);
+    }
+
+    .btn-add {
+      background: #0284c7;
+      color: #fff;
+      border: 1px solid #0284c7;
+      border-radius: 0 6px 6px 0;
+      font-weight: 600;
+      padding: 8px 14px;
+      font-size: 0.9rem;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+
+    .btn-add:hover {
+      background: #0369a1;
+      border-color: #0369a1;
+    }
+
     .header-bottom-row {
       display: flex;
       align-items: center;
@@ -62,85 +101,44 @@
       width: 100%;
     }
 
-    h1 {
-      font-size: 1.1rem;
-      font-weight: 700;
-      white-space: nowrap;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      flex-shrink: 0;
-    }
-
-    .badge-live {
-      display: inline-block;
-      width: 8px;
-      height: 8px;
-      background: #22c55e;
-      border-radius: 50%;
-      box-shadow: 0 0 8px #22c55e;
-    }
-
-    .input-form {
-      display: flex;
-      align-items: center;
-      flex: 1;
-    }
-
-    .custom-input {
-      padding: 8px 12px;
-      border-radius: 6px 0 0 6px;
-      border: 1px solid var(--border);
-      border-right: none;
+    .select-tag {
       background: #0f172a;
+      border: 1px solid #334155;
       color: var(--text);
-      font-size: 0.9rem;
+      padding: 6px 12px;
+      border-radius: 6px;
+      font-size: 0.85rem;
+      cursor: pointer;
       outline: none;
-      width: 100%;
-      transition: border-color 0.2s ease;
+      flex: 1;
+      min-width: 180px;
     }
 
-    .custom-input:focus {
+    .select-tag:hover, .select-tag:focus {
       border-color: var(--accent);
     }
 
     .btn-action {
       background: transparent;
-      border: 1px solid var(--border);
-      color: var(--text-muted);
-      padding: 6px 12px;
+      border: 1px solid #334155;
+      color: #94a3b8;
+      padding: 6px 10px;
       border-radius: 6px;
       font-size: 0.85rem;
       cursor: pointer;
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      gap: 4px;
+      gap: 6px;
       transition: all 0.2s ease;
       user-select: none;
       white-space: nowrap;
-      height: 34px;
+      flex-shrink: 0;
     }
 
     .btn-action:hover {
       color: var(--text);
-      background: var(--border);
-    }
-
-    .btn-add {
-      background: var(--accent-hover);
-      color: #fff;
-      border: 1px solid var(--accent-hover);
-      border-radius: 0 6px 6px 0;
-      font-weight: 700;
-      padding: 6px 14px;
-      height: 36px;
-      cursor: pointer;
-    }
-
-    .btn-add:hover {
-      background: #0369a1;
-      border-color: #0369a1;
+      background: #334155;
     }
 
     .btn-reset:hover {
@@ -158,71 +156,35 @@
 
     .btn-hide-toggle.active {
       background: rgba(148, 163, 184, 0.2);
-      border-color: var(--text-muted);
+      border-color: var(--hidden);
       color: var(--text);
       font-weight: 600;
-    }
-
-    .select-tag {
-      background: #0f172a;
-      border: 1px solid var(--border);
-      color: var(--text);
-      padding: 6px 10px;
-      border-radius: 6px;
-      font-size: 0.85rem;
-      cursor: pointer;
-      outline: none;
-      height: 34px;
-      transition: border-color 0.2s ease;
-    }
-
-    .select-tag:focus, .select-tag:hover {
-      border-color: var(--accent);
-    }
-
-    .dropdown {
-      position: relative;
     }
 
     .dropdown-menu {
       display: none;
       position: fixed;
-      width: 280px;
+      width: 260px;
       max-width: calc(100vw - 20px);
-      max-height: 380px;
+      max-height: 320px;
       overflow-y: auto;
       background: #1e293b;
-      border: 1px solid var(--border);
+      border: 1px solid #334155;
       border-radius: 8px;
-      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.7);
-      z-index: 2000;
-      flex-direction: column;
+      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.6);
+      z-index: 1000;
     }
 
-    .dropdown-menu.show {
-      display: flex;
-    }
+    .dropdown-menu.show { display: block; }
 
     .dropdown-header {
-      padding: 10px 12px;
+      padding: 8px 12px;
       font-size: 0.75rem;
-      font-weight: 700;
-      color: var(--text-muted);
-      border-bottom: 1px solid var(--border);
+      font-weight: 600;
+      color: #64748b;
+      border-bottom: 1px solid #334155;
       text-transform: uppercase;
       letter-spacing: 0.05em;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      background: #0f172a;
-      position: sticky;
-      top: 0;
-      z-index: 5;
-    }
-
-    .history-list-container {
-      flex: 1;
-      overflow-y: auto;
     }
 
     .history-item {
@@ -237,9 +199,7 @@
       gap: 8px;
     }
 
-    .history-item:hover {
-      background: #283548;
-    }
+    .history-item:hover { background: #283548; }
 
     .history-username {
       flex: 1;
@@ -249,9 +209,7 @@
       white-space: nowrap;
     }
 
-    .history-username:hover {
-      color: var(--accent);
-    }
+    .history-username:hover { color: var(--accent); }
 
     .history-actions {
       display: flex;
@@ -276,7 +234,6 @@
       line-height: 1;
       padding: 2px 4px;
       border-radius: 4px;
-      transition: color 0.15s ease;
     }
 
     .btn-remove-hist:hover {
@@ -286,27 +243,21 @@
 
     .btn-clear-history {
       width: 100%;
-      padding: 10px;
-      background: #0f172a;
+      padding: 8px;
+      background: transparent;
       border: none;
-      border-top: 1px solid var(--border);
+      border-top: 1px solid #334155;
       color: var(--danger);
       font-size: 0.75rem;
-      font-weight: 600;
       cursor: pointer;
       text-align: center;
-      position: sticky;
-      bottom: 0;
-      z-index: 5;
     }
 
-    .btn-clear-history:hover {
-      background: rgba(239, 68, 68, 0.15);
-    }
+    .btn-clear-history:hover { background: rgba(239, 68, 68, 0.1); }
 
     .grid-container {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+      grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
       gap: 16px;
       padding: 16px;
       flex: 1;
@@ -315,26 +266,22 @@
     .empty-message {
       grid-column: 1 / -1;
       text-align: center;
-      padding: 80px 20px;
+      padding: 60px 20px;
       color: #64748b;
-      font-size: 0.95rem;
+      font-size: 1rem;
     }
 
     .model-card {
       background: var(--card-bg);
       border-radius: 10px;
       overflow: hidden;
-      border: 1px solid var(--border);
+      border: 1px solid #334155;
       display: flex;
       flex-direction: column;
-      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
-      transition: opacity 0.2s ease, border-color 0.2s ease;
+      transition: opacity 0.2s ease;
     }
 
-    .model-card.is-hidden {
-      opacity: 0.45;
-      border-style: dashed;
-    }
+    .model-card.is-hidden { opacity: 0.5; }
 
     .model-header {
       padding: 8px 12px;
@@ -342,27 +289,24 @@
       justify-content: space-between;
       align-items: center;
       background: #0f172a;
-      border-bottom: 1px solid var(--border);
-      gap: 8px;
+      border-bottom: 1px solid #334155;
     }
 
-    .model-info-area {
+    .model-title-area {
       display: flex;
       align-items: center;
-      gap: 6px;
+      gap: 8px;
       overflow: hidden;
       flex: 1;
     }
 
     .model-name {
       font-weight: 600;
-      font-size: 0.88rem;
+      font-size: 0.9rem;
       white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
     }
 
-    .tags-wrapper {
+    .tags-container {
       display: flex;
       gap: 4px;
       flex-wrap: wrap;
@@ -370,16 +314,16 @@
     }
 
     .tag-badge {
-      font-size: 0.68rem;
+      font-size: 0.7rem;
       background: #334155;
       color: var(--accent);
-      padding: 1px 6px;
+      padding: 2px 6px;
       border-radius: 4px;
+      cursor: pointer;
       display: inline-flex;
       align-items: center;
-      gap: 3px;
-      cursor: pointer;
-      transition: background 0.15s ease, color 0.15s ease;
+      gap: 4px;
+      transition: all 0.15s ease;
     }
 
     .tag-badge:hover {
@@ -390,92 +334,133 @@
     .header-actions {
       display: flex;
       align-items: center;
-      gap: 4px;
+      gap: 6px;
       flex-shrink: 0;
     }
 
-    .btn-card-icon {
+    .btn-icon-subtle {
       background: transparent;
       border: none;
       color: #64748b;
-      font-size: 0.95rem;
+      font-size: 1rem;
       cursor: pointer;
       padding: 2px 4px;
       line-height: 1;
       border-radius: 4px;
-      transition: color 0.15s ease, background 0.15s ease;
     }
 
-    .btn-card-icon:hover {
-      color: var(--text);
-      background: #334155;
+    .btn-icon-subtle:hover { color: var(--text); }
+
+    .btn-fav {
+      background: transparent;
+      border: none;
+      color: #64748b;
+      font-size: 1.1rem;
+      cursor: pointer;
+      line-height: 1;
+      transition: color 0.2s ease;
     }
 
-    .btn-card-icon.is-favorite {
-      color: var(--star);
+    .btn-fav:hover, .btn-fav.is-favorite { color: var(--star); }
+
+    .btn-delete {
+      background: transparent;
+      border: none;
+      color: #64748b;
+      font-size: 1.2rem;
+      cursor: pointer;
+      padding: 2px 4px;
+      line-height: 1;
     }
 
-    .btn-card-icon.is-hidden-btn {
-      color: var(--accent);
-    }
+    .btn-delete:hover { color: var(--danger); }
 
-    .btn-delete:hover {
-      color: var(--danger);
-      background: rgba(239, 68, 68, 0.15);
-    }
-
+    /* Affichage complet de l'iframe sans rognage */
     .player-container {
       width: 100%;
       aspect-ratio: 16 / 9;
-      background: #020617;
+      background: #000;
       position: relative;
-      overflow: hidden;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-
-    .player-placeholder {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-      color: #475569;
-      font-size: 0.8rem;
-      text-align: center;
-      padding: 12px;
-      user-select: none;
-    }
-
-    .player-placeholder-icon {
-      font-size: 1.5rem;
     }
 
     .player-container iframe {
       position: absolute;
-      top: -11%;
-      left: -1%;
-      width: 138%;
-      height: 122%;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
       border: 0;
     }
 
+    /* Modal de gestion des tags */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: rgba(15, 23, 42, 0.8);
+      backdrop-filter: blur(4px);
+      z-index: 3000;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .modal-overlay.show { display: flex; }
+
+    .modal-card {
+      background: #1e293b;
+      border: 1px solid #334155;
+      border-radius: 10px;
+      width: 90%;
+      max-width: 360px;
+      padding: 16px;
+      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.8);
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .modal-title {
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--text);
+    }
+
+    .modal-input {
+      padding: 8px 12px;
+      border-radius: 6px;
+      border: 1px solid #334155;
+      background: #0f172a;
+      color: var(--text);
+      font-size: 0.9rem;
+      outline: none;
+      width: 100%;
+    }
+
+    .modal-input:focus { border-color: var(--accent); }
+
+    .modal-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 8px;
+    }
+
+    /* Context Menu */
     .context-menu {
       display: none;
       position: fixed;
-      z-index: 3000;
+      z-index: 2000;
       background: #1e293b;
-      border: 1px solid var(--border);
+      border: 1px solid #334155;
       border-radius: 8px;
-      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.8);
+      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.7);
       padding: 4px 0;
-      width: 190px;
+      width: 180px;
     }
 
-    .context-menu.show {
-      display: block;
-    }
+    .context-menu.show { display: block; }
 
     .context-item {
       padding: 8px 12px;
@@ -487,170 +472,52 @@
       gap: 8px;
     }
 
-    .context-item:hover {
-      background: #334155;
-    }
-
-    .context-item.danger {
-      color: var(--danger);
-    }
-
-    /* Tag Autocomplete Modal */
-    .modal-overlay {
-      display: none;
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100vw;
-      height: 100vh;
-      background: rgba(15, 23, 42, 0.75);
-      backdrop-filter: blur(4px);
-      z-index: 4000;
-      align-items: center;
-      justify-content: center;
-      padding: 16px;
-    }
-
-    .modal-overlay.show {
-      display: flex;
-    }
-
-    .modal-card {
-      background: #1e293b;
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      padding: 20px;
-      width: 100%;
-      max-width: 380px;
-      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-    }
-
-    .modal-title {
-      font-size: 0.95rem;
-      font-weight: 700;
-      color: var(--text);
-    }
-
-    .modal-input-container {
-      position: relative;
-    }
-
-    .tag-autocomplete-input {
-      width: 100%;
-      padding: 8px 12px;
-      background: #0f172a;
-      border: 1px solid var(--border);
-      border-radius: 6px;
-      color: var(--text);
-      font-size: 0.88rem;
-      outline: none;
-    }
-
-    .tag-autocomplete-input:focus {
-      border-color: var(--accent);
-    }
-
-    .tag-suggestions-list {
-      max-height: 140px;
-      overflow-y: auto;
-      background: #0f172a;
-      border: 1px solid var(--border);
-      border-radius: 6px;
-      margin-top: 4px;
-      display: flex;
-      flex-direction: column;
-    }
-
-    .tag-suggestion-item {
-      padding: 8px 12px;
-      font-size: 0.85rem;
-      color: var(--text-muted);
-      cursor: pointer;
-      transition: background 0.15s ease, color 0.15s ease;
-    }
-
-    .tag-suggestion-item:hover, .tag-suggestion-item.selected {
-      background: #334155;
-      color: var(--accent);
-    }
-
-    .modal-actions {
-      display: flex;
-      justify-content: flex-end;
-      gap: 8px;
-      margin-top: 4px;
-    }
+    .context-item:hover { background: #334155; }
+    .context-item.danger { color: var(--danger); }
 
     @media (max-width: 600px) {
-      header {
-        padding: 8px 10px;
-      }
-      h1 {
-        font-size: 0.95rem;
-      }
-      .grid-container {
-        grid-template-columns: 1fr;
-        padding: 10px;
-      }
+      header { padding: 10px; }
+      .header-top-row { flex-direction: column; align-items: stretch; }
+      .header-bottom-row { justify-content: space-between; }
+      .select-tag { width: 100%; flex: auto; }
     }
   </style>
 </head>
 <body>
   <header>
-    <!-- Top Row: Logo/Title & Full-width Model Input -->
     <div class="header-top-row">
-      <h1><span class="badge-live"></span> Directs Live</h1>
+      <h1>Directs Live</h1>
       <form id="addModelForm" class="input-form">
-        <input 
-          type="text" 
-          id="newModelInput" 
-          class="custom-input" 
-          placeholder="Nom du modèle / pseudo..." 
-          required
-        >
-        <button type="submit" class="btn-action btn-add" title="Ajouter ce modèle">+</button>
+        <input type="text" id="newModelInput" class="custom-input" placeholder="Ajouter un pseudo de modèle..." required>
+        <button type="submit" class="btn-add" title="Ajouter ce modèle">+</button>
       </form>
     </div>
 
-    <!-- Bottom Row: Filters and Controls -->
     <div class="header-bottom-row">
-      <!-- Tag Filter Dropdown (With Count) -->
       <select id="tagFilterSelect" class="select-tag" title="Filtrer par étiquette">
-        <option value="">🏷️ Étiquettes (Toutes)</option>
+        <option value="">🏷️ (Tous)</option>
       </select>
 
-      <!-- Toggle Hidden Models Button -->
+      <button id="favFilterBtn" class="btn-action btn-fav-filter" title="Afficher uniquement les favoris">&#9733; Favoris</button>
+      
       <button id="hideToggleBtn" class="btn-action btn-hide-toggle" title="Afficher/Masquer les modèles masqués">
-        🙈 <span id="hiddenCount">(0)</span>
+        🙈 Masqués <span id="hiddenCount">(0)</span>
       </button>
 
-      <!-- Favorites Filter Button -->
-      <button id="favFilterBtn" class="btn-action btn-fav-filter" title="Afficher uniquement les favoris">★</button>
+      <button id="historyBtn" class="btn-action" title="Historique des modèles">
+        📜 Récents <span id="historyCount">(0)</span>
+      </button>
 
-      <!-- History Dropdown Menu -->
-      <div class="dropdown">
-        <button id="historyBtn" class="btn-action" title="Historique des modèles">
-          📜 <span id="historyCount">(0)</span>
-        </button>
-        <div id="historyMenu" class="dropdown-menu">
-          <div class="dropdown-header">Pseudos récents</div>
-          <div id="historyList" class="history-list-container"></div>
-          <button id="clearHistoryBtn" class="btn-clear-history">Vider l'historique</button>
-        </div>
-      </div>
-
-      <!-- Clean Non-Favorites Button -->
-      <button id="resetBtn" class="btn-action btn-reset" title="Supprimer tous les modèles non-favoris">🧹</button>
+      <button id="resetBtn" class="btn-action btn-reset" title="Supprimer tous les modèles non-favoris">🧹 Nettoyer</button>
     </div>
   </header>
 
-  <!-- Main Container Grid -->
-  <main class="grid-container" id="grid"></main>
+  <div id="historyMenu" class="dropdown-menu">
+    <div class="dropdown-header">Pseudos récents</div>
+    <div id="historyList"></div>
+    <button id="clearHistoryBtn" class="btn-clear-history">Vider l'historique complet</button>
+  </div>
 
-  <!-- Context Menu -->
   <div id="contextMenu" class="context-menu">
     <div class="context-item" id="ctxFav">⭐ Favori</div>
     <div class="context-item" id="ctxTag">🏷️ Ajouter étiquette...</div>
@@ -658,40 +525,34 @@
     <div class="context-item danger" id="ctxDelete">❌ Supprimer</div>
   </div>
 
-  <div id="tagModalOverlay" class="modal-overlay">
+  <!-- Modal avec autocomplétion pour les tags -->
+  <div id="tagModal" class="modal-overlay">
     <div class="modal-card">
       <div class="modal-title" id="tagModalTitle">Ajouter une étiquette</div>
-      <div class="modal-input-container">
-        <input 
-          type="text" 
-          id="tagModalInput" 
-          class="tag-autocomplete-input" 
-          placeholder="Saisir ou choisir une étiquette..."
-          autocomplete="off"
-        >
-        <div id="tagSuggestionsList" class="tag-suggestions-list"></div>
-      </div>
+      <input type="text" id="modalTagInput" class="modal-input" placeholder="Saisir ou choisir un tag..." list="existingTagsDatalist">
+      <datalist id="existingTagsDatalist"></datalist>
       <div class="modal-actions">
-        <button id="cancelTagBtn" class="btn-action">Annuler</button>
-        <button id="confirmTagBtn" class="btn-action btn-add" style="border-radius: 6px; height: 34px;">Ajouter</button>
+        <button class="btn-action" id="cancelTagBtn">Annuler</button>
+        <button class="btn-action" style="background: #0284c7; color: #fff; border-color: #0284c7;" id="saveTagBtn">Valider</button>
       </div>
     </div>
   </div>
+
+  <main class="grid-container" id="grid"></main>
 
   <script>
     let models = JSON.parse(localStorage.getItem('cb_dashboard_models')) || [];
     let favorites = JSON.parse(localStorage.getItem('cb_dashboard_favs')) || [];
     let hiddenModels = JSON.parse(localStorage.getItem('cb_dashboard_hidden')) || [];
     let history = JSON.parse(localStorage.getItem('cb_dashboard_history')) || [];
-    let tagsMap = JSON.parse(localStorage.getItem('cb_dashboard_tags')) || {};
-
+    let tags = JSON.parse(localStorage.getItem('cb_dashboard_tags')) || {};
+    
     let showOnlyFavorites = false;
     let showHiddenModels = false;
     let selectedTagFilter = '';
+    let targetTagUser = null;
     let contextUser = null;
-    let tagModalTargetUser = null;
 
-    // DOM Elements
     const grid = document.getElementById('grid');
     const addModelForm = document.getElementById('addModelForm');
     const newModelInput = document.getElementById('newModelInput');
@@ -707,13 +568,36 @@
     const clearHistoryBtn = document.getElementById('clearHistoryBtn');
     const contextMenu = document.getElementById('contextMenu');
 
-    // Tag Modal DOM
-    const tagModalOverlay = document.getElementById('tagModalOverlay');
+    const tagModal = document.getElementById('tagModal');
+    const modalTagInput = document.getElementById('modalTagInput');
     const tagModalTitle = document.getElementById('tagModalTitle');
-    const tagModalInput = document.getElementById('tagModalInput');
-    const tagSuggestionsList = document.getElementById('tagSuggestionsList');
+    const existingTagsDatalist = document.getElementById('existingTagsDatalist');
+    const saveTagBtn = document.getElementById('saveTagBtn');
     const cancelTagBtn = document.getElementById('cancelTagBtn');
-    const confirmTagBtn = document.getElementById('confirmTagBtn');
+
+    // Optimization: Stream active status check on viewport entry/exit
+    const streamObserver = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        const container = entry.target;
+        const iframe = container.querySelector('iframe');
+        if (!iframe) return;
+
+        const targetSrc = iframe.dataset.src;
+        if (entry.isIntersecting) {
+          if (iframe.src !== targetSrc) {
+            iframe.src = targetSrc;
+          }
+        } else {
+          if (iframe.src && iframe.src !== 'about:blank') {
+            iframe.src = 'about:blank';
+          }
+        }
+      });
+    }, {
+      root: null,
+      rootMargin: '100px',
+      threshold: 0.05
+    });
 
     function saveModels() { localStorage.setItem('cb_dashboard_models', JSON.stringify(models)); }
     function saveFavorites() { localStorage.setItem('cb_dashboard_favs', JSON.stringify(favorites)); }
@@ -725,44 +609,13 @@
       localStorage.setItem('cb_dashboard_history', JSON.stringify(history)); 
       updateHistoryMenu();
     }
-    function saveTagsMap() { localStorage.setItem('cb_dashboard_tags', JSON.stringify(tagsMap)); }
+    function saveTags() { localStorage.setItem('cb_dashboard_tags', JSON.stringify(tags)); }
 
-    const observerOptions = {
-      root: null,
-      rootMargin: '100px',
-      threshold: 0.1
-    };
-
-    const videoObserver = new IntersectionObserver((entries) => {
-      entries.forEach(entry => {
-        const playerContainer = entry.target;
-        const username = playerContainer.dataset.username;
-
-        if (entry.isIntersecting) {
-          // Play / Load iframe when visible
-          if (!playerContainer.querySelector('iframe')) {
-            const iframe = document.createElement('iframe');
-            iframe.src = `https://chaturbate.com/embed/${encodeURIComponent(username)}/`;
-            iframe.allow = "autoplay; fullscreen";
-            iframe.allowFullscreen = true;
-            
-            const placeholder = playerContainer.querySelector('.player-placeholder');
-            if (placeholder) placeholder.style.display = 'none';
-
-            playerContainer.appendChild(iframe);
-          }
-        } else {
-          // Unload stream by swapping iframe src to about:blank / removing element to conserve RAM & Network resources
-          const iframe = playerContainer.querySelector('iframe');
-          if (iframe) {
-            iframe.src = 'about:blank';
-            iframe.remove();
-            const placeholder = playerContainer.querySelector('.player-placeholder');
-            if (placeholder) placeholder.style.display = 'flex';
-          }
-        }
-      });
-    }, observerOptions);
+    function getAllExistingTags() {
+      const set = new Set();
+      Object.values(tags).forEach(list => list.forEach(t => set.add(t)));
+      return Array.from(set).sort();
+    }
 
     function addModelToState(username) {
       const lower = username.toLowerCase();
@@ -797,126 +650,76 @@
       renderGrid();
     }
 
-    function getAllExistingTags() {
-      const allTags = new Set();
-      Object.values(tagsMap).forEach(tagList => {
-        tagList.forEach(t => allTags.add(t.toLowerCase()));
-      });
-      return Array.from(allTags).sort();
-    }
-
-    function addTagToModel(username, tag) {
-      const lower = username.toLowerCase();
-      const cleanTag = tag.trim().toLowerCase();
-      if (!cleanTag) return;
+    window.openTagModal = function(username) {
+      targetTagUser = username;
+      tagModalTitle.textContent = `Ajouter un tag pour ${username}`;
+      modalTagInput.value = '';
       
-      const current = tagsMap[lower] || [];
-      if (!current.includes(cleanTag)) {
-        tagsMap[lower] = [...current, cleanTag];
-        saveTagsMap();
-        renderGrid();
-      }
-    }
+      // Alimenter la datalist avec tous les tags enregistrés
+      existingTagsDatalist.innerHTML = '';
+      getAllExistingTags().forEach(t => {
+        const opt = document.createElement('option');
+        opt.value = t;
+        existingTagsDatalist.appendChild(opt);
+      });
 
-    function removeTagFromModel(username, tagToRemove) {
-      const lower = username.toLowerCase();
-      if (tagsMap[lower]) {
-        tagsMap[lower] = tagsMap[lower].filter(t => t !== tagToRemove);
-        if (tagsMap[lower].length === 0) {
-          delete tagsMap[lower];
-        }
-        saveTagsMap();
-        renderGrid();
-      }
-    }
-
-    function openTagModal(username) {
-      tagModalTargetUser = username;
-      tagModalTitle.textContent = `Ajouter une étiquette pour ${username}`;
-      tagModalInput.value = '';
-      tagModalOverlay.classList.add('show');
-      renderTagSuggestions('');
-      setTimeout(() => tagModalInput.focus(), 50);
-    }
+      tagModal.classList.add('show');
+      setTimeout(() => modalTagInput.focus(), 50);
+    };
 
     function closeTagModal() {
-      tagModalOverlay.classList.remove('show');
-      tagModalTargetUser = null;
+      tagModal.classList.remove('show');
+      targetTagUser = null;
     }
-
-    function renderTagSuggestions(filterText) {
-      const allExisting = getAllExistingTags();
-      const cleanFilter = filterText.trim().toLowerCase();
-      
-      const filtered = allExisting.filter(tag => tag.includes(cleanFilter));
-      tagSuggestionsList.innerHTML = '';
-
-      if (filtered.length === 0) {
-        if (cleanFilter) {
-          tagSuggestionsList.innerHTML = `<div class="tag-suggestion-item">Appuyer sur Entrée pour créer "${cleanFilter}"</div>`;
-        } else {
-          tagSuggestionsList.innerHTML = `<div class="tag-suggestion-item">Aucune étiquette existante. Saisissez pour créer.</div>`;
-        }
-        return;
-      }
-
-      filtered.forEach(tag => {
-        const item = document.createElement('div');
-        item.className = 'tag-suggestion-item';
-        item.textContent = `🏷️ ${tag}`;
-        item.addEventListener('click', () => {
-          if (tagModalTargetUser) {
-            addTagToModel(tagModalTargetUser, tag);
-            closeTagModal();
-          }
-        });
-        tagSuggestionsList.appendChild(item);
-      });
-    }
-
-    tagModalInput.addEventListener('input', (e) => {
-      renderTagSuggestions(e.target.value);
-    });
-
-    tagModalInput.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter') {
-        e.preventDefault();
-        submitTagModal();
-      } else if (e.key === 'Escape') {
-        closeTagModal();
-      }
-    });
 
     function submitTagModal() {
-      const value = tagModalInput.value.trim();
-      if (value && tagModalTargetUser) {
-        addTagToModel(tagModalTargetUser, value);
-        closeTagModal();
+      if (!targetTagUser) return;
+      const val = modalTagInput.value.trim();
+      if (val) {
+        const lower = targetTagUser.toLowerCase();
+        const current = tags[lower] || [];
+        if (!current.includes(val)) {
+          tags[lower] = [...current, val];
+          saveTags();
+          renderGrid();
+        }
       }
+      closeTagModal();
     }
 
-    confirmTagBtn.addEventListener('click', submitTagModal);
+    saveTagBtn.addEventListener('click', submitTagModal);
     cancelTagBtn.addEventListener('click', closeTagModal);
+    modalTagInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') submitTagModal();
+      if (e.key === 'Escape') closeTagModal();
+    });
+
+    window.removeTag = function(username, tagToRemove) {
+      const lower = username.toLowerCase();
+      if (tags[lower]) {
+        tags[lower] = tags[lower].filter(t => t !== tagToRemove);
+        if (tags[lower].length === 0) delete tags[lower];
+        saveTags();
+        renderGrid();
+      }
+    };
 
     function updateTagFilterOptions() {
-      const counts = {};
-      Object.values(tagsMap).forEach(tagList => {
-        tagList.forEach(t => {
-          counts[t] = (counts[t] || 0) + 1;
-        });
-      });
+      const existingTags = getAllExistingTags();
+      const totalModelsCount = models.length;
 
-      const totalTagsCount = Object.keys(counts).length;
-      tagFilterSelect.innerHTML = `<option value="">🏷️ Étiquettes (${totalTagsCount})</option>`;
+      tagFilterSelect.innerHTML = `<option value="">🏷️ (Tous) (${totalModelsCount})</option>`;
+      
+      existingTags.forEach(t => {
+        const count = models.filter(m => {
+          const mTags = tags[m.toLowerCase()] || [];
+          return mTags.includes(t);
+        }).length;
 
-      const sortedTags = Object.keys(counts).sort();
-      sortedTags.forEach(tag => {
         const opt = document.createElement('option');
-        opt.value = tag;
-        opt.textContent = `🏷️ ${tag} (${counts[tag]})`;
-        if (tag === selectedTagFilter) {
-          opt.selected = true;
-        }
+        opt.value = t;
+        opt.textContent = `🏷️ ${t} (${count})`;
+        if (t === selectedTagFilter) opt.selected = true;
         tagFilterSelect.appendChild(opt);
       });
     }
@@ -930,64 +733,44 @@
       const lower = username.toLowerCase();
       const isFav = favorites.includes(lower);
       const isHidden = hiddenModels.includes(lower);
-      const modelTags = tagsMap[lower] || [];
+      const modelTags = tags[lower] || [];
 
       const card = document.createElement('div');
       card.className = `model-card ${isHidden ? 'is-hidden' : ''}`;
 
+      const tagsHtml = modelTags.map(t => 
+        `<span class="tag-badge" title="Cliquer pour supprimer" onclick="removeTag('${username}', '${t}')">${t} &times;</span>`
+      ).join('');
+
+      const embedUrl = `https://chaturbate.com/embed/${encodeURIComponent(username)}/`;
+
       card.innerHTML = `
         <div class="model-header">
-          <div class="model-info-area">
-            <span class="model-name" title="${username}">${username}</span>
-            <div class="tags-wrapper"></div>
+          <div class="model-title-area">
+            <span class="model-name">${username}</span>
+            <div class="tags-container">${tagsHtml}</div>
           </div>
           <div class="header-actions">
-            <button class="btn-card-icon btn-add-tag" title="Ajouter une étiquette">🏷️</button>
-            <button class="btn-card-icon ${isHidden ? 'is-hidden-btn' : ''}" title="${isHidden ? 'Démasquer' : 'Masquer'}">🙈</button>
-            <button class="btn-card-icon ${isFav ? 'is-favorite' : ''}" title="Mettre en favori">&#9733;</button>
-            <button class="btn-card-icon btn-delete" title="Supprimer">&times;</button>
+            <button class="btn-icon-subtle" title="${isHidden ? 'Démasquer' : 'Masquer'}" onclick="toggleHideModel('${username}')">
+              ${isHidden ? '👁️' : '🙈'}
+            </button>
+            <button class="btn-icon-subtle" title="Ajouter un tag" onclick="openTagModal('${username}')">🏷️</button>
+            <button class="btn-fav ${isFav ? 'is-favorite' : ''}" title="Mettre en favori" onclick="toggleFavorite('${username}')">&#9733;</button>
+            <button class="btn-delete" title="Supprimer" onclick="removeModel('${username}')">&times;</button>
           </div>
         </div>
-        <div class="player-container" data-username="${username}">
-          <div class="player-placeholder">
-            <div class="player-placeholder-icon">📺</div>
-            <div>Chargement lors du défilement...</div>
-          </div>
+        <div class="player-container">
+          <iframe 
+            data-src="${embedUrl}" 
+            allow="autoplay; fullscreen" 
+            allowfullscreen>
+          </iframe>
         </div>
       `;
 
-      // Render tags inside tag container wrapper
-      const tagsWrapper = card.querySelector('.tags-wrapper');
-      modelTags.forEach(tag => {
-        const badge = document.createElement('span');
-        badge.className = 'tag-badge';
-        badge.title = 'Cliquer pour supprimer cette étiquette';
-        badge.innerHTML = `${tag} &times;`;
-        badge.addEventListener('click', (e) => {
-          e.stopPropagation();
-          removeTagFromModel(username, tag);
-        });
-        tagsWrapper.appendChild(badge);
-      });
-
-      // Event bindings for action buttons
-      card.querySelector('.btn-add-tag').addEventListener('click', () => {
-        openTagModal(username);
-      });
-
-      const hideBtn = card.querySelectorAll('.btn-card-icon')[1];
-      hideBtn.addEventListener('click', () => toggleHideModel(username));
-
-      const favBtn = card.querySelectorAll('.btn-card-icon')[2];
-      favBtn.addEventListener('click', () => toggleFavorite(username));
-
-      card.querySelector('.btn-delete').addEventListener('click', () => removeModel(username));
-
-      // Observe video container for scroll-based loading
       const playerContainer = card.querySelector('.player-container');
-      videoObserver.observe(playerContainer);
+      streamObserver.observe(playerContainer);
 
-      // Context menu handler
       card.addEventListener('contextmenu', (e) => {
         e.preventDefault();
         contextUser = username;
@@ -1003,16 +786,37 @@
       return card;
     }
 
-    function renderGrid() {
-      // Unobserve existing items before clearing grid
-      document.querySelectorAll('.player-container').forEach(el => {
-        videoObserver.unobserve(el);
-      });
+    document.getElementById('ctxFav').addEventListener('click', () => {
+      if (contextUser) toggleFavorite(contextUser);
+      contextMenu.classList.remove('show');
+    });
 
+    document.getElementById('ctxHide').addEventListener('click', () => {
+      if (contextUser) toggleHideModel(contextUser);
+      contextMenu.classList.remove('show');
+    });
+
+    document.getElementById('ctxTag').addEventListener('click', () => {
+      if (contextUser) openTagModal(contextUser);
+      contextMenu.classList.remove('show');
+    });
+
+    document.getElementById('ctxDelete').addEventListener('click', () => {
+      if (contextUser) removeModel(contextUser);
+      contextMenu.classList.remove('show');
+    });
+
+    document.addEventListener('click', () => {
+      contextMenu.classList.remove('show');
+    });
+
+    function renderGrid() {
+      streamObserver.disconnect();
       grid.innerHTML = '';
+      
       updateTagFilterOptions();
       updateHiddenCount();
-
+      
       let displayModels = [...models].sort((a, b) => {
         const aFav = favorites.includes(a.toLowerCase());
         const bFav = favorites.includes(b.toLowerCase());
@@ -1029,13 +833,13 @@
 
       if (selectedTagFilter) {
         displayModels = displayModels.filter(m => {
-          const mTags = tagsMap[m.toLowerCase()] || [];
+          const mTags = tags[m.toLowerCase()] || [];
           return mTags.includes(selectedTagFilter);
         });
       }
 
       if (displayModels.length === 0) {
-        grid.innerHTML = `<div class="empty-message">Aucun modèle ne correspond aux filtres sélectionnés.</div>`;
+        grid.innerHTML = `<div class="empty-message">Aucun modèle à afficher pour le moment.</div>`;
         updateHistoryMenu();
         return;
       }
@@ -1058,7 +862,7 @@
       historyList.innerHTML = '';
 
       if (history.length === 0) {
-        historyList.innerHTML = '<div style="padding: 16px; font-size: 0.8rem; color: #64748b; text-align: center;">Historique vide</div>';
+        historyList.innerHTML = '<div style="padding: 12px; font-size: 0.8rem; color: #64748b; text-align: center;">Historique vide</div>';
         return;
       }
 
@@ -1094,33 +898,26 @@
       });
     }
 
-    function positionHistoryMenuStrictly() {
-      if (!historyMenu.classList.contains('show')) return;
-
+    function positionHistoryMenu() {
       const btnRect = historyBtn.getBoundingClientRect();
       const padding = 10;
-      const viewportWidth = window.innerWidth;
-      const viewportHeight = window.innerHeight;
-
-      historyMenu.style.top = '0px';
-      historyMenu.style.left = '0px';
-      historyMenu.style.maxHeight = `${viewportHeight - 20}px`;
-
-      const menuRect = historyMenu.getBoundingClientRect();
-
-      let top = btnRect.bottom + 6;
-      if (top + menuRect.height > viewportHeight - padding) {
-        top = Math.max(padding, btnRect.top - menuRect.height - 6);
+      const menuWidth = Math.min(260, window.innerWidth - (padding * 2));
+      
+      let left = btnRect.right - menuWidth;
+      if (left < padding) left = padding;
+      if (left + menuWidth > window.innerWidth - padding) {
+        left = window.innerWidth - menuWidth - padding;
       }
 
-      let left = btnRect.right - menuRect.width;
-      if (left < padding) left = padding;
-      if (left + menuRect.width > viewportWidth - padding) {
-        left = viewportWidth - padding - menuRect.width;
+      let top = btnRect.bottom + 8;
+      const expectedHeight = 300;
+      if (top + expectedHeight > window.innerHeight - padding) {
+        top = Math.max(padding, btnRect.top - expectedHeight - 8);
       }
 
       historyMenu.style.top = `${top}px`;
       historyMenu.style.left = `${left}px`;
+      historyMenu.style.width = `${menuWidth}px`;
     }
 
     historyBtn.addEventListener('click', (e) => {
@@ -1129,7 +926,7 @@
       
       if (!isVisible) {
         historyMenu.classList.add('show');
-        positionHistoryMenuStrictly();
+        positionHistoryMenu();
       } else {
         historyMenu.classList.remove('show');
       }
@@ -1137,29 +934,20 @@
 
     document.addEventListener('click', () => {
       historyMenu.classList.remove('show');
-      contextMenu.classList.remove('show');
     });
 
     historyMenu.addEventListener('click', (e) => {
       e.stopPropagation();
     });
 
-    window.addEventListener('resize', () => {
-      positionHistoryMenuStrictly();
-    });
-
-    window.addEventListener('scroll', () => {
-      positionHistoryMenuStrictly();
-    }, true);
-
-    tagFilterSelect.addEventListener('change', (e) => {
-      selectedTagFilter = e.target.value;
-      renderGrid();
-    });
-
     hideToggleBtn.addEventListener('click', () => {
       showHiddenModels = !showHiddenModels;
       hideToggleBtn.classList.toggle('active', showHiddenModels);
+      renderGrid();
+    });
+
+    tagFilterSelect.addEventListener('change', (e) => {
+      selectedTagFilter = e.target.value;
       renderGrid();
     });
 
@@ -1173,12 +961,12 @@
       }
     });
 
-    window.removeModel = function(username) {
+    function removeModel(username) {
       const lower = username.toLowerCase();
       models = models.filter(m => m.toLowerCase() !== lower);
       saveModels();
       renderGrid();
-    };
+    }
 
     favFilterBtn.addEventListener('click', () => {
       showOnlyFavorites = !showOnlyFavorites;
@@ -1188,36 +976,32 @@
 
     resetBtn.addEventListener('click', () => {
       const nonFavsCount = models.filter(m => !favorites.includes(m.toLowerCase())).length;
-      if (nonFavsCount === 0) return;
 
-      models = models.filter(m => favorites.includes(m.toLowerCase()));
-      saveModels();
-      renderGrid();
+      if (nonFavsCount === 0) {
+        alert('Aucun modèle non-favori à supprimer.');
+        return;
+      }
+
+      if (confirm('Voulez-vous supprimer tous les modèles qui ne sont pas marqués en favoris ?')) {
+        models = models.filter(m => favorites.includes(m.toLowerCase()));
+        saveModels();
+        renderGrid();
+      }
     });
 
     clearHistoryBtn.addEventListener('click', () => {
-      history = [];
-      saveHistory();
+      if (confirm('Voulez-vous effacer l\'historique complet des pseudos enregistrés ?')) {
+        history = [];
+        saveHistory();
+      }
     });
 
-    // Context Menu Handlers
-    document.getElementById('ctxFav').addEventListener('click', () => {
-      if (contextUser) toggleFavorite(contextUser);
+    window.addEventListener('resize', () => {
+      if (historyMenu.classList.contains('show')) {
+        positionHistoryMenu();
+      }
     });
 
-    document.getElementById('ctxHide').addEventListener('click', () => {
-      if (contextUser) toggleHideModel(contextUser);
-    });
-
-    document.getElementById('ctxTag').addEventListener('click', () => {
-      if (contextUser) openTagModal(contextUser);
-    });
-
-    document.getElementById('ctxDelete').addEventListener('click', () => {
-      if (contextUser) removeModel(contextUser);
-    });
-
-    // Initial render call
     renderGrid();
   </script>
 </body>
