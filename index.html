@@ -11,6 +11,7 @@
       --accent: #38bdf8;
       --text: #f8fafc;
       --danger: #ef4444;
+      --star: #fbbf24;
     }
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
@@ -70,7 +71,9 @@
       display: inline-flex;
       align-items: center;
       justify-content: center;
+      gap: 4px;
       transition: all 0.2s ease;
+      user-select: none;
     }
 
     .btn-action:hover {
@@ -93,6 +96,14 @@
       color: var(--danger);
       border-color: var(--danger);
       background: rgba(239, 68, 68, 0.1);
+    }
+
+    /* Bouton de filtre favoris */
+    .btn-fav-filter.active {
+      background: rgba(251, 191, 36, 0.15);
+      border-color: var(--star);
+      color: var(--star);
+      font-weight: 600;
     }
 
     .grid-container {
@@ -126,6 +137,31 @@
       font-size: 0.9rem;
     }
 
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    /* Bouton Étoile Favori */
+    .btn-fav {
+      background: transparent;
+      border: none;
+      color: #64748b;
+      font-size: 1.1rem;
+      cursor: pointer;
+      line-height: 1;
+      transition: color 0.2s ease;
+    }
+
+    .btn-fav:hover {
+      color: var(--star);
+    }
+
+    .btn-fav.is-favorite {
+      color: var(--star);
+    }
+
     .btn-delete {
       background: transparent;
       border: none;
@@ -133,6 +169,7 @@
       font-size: 1.2rem;
       cursor: pointer;
       padding: 2px 4px;
+      line-height: 1;
     }
 
     .btn-delete:hover {
@@ -173,6 +210,9 @@
         <button type="submit" class="btn-action btn-add">+ Ajouter</button>
       </form>
 
+      <!-- Bouton Filtre Favoris -->
+      <button id="favFilterBtn" class="btn-action btn-fav-filter" title="Afficher uniquement les favoris">&#9733; Favoris</button>
+
       <!-- Bouton Réinitialiser -->
       <button id="resetBtn" class="btn-action btn-reset" title="Réinitialiser la liste par défaut">&#8634; Réinitialiser</button>
     </div>
@@ -191,22 +231,44 @@
     ];
 
     let models = JSON.parse(localStorage.getItem('cb_dashboard_models')) || [...defaultModels];
+    let favorites = JSON.parse(localStorage.getItem('cb_dashboard_favs')) || [];
+    let showOnlyFavorites = false;
 
     const grid = document.getElementById('grid');
     const addModelForm = document.getElementById('addModelForm');
     const newModelInput = document.getElementById('newModelInput');
     const resetBtn = document.getElementById('resetBtn');
+    const favFilterBtn = document.getElementById('favFilterBtn');
 
     function saveModels() { localStorage.setItem('cb_dashboard_models', JSON.stringify(models)); }
+    function saveFavorites() { localStorage.setItem('cb_dashboard_favs', JSON.stringify(favorites)); }
+
+    // Activer / Désactiver un favori
+    window.toggleFavorite = function(username) {
+      const lower = username.toLowerCase();
+      if (favorites.includes(lower)) {
+        favorites = favorites.filter(f => f !== lower);
+      } else {
+        favorites.push(lower);
+      }
+      saveFavorites();
+      renderGrid();
+    };
 
     function createCard(username) {
+      const lower = username.toLowerCase();
+      const isFav = favorites.includes(lower);
+
       const card = document.createElement('div');
       card.className = 'model-card';
 
       card.innerHTML = `
         <div class="model-header">
           <span class="model-name">${username}</span>
-          <button class="btn-delete" title="Supprimer" onclick="removeModel('${username}')">&times;</button>
+          <div class="header-actions">
+            <button class="btn-fav ${isFav ? 'is-favorite' : ''}" title="Mettre en favori" onclick="toggleFavorite('${username}')">&#9733;</button>
+            <button class="btn-delete" title="Supprimer" onclick="removeModel('${username}')">&times;</button>
+          </div>
         </div>
         <div class="player-container">
           <iframe 
@@ -221,7 +283,20 @@
 
     function renderGrid() {
       grid.innerHTML = '';
-      models.forEach(username => {
+      
+      // Tri : les favoris apparaissent toujours en premier
+      let displayModels = [...models].sort((a, b) => {
+        const aFav = favorites.includes(a.toLowerCase());
+        const bFav = favorites.includes(b.toLowerCase());
+        return bFav - aFav;
+      });
+
+      // Filtrer si le bouton "Favoris" du header est actif
+      if (showOnlyFavorites) {
+        displayModels = displayModels.filter(m => favorites.includes(m.toLowerCase()));
+      }
+
+      displayModels.forEach(username => {
         grid.appendChild(createCard(username));
       });
     }
@@ -241,16 +316,30 @@
 
     // Gestion de la suppression de modèle
     window.removeModel = function(username) {
-      models = models.filter(m => m.toLowerCase() !== username.toLowerCase());
+      const lower = username.toLowerCase();
+      models = models.filter(m => m.toLowerCase() !== lower);
+      favorites = favorites.filter(f => f !== lower);
       saveModels();
+      saveFavorites();
       renderGrid();
     };
 
+    // Filtre des favoris dans le header
+    favFilterBtn.addEventListener('click', () => {
+      showOnlyFavorites = !showOnlyFavorites;
+      favFilterBtn.classList.toggle('active', showOnlyFavorites);
+      renderGrid();
+    });
+
     // Gestion de la réinitialisation
     resetBtn.addEventListener('click', () => {
-      if (confirm('Voulez-vous réinitialiser la liste avec les modèles par défaut ?')) {
+      if (confirm('Voulez-vous réinitialiser la liste et les favoris ?')) {
         models = [...defaultModels];
+        favorites = [];
+        showOnlyFavorites = false;
+        favFilterBtn.classList.remove('active');
         localStorage.removeItem('cb_dashboard_models');
+        localStorage.removeItem('cb_dashboard_favs');
         renderGrid();
       }
     });
