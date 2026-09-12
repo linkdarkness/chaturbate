@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Directs Live</title>
+  <title>Directs</title>
   <style>
     :root {
       --bg: #0f172a;
@@ -23,12 +23,7 @@
       display: flex;
       flex-direction: column;
     }
-    
-    /* Header fixe en haut de page */
     header {
-      position: sticky;
-      top: 0;
-      z-index: 100;
       padding: 12px 20px;
       background: rgba(30, 41, 59, 0.95);
       backdrop-filter: blur(8px);
@@ -288,7 +283,6 @@
 
     @media (max-width: 480px) {
       header {
-        position: sticky;
         flex-direction: column;
         align-items: stretch;
       }
