@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Directs Live</title>
+  <title>Directs Live Dashboard</title>
   <style>
     :root {
       --bg: #0f172a;
@@ -13,59 +13,67 @@
       --danger: #ef4444;
       --star: #fbbf24;
       --hidden: #94a3b8;
+      --border: #334155;
     }
-    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
     body {
-      font-family: system-ui, -apple-system, sans-serif;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
       background: var(--bg);
       color: var(--text);
       min-height: 100vh;
       display: flex;
       flex-direction: column;
+      overflow-x: hidden;
     }
-    
+
     header {
       position: sticky;
       top: 0;
-      z-index: 100;
-      padding: 10px 16px;
+      z-index: 1000;
+      padding: 10px 14px;
       background: rgba(30, 41, 59, 0.95);
-      backdrop-filter: blur(8px);
-      -webkit-backdrop-filter: blur(8px);
-      border-bottom: 1px solid #334155;
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      border-bottom: 1px solid var(--border);
       display: flex;
       justify-content: space-between;
       align-items: center;
-      gap: 12px;
+      gap: 10px;
       flex-wrap: wrap;
     }
-    h1 { font-size: 1.1rem; white-space: nowrap; }
 
-    .controls-wrapper {
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-      align-items: flex-end;
-    }
-
-    .controls-row-top, .controls-row-bottom {
+    h1 {
+      font-size: 1.05rem;
+      font-weight: 700;
+      white-space: nowrap;
       display: flex;
       align-items: center;
       gap: 6px;
-      flex-wrap: nowrap;
+      color: var(--text);
+    }
+
+    .controls-wrapper {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
     }
 
     .input-form {
       display: flex;
       align-items: center;
-      gap: 0;
-      flex-shrink: 0;
     }
 
     .custom-input {
-      padding: 5px 8px;
+      padding: 6px 10px;
       border-radius: 6px 0 0 6px;
-      border: 1px solid #334155;
+      border: 1px solid var(--border);
       border-right: none;
       background: #0f172a;
       color: var(--text);
@@ -77,14 +85,14 @@
 
     .custom-input:focus {
       border-color: var(--accent);
-      width: 130px;
+      width: 140px;
     }
 
     .btn-action {
       background: transparent;
-      border: 1px solid #334155;
+      border: 1px solid var(--border);
       color: #94a3b8;
-      padding: 5px 8px;
+      padding: 6px 10px;
       border-radius: 6px;
       font-size: 0.85rem;
       cursor: pointer;
@@ -95,12 +103,12 @@
       transition: all 0.2s ease;
       user-select: none;
       white-space: nowrap;
-      flex-shrink: 0;
+      height: 32px;
     }
 
     .btn-action:hover {
       color: var(--text);
-      background: #334155;
+      background: var(--border);
     }
 
     .btn-add {
@@ -108,8 +116,9 @@
       color: #fff;
       border: 1px solid #0284c7;
       border-radius: 0 6px 6px 0;
-      font-weight: 600;
-      padding: 5px 8px;
+      font-weight: 700;
+      padding: 6px 12px;
+      height: 32px;
     }
 
     .btn-add:hover {
@@ -138,46 +147,65 @@
     }
 
     .select-tag {
-      background: transparent;
-      border: 1px solid #334155;
-      color: #94a3b8;
-      padding: 5px 8px;
+      background: #0f172a;
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 6px 10px;
       border-radius: 6px;
       font-size: 0.85rem;
       cursor: pointer;
       outline: none;
-      flex-shrink: 0;
+      height: 32px;
+      transition: border-color 0.2s ease;
     }
 
-    .select-tag:hover, .select-tag:focus {
-      color: var(--text);
-      background: #334155;
+    .select-tag:focus, .select-tag:hover {
+      border-color: var(--accent);
+    }
+
+    .dropdown {
+      position: relative;
     }
 
     .dropdown-menu {
       display: none;
       position: fixed;
-      width: 260px;
+      width: 280px;
       max-width: calc(100vw - 20px);
-      max-height: 320px;
+      max-height: 380px;
       overflow-y: auto;
       background: #1e293b;
-      border: 1px solid #334155;
+      border: 1px solid var(--border);
       border-radius: 8px;
-      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.6);
-      z-index: 1000;
+      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.7);
+      z-index: 2000;
+      flex-direction: column;
     }
 
-    .dropdown-menu.show { display: block; }
+    .dropdown-menu.show {
+      display: flex;
+    }
 
     .dropdown-header {
-      padding: 8px 12px;
+      padding: 10px 12px;
       font-size: 0.75rem;
-      font-weight: 600;
-      color: #64748b;
-      border-bottom: 1px solid #334155;
+      font-weight: 700;
+      color: #94a3b8;
+      border-bottom: 1px solid var(--border);
       text-transform: uppercase;
       letter-spacing: 0.05em;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: #0f172a;
+      position: sticky;
+      top: 0;
+      z-index: 5;
+    }
+
+    .history-list-container {
+      flex: 1;
+      overflow-y: auto;
     }
 
     .history-item {
@@ -192,7 +220,9 @@
       gap: 8px;
     }
 
-    .history-item:hover { background: #283548; }
+    .history-item:hover {
+      background: #283548;
+    }
 
     .history-username {
       flex: 1;
@@ -202,7 +232,9 @@
       white-space: nowrap;
     }
 
-    .history-username:hover { color: var(--accent); }
+    .history-username:hover {
+      color: var(--accent);
+    }
 
     .history-actions {
       display: flex;
@@ -227,6 +259,7 @@
       line-height: 1;
       padding: 2px 4px;
       border-radius: 4px;
+      transition: color 0.15s ease;
     }
 
     .btn-remove-hist:hover {
@@ -236,21 +269,27 @@
 
     .btn-clear-history {
       width: 100%;
-      padding: 8px;
-      background: transparent;
+      padding: 10px;
+      background: #0f172a;
       border: none;
-      border-top: 1px solid #334155;
+      border-top: 1px solid var(--border);
       color: var(--danger);
       font-size: 0.75rem;
+      font-weight: 600;
       cursor: pointer;
       text-align: center;
+      position: sticky;
+      bottom: 0;
+      z-index: 5;
     }
 
-    .btn-clear-history:hover { background: rgba(239, 68, 68, 0.1); }
+    .btn-clear-history:hover {
+      background: rgba(239, 68, 68, 0.15);
+    }
 
     .grid-container {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+      grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
       gap: 16px;
       padding: 16px;
       flex: 1;
@@ -259,22 +298,26 @@
     .empty-message {
       grid-column: 1 / -1;
       text-align: center;
-      padding: 60px 20px;
+      padding: 80px 20px;
       color: #64748b;
-      font-size: 1rem;
+      font-size: 0.95rem;
     }
 
     .model-card {
       background: var(--card-bg);
       border-radius: 10px;
       overflow: hidden;
-      border: 1px solid #334155;
+      border: 1px solid var(--border);
       display: flex;
       flex-direction: column;
-      transition: opacity 0.2s ease;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+      transition: opacity 0.2s ease, border-color 0.2s ease;
     }
 
-    .model-card.is-hidden { opacity: 0.5; }
+    .model-card.is-hidden {
+      opacity: 0.45;
+      border-style: dashed;
+    }
 
     .model-header {
       padding: 8px 12px;
@@ -282,85 +325,87 @@
       justify-content: space-between;
       align-items: center;
       background: #0f172a;
-      border-bottom: 1px solid #334155;
+      border-bottom: 1px solid var(--border);
+      gap: 8px;
     }
 
-    .model-title-area {
+    .model-info-area {
       display: flex;
       align-items: center;
-      gap: 8px;
+      gap: 6px;
       overflow: hidden;
+      flex: 1;
     }
 
     .model-name {
       font-weight: 600;
-      font-size: 0.9rem;
+      font-size: 0.88rem;
       white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
 
-    .tags-container {
+    .tags-wrapper {
       display: flex;
       gap: 4px;
       flex-wrap: wrap;
+      align-items: center;
     }
 
     .tag-badge {
-      font-size: 0.7rem;
+      font-size: 0.68rem;
       background: #334155;
       color: var(--accent);
-      padding: 1px 5px;
+      padding: 1px 6px;
       border-radius: 4px;
+      display: inline-flex;
+      align-items: center;
+      gap: 3px;
       cursor: pointer;
+      transition: background 0.15s ease, color 0.15s ease;
     }
 
     .tag-badge:hover {
-      background: var(--accent);
-      color: #0f172a;
+      background: rgba(239, 68, 68, 0.2);
+      color: var(--danger);
     }
 
     .header-actions {
       display: flex;
       align-items: center;
-      gap: 6px;
+      gap: 4px;
+      flex-shrink: 0;
     }
 
-    .btn-icon-subtle {
+    .btn-card-icon {
       background: transparent;
       border: none;
       color: #64748b;
-      font-size: 1rem;
+      font-size: 0.95rem;
       cursor: pointer;
       padding: 2px 4px;
       line-height: 1;
       border-radius: 4px;
+      transition: color 0.15s ease, background 0.15s ease;
     }
 
-    .btn-icon-subtle:hover { color: var(--text); }
-    .btn-hide.is-hidden { color: var(--accent); }
-
-    .btn-fav {
-      background: transparent;
-      border: none;
-      color: #64748b;
-      font-size: 1.1rem;
-      cursor: pointer;
-      line-height: 1;
-      transition: color 0.2s ease;
+    .btn-card-icon:hover {
+      color: var(--text);
+      background: #334155;
     }
 
-    .btn-fav:hover, .btn-fav.is-favorite { color: var(--star); }
-
-    .btn-delete {
-      background: transparent;
-      border: none;
-      color: #64748b;
-      font-size: 1.2rem;
-      cursor: pointer;
-      padding: 2px 4px;
-      line-height: 1;
+    .btn-card-icon.is-favorite {
+      color: var(--star);
     }
 
-    .btn-delete:hover { color: var(--danger); }
+    .btn-card-icon.is-hidden-btn {
+      color: var(--accent);
+    }
+
+    .btn-delete:hover {
+      color: var(--danger);
+      background: rgba(239, 68, 68, 0.15);
+    }
 
     .player-container {
       width: 100%;
@@ -379,141 +424,61 @@
       border: 0;
     }
 
-    /* Style de la fenêtre modale de gestion des tags */
-    .modal-overlay {
+    .context-menu {
       display: none;
       position: fixed;
-      top: 0;
-      left: 0;
-      width: 100vw;
-      height: 100vh;
-      background: rgba(15, 23, 42, 0.8);
-      backdrop-filter: blur(4px);
-      z-index: 2000;
-      justify-content: center;
-      align-items: center;
-    }
-
-    .modal-overlay.show { display: flex; }
-
-    .modal-content {
+      z-index: 3000;
       background: #1e293b;
-      border: 1px solid #334155;
-      border-radius: 12px;
-      padding: 20px;
-      width: 360px;
-      max-width: 90vw;
-      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5);
-      display: flex;
-      flex-direction: column;
-      gap: 16px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.8);
+      padding: 4px 0;
+      width: 190px;
     }
 
-    .modal-title {
-      font-size: 1rem;
-      font-weight: 600;
+    .context-menu.show {
+      display: block;
+    }
+
+    .context-item {
+      padding: 8px 12px;
+      font-size: 0.85rem;
       color: var(--text);
-    }
-
-    .modal-section-title {
-      font-size: 0.75rem;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-      color: #64748b;
-      margin-bottom: 6px;
-    }
-
-    .tag-chips-wrapper {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 6px;
-      max-height: 120px;
-      overflow-y: auto;
-    }
-
-    .chip-btn {
-      background: #0f172a;
-      border: 1px solid #334155;
-      color: #94a3b8;
-      padding: 4px 10px;
-      border-radius: 20px;
-      font-size: 0.8rem;
       cursor: pointer;
-      transition: all 0.15s ease;
-      display: inline-flex;
+      display: flex;
       align-items: center;
-      gap: 4px;
-    }
-
-    .chip-btn:hover {
-      border-color: var(--accent);
-      color: var(--text);
-    }
-
-    .chip-btn.selected {
-      background: var(--accent);
-      border-color: var(--accent);
-      color: #0f172a;
-      font-weight: 600;
-    }
-
-    .chip-btn.active-assigned {
-      background: rgba(56, 189, 248, 0.2);
-      border-color: var(--accent);
-      color: var(--accent);
-    }
-
-    .tag-input-row {
-      display: flex;
-      gap: 6px;
-    }
-
-    .tag-input-row input {
-      flex: 1;
-      background: #0f172a;
-      border: 1px solid #334155;
-      color: var(--text);
-      padding: 6px 10px;
-      border-radius: 6px;
-      font-size: 0.85rem;
-      outline: none;
-    }
-
-    .tag-input-row input:focus { border-color: var(--accent); }
-
-    .modal-actions {
-      display: flex;
-      justify-content: flex-end;
       gap: 8px;
-      margin-top: 8px;
     }
 
-    .btn-modal {
-      padding: 6px 14px;
-      border-radius: 6px;
-      font-size: 0.85rem;
-      cursor: pointer;
-      border: none;
-      font-weight: 500;
-    }
-
-    .btn-modal-cancel {
+    .context-item:hover {
       background: #334155;
-      color: var(--text);
     }
 
-    .btn-modal-cancel:hover { background: #475569; }
-
-    .btn-modal-save {
-      background: #0284c7;
-      color: white;
+    .context-item.danger {
+      color: var(--danger);
     }
-
-    .btn-modal-save:hover { background: #0369a1; }
 
     @media (max-width: 600px) {
-      header { justify-content: center; padding: 8px 10px; }
-      .controls-wrapper { align-items: center; width: 100%; }
+      header {
+        padding: 8px 10px;
+      }
+      h1 {
+        display: none;
+      }
+      .controls-wrapper {
+        width: 100%;
+        justify-content: space-between;
+      }
+      .custom-input {
+        width: 90px;
+      }
+      .custom-input:focus {
+        width: 110px;
+      }
+      .grid-container {
+        grid-template-columns: 1fr;
+        padding: 10px;
+      }
     }
   </style>
 </head>
@@ -521,68 +486,56 @@
   <header>
     <h1>Directs Live</h1>
     <div class="controls-wrapper">
-      <div class="controls-row-top">
-        <form id="addModelForm" class="input-form">
-          <input type="text" id="newModelInput" class="custom-input" placeholder="Pseudo..." required>
-          <button type="submit" class="btn-action btn-add" title="Ajouter ce modèle">+</button>
-        </form>
+      <!-- Add Model Input Form -->
+      <form id="addModelForm" class="input-form">
+        <input 
+          type="text" 
+          id="newModelInput" 
+          class="custom-input" 
+          placeholder="Pseudo..." 
+          required
+        >
+        <button type="submit" class="btn-action btn-add" title="Ajouter ce modèle">+</button>
+      </form>
 
-        <button id="favFilterBtn" class="btn-action btn-fav-filter" title="Afficher uniquement les favoris">&#9733;</button>
-        <button id="resetBtn" class="btn-action btn-reset" title="Supprimer tous les modèles non-favoris">🧹 Nettoyer</button>
-      </div>
+      <!-- Tag Filter Dropdown (With Count) -->
+      <select id="tagFilterSelect" class="select-tag" title="Filtrer par étiquette">
+        <option value="">🏷️ Étiquettes (Toutes)</option>
+      </select>
 
-      <div class="controls-row-bottom">
-        <select id="tagFilterSelect" class="select-tag" title="Filtrer par étiquette">
-          <option value="">🏷️ (Tous)</option>
-        </select>
+      <!-- Toggle Hidden Models Button -->
+      <button id="hideToggleBtn" class="btn-action btn-hide-toggle" title="Afficher/Masquer les modèles masqués">
+        🙈 <span id="hiddenCount">(0)</span>
+      </button>
 
-        <button id="hideToggleBtn" class="btn-action btn-hide-toggle" title="Afficher/Masquer les modèles masqués">
-          🙈 <span id="hiddenCount">(0)</span>
-        </button>
+      <!-- Favorites Filter Button -->
+      <button id="favFilterBtn" class="btn-action btn-fav-filter" title="Afficher uniquement les favoris">★</button>
 
+      <!-- History Dropdown Menu -->
+      <div class="dropdown">
         <button id="historyBtn" class="btn-action" title="Historique des modèles">
           📜 <span id="historyCount">(0)</span>
         </button>
-      </div>
-    </div>
-  </header>
-
-  <div id="historyMenu" class="dropdown-menu">
-    <div class="dropdown-header">Pseudos récents</div>
-    <div id="historyList"></div>
-    <button id="clearHistoryBtn" class="btn-clear-history">Vider l'historique complet</button>
-  </div>
-
-  <main class="grid-container" id="grid"></main>
-
-  <!-- Structure Modale pour l'édition de Tags -->
-  <div id="tagModal" class="modal-overlay">
-    <div class="modal-content">
-      <div class="modal-title" id="tagModalTitle">Étiquettes pour...</div>
-      
-      <div>
-        <div class="modal-section-title">Étiquettes attribuées</div>
-        <div id="assignedTagsList" class="tag-chips-wrapper"></div>
-      </div>
-
-      <div>
-        <div class="modal-section-title">Cliquer pour ajouter un tag existant</div>
-        <div id="suggestedTagsList" class="tag-chips-wrapper"></div>
-      </div>
-
-      <div>
-        <div class="modal-section-title">Créer un nouveau tag</div>
-        <div class="tag-input-row">
-          <input type="text" id="newTagInput" placeholder="Nouveau tag...">
-          <button type="button" class="btn-action" id="addCustomTagBtn">+</button>
+        <div id="historyMenu" class="dropdown-menu">
+          <div class="dropdown-header">Pseudos récents</div>
+          <div id="historyList" class="history-list-container"></div>
+          <button id="clearHistoryBtn" class="btn-clear-history">Vider l'historique</button>
         </div>
       </div>
 
-      <div class="modal-actions">
-        <button type="button" class="btn-modal btn-modal-cancel" id="cancelTagModal">Annuler</button>
-        <button type="button" class="btn-modal btn-modal-save" id="saveTagModal">Enregistrer</button>
-      </div>
+      <!-- Clean Non-Favorites Button -->
+      <button id="resetBtn" class="btn-action btn-reset" title="Supprimer tous les modèles non-favoris">🧹</button>
     </div>
+  </header>
+
+  <main class="grid-container" id="grid"></main>
+
+  <!-- Right Click Context Menu -->
+  <div id="contextMenu" class="context-menu">
+    <div class="context-item" id="ctxFav">⭐ Favori</div>
+    <div class="context-item" id="ctxTag">🏷️ Ajouter étiquette...</div>
+    <div class="context-item" id="ctxHide">🙈 Masquer</div>
+    <div class="context-item danger" id="ctxDelete">❌ Supprimer</div>
   </div>
 
   <script>
@@ -590,14 +543,14 @@
     let favorites = JSON.parse(localStorage.getItem('cb_dashboard_favs')) || [];
     let hiddenModels = JSON.parse(localStorage.getItem('cb_dashboard_hidden')) || [];
     let history = JSON.parse(localStorage.getItem('cb_dashboard_history')) || [];
-    let tags = JSON.parse(localStorage.getItem('cb_dashboard_tags')) || {};
-    
+    let tagsMap = JSON.parse(localStorage.getItem('cb_dashboard_tags')) || {};
+
     let showOnlyFavorites = false;
     let showHiddenModels = false;
     let selectedTagFilter = '';
-    let currentModalUser = null;
-    let tempUserTags = [];
+    let contextUser = null;
 
+    // DOM Elements
     const grid = document.getElementById('grid');
     const addModelForm = document.getElementById('addModelForm');
     const newModelInput = document.getElementById('newModelInput');
@@ -611,16 +564,7 @@
     const historyList = document.getElementById('historyList');
     const historyCount = document.getElementById('historyCount');
     const clearHistoryBtn = document.getElementById('clearHistoryBtn');
-
-    /* Éléments Modale */
-    const tagModal = document.getElementById('tagModal');
-    const tagModalTitle = document.getElementById('tagModalTitle');
-    const assignedTagsList = document.getElementById('assignedTagsList');
-    const suggestedTagsList = document.getElementById('suggestedTagsList');
-    const newTagInput = document.getElementById('newTagInput');
-    const addCustomTagBtn = document.getElementById('addCustomTagBtn');
-    const cancelTagModal = document.getElementById('cancelTagModal');
-    const saveTagModal = document.getElementById('saveTagModal');
+    const contextMenu = document.getElementById('contextMenu');
 
     function saveModels() { localStorage.setItem('cb_dashboard_models', JSON.stringify(models)); }
     function saveFavorites() { localStorage.setItem('cb_dashboard_favs', JSON.stringify(favorites)); }
@@ -632,13 +576,7 @@
       localStorage.setItem('cb_dashboard_history', JSON.stringify(history)); 
       updateHistoryMenu();
     }
-    function saveTags() { localStorage.setItem('cb_dashboard_tags', JSON.stringify(tags)); }
-
-    function getAllExistingTags() {
-      const set = new Set();
-      Object.values(tags).forEach(list => list.forEach(t => set.add(t)));
-      return Array.from(set).sort();
-    }
+    function saveTagsMap() { localStorage.setItem('cb_dashboard_tags', JSON.stringify(tagsMap)); }
 
     function addModelToState(username) {
       const lower = username.toLowerCase();
@@ -651,7 +589,7 @@
       renderGrid();
     }
 
-    window.toggleFavorite = function(username) {
+    function toggleFavorite(username) {
       const lower = username.toLowerCase();
       if (favorites.includes(lower)) {
         favorites = favorites.filter(f => f !== lower);
@@ -660,9 +598,9 @@
       }
       saveFavorites();
       renderGrid();
-    };
+    }
 
-    window.toggleHideModel = function(username) {
+    function toggleHideModel(username) {
       const lower = username.toLowerCase();
       if (hiddenModels.includes(lower)) {
         hiddenModels = hiddenModels.filter(h => h !== lower);
@@ -671,102 +609,53 @@
       }
       saveHidden();
       renderGrid();
-    };
+    }
 
-    /* Gestionnaire de la Modale de Tags */
-    window.editTags = function(username) {
-      currentModalUser = username;
+    function addTagToModel(username, tag) {
       const lower = username.toLowerCase();
-      tempUserTags = [...(tags[lower] || [])];
+      const cleanTag = tag.trim().toLowerCase();
+      if (!cleanTag) return;
       
-      tagModalTitle.textContent = `Étiquettes pour ${username}`;
-      newTagInput.value = '';
-      
-      renderModalTags();
-      tagModal.classList.add('show');
-    };
-
-    function renderModalTags() {
-      assignedTagsList.innerHTML = '';
-      suggestedTagsList.innerHTML = '';
-
-      if (tempUserTags.length === 0) {
-        assignedTagsList.innerHTML = '<span style="font-size:0.8rem; color:#64748b;">Aucun tag attribué</span>';
-      } else {
-        tempUserTags.forEach(tag => {
-          const btn = document.createElement('button');
-          btn.className = 'chip-btn selected';
-          btn.innerHTML = `${tag} <span>&times;</span>`;
-          btn.onclick = () => {
-            tempUserTags = tempUserTags.filter(t => t !== tag);
-            renderModalTags();
-          };
-          assignedTagsList.appendChild(btn);
-        });
-      }
-
-      const allTags = getAllExistingTags();
-      const availableSuggestions = allTags.filter(t => !tempUserTags.includes(t));
-
-      if (availableSuggestions.length === 0) {
-        suggestedTagsList.innerHTML = '<span style="font-size:0.8rem; color:#64748b;">Aucune suggestion</span>';
-      } else {
-        availableSuggestions.forEach(tag => {
-          const btn = document.createElement('button');
-          btn.className = 'chip-btn';
-          btn.textContent = `+ ${tag}`;
-          btn.onclick = () => {
-            tempUserTags.push(tag);
-            renderModalTags();
-          };
-          suggestedTagsList.appendChild(btn);
-        });
-      }
-    }
-
-    function handleAddCustomTag() {
-      const val = newTagInput.value.trim();
-      if (val && !tempUserTags.includes(val)) {
-        tempUserTags.push(val);
-        newTagInput.value = '';
-        renderModalTags();
-      }
-    }
-
-    addCustomTagBtn.onclick = handleAddCustomTag;
-    newTagInput.onkeydown = (e) => {
-      if (e.key === 'Enter') {
-        e.preventDefault();
-        handleAddCustomTag();
-      }
-    };
-
-    cancelTagModal.onclick = () => {
-      tagModal.classList.remove('show');
-    };
-
-    saveTagModal.onclick = () => {
-      if (currentModalUser) {
-        const lower = currentModalUser.toLowerCase();
-        if (tempUserTags.length > 0) {
-          tags[lower] = tempUserTags;
-        } else {
-          delete tags[lower];
-        }
-        saveTags();
+      const current = tagsMap[lower] || [];
+      if (!current.includes(cleanTag)) {
+        tagsMap[lower] = [...current, cleanTag];
+        saveTagsMap();
         renderGrid();
       }
-      tagModal.classList.remove('show');
-    };
+    }
+
+    function removeTagFromModel(username, tagToRemove) {
+      const lower = username.toLowerCase();
+      if (tagsMap[lower]) {
+        tagsMap[lower] = tagsMap[lower].filter(t => t !== tagToRemove);
+        if (tagsMap[lower].length === 0) {
+          delete tagsMap[lower];
+        }
+        saveTagsMap();
+        renderGrid();
+      }
+    }
 
     function updateTagFilterOptions() {
-      const existingTags = getAllExistingTags();
-      tagFilterSelect.innerHTML = '<option value="">🏷️ (Tous)</option>';
-      existingTags.forEach(t => {
+      // Calculate model count per tag
+      const counts = {};
+      Object.values(tagsMap).forEach(tagList => {
+        tagList.forEach(t => {
+          counts[t] = (counts[t] || 0) + 1;
+        });
+      });
+
+      const totalTagsCount = Object.keys(counts).length;
+      tagFilterSelect.innerHTML = `<option value="">🏷️ Étiquettes (${totalTagsCount})</option>`;
+
+      const sortedTags = Object.keys(counts).sort();
+      sortedTags.forEach(tag => {
         const opt = document.createElement('option');
-        opt.value = t;
-        opt.textContent = `🏷️ ${t}`;
-        if (t === selectedTagFilter) opt.selected = true;
+        opt.value = tag;
+        opt.textContent = `🏷️ ${tag} (${counts[tag]})`;
+        if (tag === selectedTagFilter) {
+          opt.selected = true;
+        }
         tagFilterSelect.appendChild(opt);
       });
     }
@@ -780,26 +669,22 @@
       const lower = username.toLowerCase();
       const isFav = favorites.includes(lower);
       const isHidden = hiddenModels.includes(lower);
-      const modelTags = tags[lower] || [];
+      const modelTags = tagsMap[lower] || [];
 
       const card = document.createElement('div');
       card.className = `model-card ${isHidden ? 'is-hidden' : ''}`;
 
-      const tagsHtml = modelTags.map(t => `<span class="tag-badge" onclick="filterByTag('${t}')">${t}</span>`).join('');
-
       card.innerHTML = `
         <div class="model-header">
-          <div class="model-title-area">
-            <span class="model-name">${username}</span>
-            <div class="tags-container">${tagsHtml}</div>
+          <div class="model-info-area">
+            <span class="model-name" title="${username}">${username}</span>
+            <div class="tags-wrapper"></div>
           </div>
           <div class="header-actions">
-            <button class="btn-icon-subtle btn-hide ${isHidden ? 'is-hidden' : ''}" title="${isHidden ? 'Démasquer ce modèle' : 'Masquer ce modèle'}" onclick="toggleHideModel('${username}')">
-              ${isHidden ? '👁️' : '🙈'}
-            </button>
-            <button class="btn-icon-subtle" title="Gérer les étiquettes" onclick="editTags('${username}')">🏷️</button>
-            <button class="btn-fav ${isFav ? 'is-favorite' : ''}" title="Mettre en favori" onclick="toggleFavorite('${username}')">&#9733;</button>
-            <button class="btn-delete" title="Supprimer" onclick="removeModel('${username}')">&times;</button>
+            <button class="btn-card-icon btn-add-tag" title="Ajouter une étiquette">🏷️</button>
+            <button class="btn-card-icon ${isHidden ? 'is-hidden-btn' : ''}" title="${isHidden ? 'Démasquer' : 'Masquer'}">🙈</button>
+            <button class="btn-card-icon ${isFav ? 'is-favorite' : ''}" title="Mettre en favori">&#9733;</button>
+            <button class="btn-card-icon btn-delete" title="Supprimer">&times;</button>
           </div>
         </div>
         <div class="player-container">
@@ -810,20 +695,56 @@
           </iframe>
         </div>
       `;
+
+      // Render tags inside wrapper
+      const tagsWrapper = card.querySelector('.tags-wrapper');
+      modelTags.forEach(tag => {
+        const badge = document.createElement('span');
+        badge.className = 'tag-badge';
+        badge.title = 'Cliquer pour supprimer cette étiquette';
+        badge.innerHTML = `${tag} &times;`;
+        badge.addEventListener('click', (e) => {
+          e.stopPropagation();
+          removeTagFromModel(username, tag);
+        });
+        tagsWrapper.appendChild(badge);
+      });
+
+      // Event bindings for action buttons
+      card.querySelector('.btn-add-tag').addEventListener('click', () => {
+        const inputTag = prompt(`Ajouter une étiquette pour ${username} :`);
+        if (inputTag) addTagToModel(username, inputTag);
+      });
+
+      const hideBtn = card.querySelectorAll('.btn-card-icon')[1];
+      hideBtn.addEventListener('click', () => toggleHideModel(username));
+
+      const favBtn = card.querySelectorAll('.btn-card-icon')[2];
+      favBtn.addEventListener('click', () => toggleFavorite(username));
+
+      card.querySelector('.btn-delete').addEventListener('click', () => removeModel(username));
+
+      // Right-click context menu event
+      card.addEventListener('contextmenu', (e) => {
+        e.preventDefault();
+        contextUser = username;
+        
+        document.getElementById('ctxFav').textContent = isFav ? '⭐ Retirer Favori' : '⭐ Ajouter Favori';
+        document.getElementById('ctxHide').textContent = isHidden ? '👁️ Démasquer' : '🙈 Masquer';
+        
+        contextMenu.style.top = `${e.clientY}px`;
+        contextMenu.style.left = `${e.clientX}px`;
+        contextMenu.classList.add('show');
+      });
+
       return card;
     }
-
-    window.filterByTag = function(tag) {
-      selectedTagFilter = tag;
-      tagFilterSelect.value = tag;
-      renderGrid();
-    };
 
     function renderGrid() {
       grid.innerHTML = '';
       updateTagFilterOptions();
       updateHiddenCount();
-      
+
       let displayModels = [...models].sort((a, b) => {
         const aFav = favorites.includes(a.toLowerCase());
         const bFav = favorites.includes(b.toLowerCase());
@@ -840,13 +761,13 @@
 
       if (selectedTagFilter) {
         displayModels = displayModels.filter(m => {
-          const mTags = tags[m.toLowerCase()] || [];
+          const mTags = tagsMap[m.toLowerCase()] || [];
           return mTags.includes(selectedTagFilter);
         });
       }
 
       if (displayModels.length === 0) {
-        grid.innerHTML = `<div class="empty-message">Aucun modèle ne correspond aux filtres actuels.</div>`;
+        grid.innerHTML = `<div class="empty-message">Aucun modèle ne correspond aux filtres sélectionnés.</div>`;
         updateHistoryMenu();
         return;
       }
@@ -869,7 +790,7 @@
       historyList.innerHTML = '';
 
       if (history.length === 0) {
-        historyList.innerHTML = '<div style="padding: 12px; font-size: 0.8rem; color: #64748b; text-align: center;">Historique vide</div>';
+        historyList.innerHTML = '<div style="padding: 16px; font-size: 0.8rem; color: #64748b; text-align: center;">Historique vide</div>';
         return;
       }
 
@@ -905,26 +826,33 @@
       });
     }
 
-    function positionHistoryMenu() {
+    function positionHistoryMenuStrictly() {
+      if (!historyMenu.classList.contains('show')) return;
+
       const btnRect = historyBtn.getBoundingClientRect();
       const padding = 10;
-      const menuWidth = Math.min(260, window.innerWidth - (padding * 2));
-      
-      let left = btnRect.right - menuWidth;
-      if (left < padding) left = padding;
-      if (left + menuWidth > window.innerWidth - padding) {
-        left = window.innerWidth - menuWidth - padding;
+      const viewportWidth = window.innerWidth;
+      const viewportHeight = window.innerHeight;
+
+      historyMenu.style.top = '0px';
+      historyMenu.style.left = '0px';
+      historyMenu.style.maxHeight = `${viewportHeight - 20}px`;
+
+      const menuRect = historyMenu.getBoundingClientRect();
+
+      let top = btnRect.bottom + 6;
+      if (top + menuRect.height > viewportHeight - padding) {
+        top = Math.max(padding, btnRect.top - menuRect.height - 6);
       }
 
-      let top = btnRect.bottom + 8;
-      const expectedHeight = 300;
-      if (top + expectedHeight > window.innerHeight - padding) {
-        top = Math.max(padding, btnRect.top - expectedHeight - 8);
+      let left = btnRect.right - menuRect.width;
+      if (left < padding) left = padding;
+      if (left + menuRect.width > viewportWidth - padding) {
+        left = viewportWidth - padding - menuRect.width;
       }
 
       historyMenu.style.top = `${top}px`;
       historyMenu.style.left = `${left}px`;
-      historyMenu.style.width = `${menuWidth}px`;
     }
 
     historyBtn.addEventListener('click', (e) => {
@@ -933,7 +861,7 @@
       
       if (!isVisible) {
         historyMenu.classList.add('show');
-        positionHistoryMenu();
+        positionHistoryMenuStrictly();
       } else {
         historyMenu.classList.remove('show');
       }
@@ -941,20 +869,29 @@
 
     document.addEventListener('click', () => {
       historyMenu.classList.remove('show');
+      contextMenu.classList.remove('show');
     });
 
     historyMenu.addEventListener('click', (e) => {
       e.stopPropagation();
     });
 
-    hideToggleBtn.addEventListener('click', () => {
-      showHiddenModels = !showHiddenModels;
-      hideToggleBtn.classList.toggle('active', showHiddenModels);
-      renderGrid();
+    window.addEventListener('resize', () => {
+      positionHistoryMenuStrictly();
     });
+
+    window.addEventListener('scroll', () => {
+      positionHistoryMenuStrictly();
+    }, true);
 
     tagFilterSelect.addEventListener('change', (e) => {
       selectedTagFilter = e.target.value;
+      renderGrid();
+    });
+
+    hideToggleBtn.addEventListener('click', () => {
+      showHiddenModels = !showHiddenModels;
+      hideToggleBtn.classList.toggle('active', showHiddenModels);
       renderGrid();
     });
 
@@ -983,32 +920,39 @@
 
     resetBtn.addEventListener('click', () => {
       const nonFavsCount = models.filter(m => !favorites.includes(m.toLowerCase())).length;
+      if (nonFavsCount === 0) return;
 
-      if (nonFavsCount === 0) {
-        alert('Aucun modèle non-favori à supprimer.');
-        return;
-      }
-
-      if (confirm('Voulez-vous supprimer tous les modèles qui ne sont pas marqués en favoris ?')) {
-        models = models.filter(m => favorites.includes(m.toLowerCase()));
-        saveModels();
-        renderGrid();
-      }
+      models = models.filter(m => favorites.includes(m.toLowerCase()));
+      saveModels();
+      renderGrid();
     });
 
     clearHistoryBtn.addEventListener('click', () => {
-      if (confirm('Voulez-vous effacer l\'historique complet des pseudos enregistrés ?')) {
-        history = [];
-        saveHistory();
+      history = [];
+      saveHistory();
+    });
+
+    // Context Menu Handlers
+    document.getElementById('ctxFav').addEventListener('click', () => {
+      if (contextUser) toggleFavorite(contextUser);
+    });
+
+    document.getElementById('ctxHide').addEventListener('click', () => {
+      if (contextUser) toggleHideModel(contextUser);
+    });
+
+    document.getElementById('ctxTag').addEventListener('click', () => {
+      if (contextUser) {
+        const inputTag = prompt(`Ajouter une étiquette pour ${contextUser} :`);
+        if (inputTag) addTagToModel(contextUser, inputTag);
       }
     });
 
-    window.addEventListener('resize', () => {
-      if (historyMenu.classList.contains('show')) {
-        positionHistoryMenu();
-      }
+    document.getElementById('ctxDelete').addEventListener('click', () => {
+      if (contextUser) removeModel(contextUser);
     });
 
+    // Initial render call
     renderGrid();
   </script>
 </body>
