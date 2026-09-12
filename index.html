@@ -69,7 +69,6 @@
       border-color: var(--accent);
     }
 
-    /* Boutons compacts de contrôles */
     .btn-action {
       background: transparent;
       border: 1px solid #334155;
@@ -152,7 +151,6 @@
       color: var(--accent);
     }
     
-    /* Conteneur principal de la grille */
     .grid-wrapper {
       position: relative;
       flex: 1;
@@ -169,7 +167,6 @@
       transition: filter 0.3s ease, opacity 0.3s ease;
     }
 
-    /* Mode discret (Panic Blur) */
     .grid-container.blurred {
       filter: blur(25px) grayscale(80%);
       opacity: 0.2;
@@ -218,7 +215,6 @@
       gap: 6px;
     }
 
-    /* Bouton Étoile Favori */
     .btn-fav {
       background: transparent;
       border: none;
@@ -231,6 +227,22 @@
 
     .btn-fav.is-favorite {
       color: var(--star);
+    }
+
+    .btn-reload {
+      background: transparent;
+      border: none;
+      color: #64748b;
+      font-size: 1.1rem;
+      line-height: 1;
+      cursor: pointer;
+      padding: 2px 4px;
+      border-radius: 4px;
+      transition: all 0.2s ease;
+    }
+
+    .btn-reload:hover {
+      color: var(--accent);
     }
 
     .btn-delete {
@@ -250,7 +262,6 @@
       background: #1e293b;
     }
 
-    /* Cadre vidéo rogné */
     .player-container {
       width: 100%;
       aspect-ratio: 16 / 9;
@@ -313,7 +324,6 @@
   <header>
     <h1>Directs Live</h1>
     <div class="controls-group">
-      <!-- Formulaire d'ajout -->
       <form id="addModelForm" class="input-form">
         <input 
           type="text" 
@@ -326,19 +336,11 @@
         <button type="submit" class="btn-action btn-add">+ Ajouter</button>
       </form>
 
-      <!-- Bouton Tri Alphabétique -->
       <button id="sortBtn" class="btn-action" title="Trier par ordre alphabétique">A-Z</button>
-
-      <!-- Bouton Filtre Favoris -->
       <button id="favFilterBtn" class="btn-action btn-fav-filter" title="Afficher uniquement les favoris">&#9733;</button>
-
-      <!-- Bouton Réinitialiser -->
       <button id="resetBtn" class="btn-action btn-reset" title="Réinitialiser la liste d'origine">&#8634;</button>
-
-      <!-- Bouton Mode Discret -->
       <button id="blurBtn" class="btn-action btn-blur" title="Mode Discret (Raccourci: Touche P)">&#128065;</button>
 
-      <!-- Barre de recherche -->
       <input 
         type="text" 
         id="searchInput" 
@@ -347,7 +349,6 @@
         autocomplete="off"
       >
 
-      <!-- Boutons de disposition -->
       <div class="layout-selector">
         <button class="layout-btn" data-cols="auto">Auto</button>
         <button class="layout-btn" data-cols="1">1</button>
@@ -365,15 +366,10 @@
   <script>
     const defaultModels = [
       'dreamsweetgirl',
-      'cutefacebigass',
-      'sweet_sugar87',
       'ellyrockstar',
       'pinkcouplexo',
       'julcy_peach',
-      'shiny_lily',
-      'olsenspring',
-      'holly_and_honey_69',
-      'naughty_pearls'
+      'shiny_lily'
     ];
 
     let models = JSON.parse(localStorage.getItem('cb_dashboard_models')) || [...defaultModels];
@@ -398,7 +394,6 @@
     function saveSort() { localStorage.setItem('cb_dashboard_sort', JSON.stringify(sortAsc)); }
     function saveCols(cols) { localStorage.setItem('cb_dashboard_cols', cols); }
 
-    // Favori
     window.toggleFavorite = function(username) {
       const lower = username.toLowerCase();
       if (favorites.includes(lower)) {
@@ -410,7 +405,16 @@
       renderGrid();
     };
 
-    // Création d'une carte
+    window.reloadIframe = function(username) {
+      const card = document.querySelector(`.model-card[data-username="${username.toLowerCase()}"]`);
+      if (card) {
+        const iframe = card.querySelector('iframe');
+        if (iframe) {
+          iframe.src = iframe.src;
+        }
+      }
+    };
+
     function createCard(username) {
       const lower = username.toLowerCase();
       const isFav = favorites.includes(lower);
@@ -427,15 +431,14 @@
           </div>
           <div class="header-actions">
             <button class="btn-fav ${isFav ? 'is-favorite' : ''}" title="Favori" onclick="toggleFavorite('${username}')">&#9733;</button>
+            <button class="btn-reload" title="Recharger ce lecteur" onclick="reloadIframe('${username}')">&#8634;</button>
             <button class="btn-delete" title="Supprimer" onclick="removeModel('${username}')">&times;</button>
           </div>
         </div>
         <div class="player-container">
           <iframe 
             src="https://chaturbate.com/embed/${encodeURIComponent(username)}/" 
-            allow="autoplay; fullscreen" 
-            sandbox="allow-scripts allow-same-origin allow-forms"
-            referrerpolicy="no-referrer-when-downgrade"
+            allow="autoplay; fullscreen; encrypted-media; picture-in-picture"
             allowfullscreen>
           </iframe>
           <div class="drag-preventer"></div>
@@ -444,7 +447,6 @@
       return card;
     }
 
-    // Rendu de la grille
     function renderGrid() {
       grid.innerHTML = '';
       
@@ -468,7 +470,6 @@
       sortBtn.textContent = sortAsc ? 'A-Z' : 'Z-A';
     }
 
-    // Ajout d'un modèle
     addModelForm.addEventListener('submit', (e) => {
       e.preventDefault();
       const username = newModelInput.value.trim();
@@ -481,7 +482,6 @@
       }
     });
 
-    // Suppression d'un modèle
     window.removeModel = function(username) {
       const lower = username.toLowerCase();
       models = models.filter(m => m.toLowerCase() !== lower);
@@ -491,14 +491,12 @@
       renderGrid();
     };
 
-    // Tri alphabétique
     sortBtn.addEventListener('click', () => {
       sortAsc = !sortAsc;
       saveSort();
       renderGrid();
     });
 
-    // Mode Discret (Panic Blur)
     function toggleBlur() {
       isBlurred = !isBlurred;
       grid.classList.toggle('blurred', isBlurred);
@@ -507,14 +505,12 @@
 
     blurBtn.addEventListener('click', toggleBlur);
 
-    // Raccourci clavier 'P' pour flouter
     window.addEventListener('keydown', (e) => {
       if (e.key.toLowerCase() === 'p' && e.target.tagName !== 'INPUT') {
         toggleBlur();
       }
     });
 
-    // Réinitialisation
     resetBtn.addEventListener('click', () => {
       if (confirm('Réinitialiser la liste avec les modèles par défaut ?')) {
         models = [...defaultModels];
@@ -527,14 +523,12 @@
       }
     });
 
-    // Filtre favoris
     favFilterBtn.addEventListener('click', () => {
       showOnlyFavorites = !showOnlyFavorites;
       favFilterBtn.classList.toggle('active', showOnlyFavorites);
       applyFilters();
     });
 
-    // Application des filtres texte + favoris
     function applyFilters() {
       const query = searchInput.value.trim().toLowerCase();
       const cards = grid.querySelectorAll('.model-card');
@@ -556,7 +550,6 @@
 
     searchInput.addEventListener('input', applyFilters);
 
-    // Colonnes et disposition
     function applyColumns(cols) {
       layoutBtns.forEach(b => {
         b.classList.toggle('active', b.getAttribute('data-cols') === cols);
@@ -578,7 +571,6 @@
 
     window.addEventListener('dragstart', (e) => e.preventDefault());
 
-    // Initialisation
     applyColumns(currentCols);
     renderGrid();
   </script>
