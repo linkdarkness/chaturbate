@@ -112,25 +112,35 @@
       font-weight: 600;
     }
 
-    /* Menu déroulant d'historique */
+    /* Conteneur Dropdown */
     .dropdown {
       position: relative;
     }
 
+    /* Correction du Menu déroulant pour éviter le dépassement de l'écran */
     .dropdown-menu {
       display: none;
       position: absolute;
       top: 100%;
       right: 0;
       margin-top: 6px;
-      width: 240px;
-      max-height: 300px;
+      width: 260px;
+      max-width: 90vw;
+      max-height: 320px;
       overflow-y: auto;
       background: #1e293b;
       border: 1px solid #334155;
       border-radius: 8px;
-      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5);
+      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.6);
       z-index: 110;
+    }
+
+    /* Adaptabilité mobile/écrans réduits pour réaligner à gauche si nécessaire */
+    @media (max-width: 600px) {
+      .dropdown-menu {
+        right: auto;
+        left: 0;
+      }
     }
 
     .dropdown-menu.show {
@@ -356,18 +366,15 @@
 
     function addModelToState(username) {
       const lower = username.toLowerCase();
-      // Ajout dans la liste active
       if (!models.map(m => m.toLowerCase()).includes(lower)) {
         models.unshift(username);
         saveModels();
       }
-      // Ajout dans l'historique (sans doublon, placé en haut)
       history = [username, ...history.filter(h => h.toLowerCase() !== lower)];
       saveHistory();
       renderGrid();
     }
 
-    // Basculer un favori
     window.toggleFavorite = function(username) {
       const lower = username.toLowerCase();
       if (favorites.includes(lower)) {
@@ -431,7 +438,6 @@
       updateHistoryMenu();
     }
 
-    // Mise à jour du menu déroulant d'historique
     function updateHistoryMenu() {
       historyCount.textContent = `(${history.length})`;
       historyList.innerHTML = '';
@@ -463,10 +469,21 @@
       });
     }
 
-    // Toggle menu d'historique
+    // Basculer l'affichage du menu et ajuster sa position si nécessaire
     historyBtn.addEventListener('click', (e) => {
       e.stopPropagation();
+      
+      const isVisible = historyMenu.classList.contains('show');
       historyMenu.classList.toggle('show');
+
+      if (!isVisible) {
+        // Détecte si la popup dépasse le bord gauche de l'écran
+        const rect = historyMenu.getBoundingClientRect();
+        if (rect.left < 10) {
+          historyMenu.style.right = 'auto';
+          historyMenu.style.left = '0';
+        }
+      }
     });
 
     document.addEventListener('click', () => {
@@ -477,7 +494,6 @@
       e.stopPropagation();
     });
 
-    // Formulaire d'ajout
     addModelForm.addEventListener('submit', (e) => {
       e.preventDefault();
       const username = newModelInput.value.trim();
@@ -488,7 +504,6 @@
       }
     });
 
-    // Suppression d'un modèle
     window.removeModel = function(username) {
       const lower = username.toLowerCase();
       models = models.filter(m => m.toLowerCase() !== lower);
@@ -498,14 +513,12 @@
       renderGrid();
     };
 
-    // Filtre des favoris
     favFilterBtn.addEventListener('click', () => {
       showOnlyFavorites = !showOnlyFavorites;
       favFilterBtn.classList.toggle('active', showOnlyFavorites);
       renderGrid();
     });
 
-    // Réinitialisation
     resetBtn.addEventListener('click', () => {
       const nonFavsCount = models.filter(m => !favorites.includes(m.toLowerCase())).length;
 
@@ -521,7 +534,6 @@
       }
     });
 
-    // Vider l'historique
     clearHistoryBtn.addEventListener('click', () => {
       if (confirm('Voulez-vous effacer l\'historique des pseudos enregistrés ?')) {
         history = [];
