@@ -55,7 +55,7 @@
       display: flex;
       align-items: center;
       gap: 0;
-      flex: 1; /* Remplit l'écran */
+      flex: 1;
     }
 
     .custom-input {
@@ -375,10 +375,10 @@
 
     .btn-delete:hover { color: var(--danger); }
 
-    /* Affichage complet de l'iframe sans rognage */
+    /* Hauteur doublée par rapport au ratio 16:9 standard */
     .player-container {
       width: 100%;
-      aspect-ratio: 16 / 9;
+      aspect-ratio: 16 / 18;
       background: #000;
       position: relative;
     }
@@ -525,7 +525,6 @@
     <div class="context-item danger" id="ctxDelete">❌ Supprimer</div>
   </div>
 
-  <!-- Modal avec autocomplétion pour les tags -->
   <div id="tagModal" class="modal-overlay">
     <div class="modal-card">
       <div class="modal-title" id="tagModalTitle">Ajouter une étiquette</div>
@@ -575,7 +574,6 @@
     const saveTagBtn = document.getElementById('saveTagBtn');
     const cancelTagBtn = document.getElementById('cancelTagBtn');
 
-    // Optimization: Stream active status check on viewport entry/exit
     const streamObserver = new IntersectionObserver((entries) => {
       entries.forEach(entry => {
         const container = entry.target;
@@ -655,7 +653,6 @@
       tagModalTitle.textContent = `Ajouter un tag pour ${username}`;
       modalTagInput.value = '';
       
-      // Alimenter la datalist avec tous les tags enregistrés
       existingTagsDatalist.innerHTML = '';
       getAllExistingTags().forEach(t => {
         const opt = document.createElement('option');
