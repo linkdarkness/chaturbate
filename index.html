@@ -12,6 +12,7 @@
       --text: #f8fafc;
       --danger: #ef4444;
       --star: #fbbf24;
+      --hidden: #94a3b8;
     }
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
@@ -57,7 +58,7 @@
       flex-wrap: nowrap;
     }
 
-    /* Deuxième ligne : Filtre Étiquettes + Historique */
+    /* Deuxième ligne : Filtre Étiquettes, Masqués, Historique */
     .controls-row-bottom {
       display: flex;
       align-items: center;
@@ -137,6 +138,13 @@
       background: rgba(251, 191, 36, 0.15);
       border-color: var(--star);
       color: var(--star);
+      font-weight: 600;
+    }
+
+    .btn-hide-toggle.active {
+      background: rgba(148, 163, 184, 0.2);
+      border-color: var(--hidden);
+      color: var(--text);
       font-weight: 600;
     }
 
@@ -286,6 +294,11 @@
       border: 1px solid #334155;
       display: flex;
       flex-direction: column;
+      transition: opacity 0.2s ease;
+    }
+
+    .model-card.is-hidden {
+      opacity: 0.5;
     }
 
     .model-header {
@@ -344,10 +357,19 @@
       cursor: pointer;
       padding: 2px 4px;
       line-height: 1;
+      border-radius: 4px;
     }
 
     .btn-icon-subtle:hover {
       color: var(--text);
+    }
+
+    .btn-hide {
+      color: #64748b;
+    }
+
+    .btn-hide.is-hidden {
+      color: var(--accent);
     }
 
     .btn-fav {
@@ -428,11 +450,15 @@
         <button id="resetBtn" class="btn-action btn-reset" title="Supprimer tous les modèles non-favoris">🧹 Nettoyer</button>
       </div>
 
-      <!-- LIGNE 2 : Filtre par étiquette & Historique -->
+      <!-- LIGNE 2 : Filtre étiquettes, Affichage masqués, Historique -->
       <div class="controls-row-bottom">
         <select id="tagFilterSelect" class="select-tag" title="Filtrer par étiquette">
           <option value="">🏷️ (Tous)</option>
         </select>
+
+        <button id="hideToggleBtn" class="btn-action btn-hide-toggle" title="Afficher/Masquer les modèles masqués">
+          🙈 <span id="hiddenCount">(0)</span>
+        </button>
 
         <button id="historyBtn" class="btn-action" title="Historique des modèles">
           📜 <span id="historyCount">(0)</span>
@@ -453,9 +479,12 @@
   <script>
     let models = JSON.parse(localStorage.getItem('cb_dashboard_models')) || [];
     let favorites = JSON.parse(localStorage.getItem('cb_dashboard_favs')) || [];
+    let hiddenModels = JSON.parse(localStorage.getItem('cb_dashboard_hidden')) || [];
     let history = JSON.parse(localStorage.getItem('cb_dashboard_history')) || [];
     let tags = JSON.parse(localStorage.getItem('cb_dashboard_tags')) || {};
+    
     let showOnlyFavorites = false;
+    let showHiddenModels = false;
     let selectedTagFilter = '';
 
     const grid = document.getElementById('grid');
@@ -463,6 +492,8 @@
     const newModelInput = document.getElementById('newModelInput');
     const resetBtn = document.getElementById('resetBtn');
     const favFilterBtn = document.getElementById('favFilterBtn');
+    const hideToggleBtn = document.getElementById('hideToggleBtn');
+    const hiddenCount = document.getElementById('hiddenCount');
     const tagFilterSelect = document.getElementById('tagFilterSelect');
     const historyBtn = document.getElementById('historyBtn');
     const historyMenu = document.getElementById('historyMenu');
@@ -472,6 +503,10 @@
 
     function saveModels() { localStorage.setItem('cb_dashboard_models', JSON.stringify(models)); }
     function saveFavorites() { localStorage.setItem('cb_dashboard_favs', JSON.stringify(favorites)); }
+    function saveHidden() { 
+      localStorage.setItem('cb_dashboard_hidden', JSON.stringify(hiddenModels)); 
+      updateHiddenCount();
+    }
     function saveHistory() { 
       localStorage.setItem('cb_dashboard_history', JSON.stringify(history)); 
       updateHistoryMenu();
@@ -503,6 +538,17 @@
         favorites.push(lower);
       }
       saveFavorites();
+      renderGrid();
+    };
+
+    window.toggleHideModel = function(username) {
+      const lower = username.toLowerCase();
+      if (hiddenModels.includes(lower)) {
+        hiddenModels = hiddenModels.filter(h => h !== lower);
+      } else {
+        hiddenModels.push(lower);
+      }
+      saveHidden();
       renderGrid();
     };
 
@@ -542,13 +588,19 @@
       });
     }
 
+    function updateHiddenCount() {
+      const count = models.filter(m => hiddenModels.includes(m.toLowerCase())).length;
+      hiddenCount.textContent = `(${count})`;
+    }
+
     function createCard(username) {
       const lower = username.toLowerCase();
       const isFav = favorites.includes(lower);
+      const isHidden = hiddenModels.includes(lower);
       const modelTags = tags[lower] || [];
 
       const card = document.createElement('div');
-      card.className = 'model-card';
+      card.className = `model-card ${isHidden ? 'is-hidden' : ''}`;
 
       const tagsHtml = modelTags.map(t => `<span class="tag-badge" onclick="filterByTag('${t}')">${t}</span>`).join('');
 
@@ -559,6 +611,9 @@
             <div class="tags-container">${tagsHtml}</div>
           </div>
           <div class="header-actions">
+            <button class="btn-icon-subtle btn-hide ${isHidden ? 'is-hidden' : ''}" title="${isHidden ? 'Démasquer ce modèle' : 'Masquer ce modèle'}" onclick="toggleHideModel('${username}')">
+              ${isHidden ? '👁️' : '🙈'}
+            </button>
             <button class="btn-icon-subtle" title="Gérer les étiquettes" onclick="editTags('${username}')">🏷️</button>
             <button class="btn-fav ${isFav ? 'is-favorite' : ''}" title="Mettre en favori" onclick="toggleFavorite('${username}')">&#9733;</button>
             <button class="btn-delete" title="Supprimer" onclick="removeModel('${username}')">&times;</button>
@@ -584,12 +639,17 @@
     function renderGrid() {
       grid.innerHTML = '';
       updateTagFilterOptions();
+      updateHiddenCount();
       
       let displayModels = [...models].sort((a, b) => {
         const aFav = favorites.includes(a.toLowerCase());
         const bFav = favorites.includes(b.toLowerCase());
         return bFav - aFav;
       });
+
+      if (!showHiddenModels) {
+        displayModels = displayModels.filter(m => !hiddenModels.includes(m.toLowerCase()));
+      }
 
       if (showOnlyFavorites) {
         displayModels = displayModels.filter(m => favorites.includes(m.toLowerCase()));
@@ -702,6 +762,12 @@
 
     historyMenu.addEventListener('click', (e) => {
       e.stopPropagation();
+    });
+
+    hideToggleBtn.addEventListener('click', () => {
+      showHiddenModels = !showHiddenModels;
+      hideToggleBtn.classList.toggle('active', showHiddenModels);
+      renderGrid();
     });
 
     tagFilterSelect.addEventListener('change', (e) => {
