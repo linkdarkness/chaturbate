@@ -23,7 +23,7 @@
       flex-direction: column;
     }
     
-    /* Header toujours visible en haut (Sticky) */
+    /* Header toujours visible (Sticky) */
     header {
       position: sticky;
       top: 0;
@@ -105,12 +105,100 @@
       background: rgba(239, 68, 68, 0.1);
     }
 
-    /* Bouton de filtre favoris */
     .btn-fav-filter.active {
       background: rgba(251, 191, 36, 0.15);
       border-color: var(--star);
       color: var(--star);
       font-weight: 600;
+    }
+
+    /* Menu déroulant d'historique */
+    .dropdown {
+      position: relative;
+    }
+
+    .dropdown-menu {
+      display: none;
+      position: absolute;
+      top: 100%;
+      right: 0;
+      margin-top: 6px;
+      width: 240px;
+      max-height: 300px;
+      overflow-y: auto;
+      background: #1e293b;
+      border: 1px solid #334155;
+      border-radius: 8px;
+      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5);
+      z-index: 110;
+    }
+
+    .dropdown-menu.show {
+      display: block;
+    }
+
+    .dropdown-header {
+      padding: 8px 12px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: #64748b;
+      border-bottom: 1px solid #334155;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .history-item {
+      padding: 8px 12px;
+      font-size: 0.85rem;
+      color: var(--text);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      cursor: pointer;
+      border-bottom: 1px solid rgba(51, 65, 85, 0.5);
+      transition: background 0.15s ease;
+    }
+
+    .history-item:hover {
+      background: #334155;
+      color: var(--accent);
+    }
+
+    .history-item.already-added {
+      color: #64748b;
+      cursor: default;
+    }
+
+    .history-item.already-added:hover {
+      background: transparent;
+      color: #64748b;
+    }
+
+    .badge-added {
+      font-size: 0.7rem;
+      background: #0f172a;
+      padding: 2px 6px;
+      border-radius: 4px;
+      color: #64748b;
+    }
+
+    .btn-clear-history {
+      width: 100%;
+      padding: 8px;
+      background: transparent;
+      border: none;
+      border-top: 1px solid #334155;
+      color: var(--danger);
+      font-size: 0.75rem;
+      cursor: pointer;
+      text-align: center;
+    }
+
+    .btn-clear-history:hover {
+      background: rgba(239, 68, 68, 0.1);
     }
 
     .grid-container {
@@ -158,7 +246,6 @@
       gap: 6px;
     }
 
-    /* Bouton Étoile Favori */
     .btn-fav {
       background: transparent;
       border: none;
@@ -169,11 +256,7 @@
       transition: color 0.2s ease;
     }
 
-    .btn-fav:hover {
-      color: var(--star);
-    }
-
-    .btn-fav.is-favorite {
+    .btn-fav:hover, .btn-fav.is-favorite {
       color: var(--star);
     }
 
@@ -225,6 +308,18 @@
         <button type="submit" class="btn-action btn-add">+ Ajouter</button>
       </form>
 
+      <!-- Menu Historique -->
+      <div class="dropdown">
+        <button id="historyBtn" class="btn-action" title="Voir l'historique des modèles ajoutés">
+          📜 Historique <span id="historyCount">(0)</span>
+        </button>
+        <div id="historyMenu" class="dropdown-menu">
+          <div class="dropdown-header">Pseudos récents</div>
+          <div id="historyList"></div>
+          <button id="clearHistoryBtn" class="btn-clear-history">Vider l'historique</button>
+        </div>
+      </div>
+
       <!-- Bouton Filtre Favoris -->
       <button id="favFilterBtn" class="btn-action btn-fav-filter" title="Afficher uniquement les favoris">&#9733; Favoris</button>
 
@@ -238,6 +333,7 @@
   <script>
     let models = JSON.parse(localStorage.getItem('cb_dashboard_models')) || [];
     let favorites = JSON.parse(localStorage.getItem('cb_dashboard_favs')) || [];
+    let history = JSON.parse(localStorage.getItem('cb_dashboard_history')) || [];
     let showOnlyFavorites = false;
 
     const grid = document.getElementById('grid');
@@ -245,11 +341,33 @@
     const newModelInput = document.getElementById('newModelInput');
     const resetBtn = document.getElementById('resetBtn');
     const favFilterBtn = document.getElementById('favFilterBtn');
+    const historyBtn = document.getElementById('historyBtn');
+    const historyMenu = document.getElementById('historyMenu');
+    const historyList = document.getElementById('historyList');
+    const historyCount = document.getElementById('historyCount');
+    const clearHistoryBtn = document.getElementById('clearHistoryBtn');
 
     function saveModels() { localStorage.setItem('cb_dashboard_models', JSON.stringify(models)); }
     function saveFavorites() { localStorage.setItem('cb_dashboard_favs', JSON.stringify(favorites)); }
+    function saveHistory() { 
+      localStorage.setItem('cb_dashboard_history', JSON.stringify(history)); 
+      updateHistoryMenu();
+    }
 
-    // Activer / Désactiver un favori
+    function addModelToState(username) {
+      const lower = username.toLowerCase();
+      // Ajout dans la liste active
+      if (!models.map(m => m.toLowerCase()).includes(lower)) {
+        models.unshift(username);
+        saveModels();
+      }
+      // Ajout dans l'historique (sans doublon, placé en haut)
+      history = [username, ...history.filter(h => h.toLowerCase() !== lower)];
+      saveHistory();
+      renderGrid();
+    }
+
+    // Basculer un favori
     window.toggleFavorite = function(username) {
       const lower = username.toLowerCase();
       if (favorites.includes(lower)) {
@@ -290,42 +408,87 @@
     function renderGrid() {
       grid.innerHTML = '';
       
-      // Tri : les favoris apparaissent toujours en premier
       let displayModels = [...models].sort((a, b) => {
         const aFav = favorites.includes(a.toLowerCase());
         const bFav = favorites.includes(b.toLowerCase());
         return bFav - aFav;
       });
 
-      // Filtrer si le bouton "Favoris" du header est actif
       if (showOnlyFavorites) {
         displayModels = displayModels.filter(m => favorites.includes(m.toLowerCase()));
       }
 
       if (displayModels.length === 0) {
         grid.innerHTML = `<div class="empty-message">${showOnlyFavorites ? 'Aucun favori enregistré.' : 'Aucun modèle affiché. Utilisez le champ ci-dessus pour ajouter un pseudo.'}</div>`;
+        updateHistoryMenu();
         return;
       }
 
       displayModels.forEach(username => {
         grid.appendChild(createCard(username));
       });
+
+      updateHistoryMenu();
     }
 
-    // Gestion de l'ajout de modèle
+    // Mise à jour du menu déroulant d'historique
+    function updateHistoryMenu() {
+      historyCount.textContent = `(${history.length})`;
+      historyList.innerHTML = '';
+
+      if (history.length === 0) {
+        historyList.innerHTML = '<div style="padding: 12px; font-size: 0.8rem; color: #64748b; text-align: center;">Historique vide</div>';
+        return;
+      }
+
+      history.forEach(username => {
+        const lower = username.toLowerCase();
+        const isPresent = models.map(m => m.toLowerCase()).includes(lower);
+
+        const item = document.createElement('div');
+        item.className = `history-item ${isPresent ? 'already-added' : ''}`;
+        
+        item.innerHTML = `
+          <span>${username}</span>
+          ${isPresent ? '<span class="badge-added">Actif</span>' : '<span style="font-size:0.75rem; color:var(--accent);">+ Réajouter</span>'}
+        `;
+
+        if (!isPresent) {
+          item.addEventListener('click', () => {
+            addModelToState(username);
+          });
+        }
+
+        historyList.appendChild(item);
+      });
+    }
+
+    // Toggle menu d'historique
+    historyBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      historyMenu.classList.toggle('show');
+    });
+
+    document.addEventListener('click', () => {
+      historyMenu.classList.remove('show');
+    });
+
+    historyMenu.addEventListener('click', (e) => {
+      e.stopPropagation();
+    });
+
+    // Formulaire d'ajout
     addModelForm.addEventListener('submit', (e) => {
       e.preventDefault();
       const username = newModelInput.value.trim();
 
-      if (username && !models.map(m => m.toLowerCase()).includes(username.toLowerCase())) {
-        models.unshift(username);
-        saveModels();
-        renderGrid();
+      if (username) {
+        addModelToState(username);
         newModelInput.value = '';
       }
     });
 
-    // Gestion de la suppression d'un modèle
+    // Suppression d'un modèle
     window.removeModel = function(username) {
       const lower = username.toLowerCase();
       models = models.filter(m => m.toLowerCase() !== lower);
@@ -335,14 +498,14 @@
       renderGrid();
     };
 
-    // Filtre des favoris dans le header
+    // Filtre des favoris
     favFilterBtn.addEventListener('click', () => {
       showOnlyFavorites = !showOnlyFavorites;
       favFilterBtn.classList.toggle('active', showOnlyFavorites);
       renderGrid();
     });
 
-    // Réinitialisation : conserver uniquement les favoris
+    // Réinitialisation
     resetBtn.addEventListener('click', () => {
       const nonFavsCount = models.filter(m => !favorites.includes(m.toLowerCase())).length;
 
@@ -355,6 +518,14 @@
         models = models.filter(m => favorites.includes(m.toLowerCase()));
         saveModels();
         renderGrid();
+      }
+    });
+
+    // Vider l'historique
+    clearHistoryBtn.addEventListener('click', () => {
+      if (confirm('Voulez-vous effacer l\'historique des pseudos enregistrés ?')) {
+        history = [];
+        saveHistory();
       }
     });
 
