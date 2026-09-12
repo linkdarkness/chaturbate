@@ -478,6 +478,12 @@
     }
     function saveTags() { localStorage.setItem('cb_dashboard_tags', JSON.stringify(tags)); }
 
+    function getAllExistingTags() {
+      const set = new Set();
+      Object.values(tags).forEach(list => list.forEach(t => set.add(t)));
+      return Array.from(set).sort();
+    }
+
     function addModelToState(username) {
       const lower = username.toLowerCase();
       if (!models.map(m => m.toLowerCase()).includes(lower)) {
@@ -503,7 +509,14 @@
     window.editTags = function(username) {
       const lower = username.toLowerCase();
       const currentTags = (tags[lower] || []).join(', ');
-      const input = prompt(`Étiquettes pour ${username} (séparées par des virgules) :`, currentTags);
+      const existingTags = getAllExistingTags();
+      
+      let suggestionText = '';
+      if (existingTags.length > 0) {
+        suggestionText = `\n\nÉtiquettes déjà existantes : [ ${existingTags.join(', ')} ]`;
+      }
+
+      const input = prompt(`Étiquettes pour ${username} (séparées par des virgules) :${suggestionText}`, currentTags);
       
       if (input !== null) {
         const parsedTags = input.split(',').map(t => t.trim()).filter(t => t.length > 0);
@@ -518,11 +531,9 @@
     };
 
     function updateTagFilterOptions() {
-      const allTags = new Set();
-      Object.values(tags).forEach(list => list.forEach(t => allTags.add(t)));
-      
+      const existingTags = getAllExistingTags();
       tagFilterSelect.innerHTML = '<option value="">🏷️ (Tous)</option>';
-      Array.from(allTags).sort().forEach(t => {
+      existingTags.forEach(t => {
         const opt = document.createElement('option');
         opt.value = t;
         opt.textContent = `🏷️ ${t}`;
