@@ -180,17 +180,19 @@
   <header>
     <h1>Directs Live</h1>
     <div class="controls-group">
+      <!-- Formulaire pour rajouter des modèles -->
       <form id="addModelForm" class="input-form">
         <input 
           type="text" 
           id="newModelInput" 
           class="custom-input" 
-          placeholder="Pseudo..." 
+          placeholder="Pseudo du modèle..." 
           required
         >
         <button type="submit" class="btn-action btn-add">+ Ajouter</button>
       </form>
 
+      <!-- Sélecteur de colonnes -->
       <div class="layout-selector">
         <button class="layout-btn" data-cols="auto">Auto</button>
         <button class="layout-btn" data-cols="1">1</button>
@@ -251,6 +253,7 @@
       });
     }
 
+    // Gestion de l'ajout de modèle
     addModelForm.addEventListener('submit', (e) => {
       e.preventDefault();
       const username = newModelInput.value.trim();
@@ -263,6 +266,7 @@
       }
     });
 
+    // Gestion de la suppression de modèle
     window.removeModel = function(username) {
       models = models.filter(m => m.toLowerCase() !== username.toLowerCase());
       saveModels();
