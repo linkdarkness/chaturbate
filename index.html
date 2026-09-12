@@ -71,6 +71,7 @@
       display: inline-flex;
       align-items: center;
       justify-content: center;
+      transition: all 0.2s ease;
     }
 
     .btn-action:hover {
@@ -87,6 +88,12 @@
 
     .btn-add:hover {
       background: #0369a1;
+    }
+
+    .btn-reset:hover {
+      color: var(--danger);
+      border-color: var(--danger);
+      background: rgba(239, 68, 68, 0.1);
     }
 
     .layout-selector {
@@ -192,6 +199,9 @@
         <button type="submit" class="btn-action btn-add">+ Ajouter</button>
       </form>
 
+      <!-- Bouton Réinitialiser -->
+      <button id="resetBtn" class="btn-action btn-reset" title="Réinitialiser la liste par défaut">&#8634; Réinitialiser</button>
+
       <!-- Sélecteur de colonnes -->
       <div class="layout-selector">
         <button class="layout-btn" data-cols="auto">Auto</button>
@@ -221,6 +231,7 @@
     const grid = document.getElementById('grid');
     const addModelForm = document.getElementById('addModelForm');
     const newModelInput = document.getElementById('newModelInput');
+    const resetBtn = document.getElementById('resetBtn');
     const layoutBtns = document.querySelectorAll('.layout-btn');
 
     function saveModels() { localStorage.setItem('cb_dashboard_models', JSON.stringify(models)); }
@@ -272,6 +283,15 @@
       saveModels();
       renderGrid();
     };
+
+    // Gestion de la réinitialisation
+    resetBtn.addEventListener('click', () => {
+      if (confirm('Voulez-vous réinitialiser la liste avec les modèles par défaut ?')) {
+        models = [...defaultModels];
+        localStorage.removeItem('cb_dashboard_models');
+        renderGrid();
+      }
+    });
 
     function applyColumns(cols) {
       layoutBtns.forEach(b => {
