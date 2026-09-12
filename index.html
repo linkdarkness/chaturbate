@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Directs Live</title>
+  <title>Directs Live Dashboard</title>
   <style>
     :root {
       --bg: #0f172a;
@@ -12,6 +12,7 @@
       --text: #f8fafc;
       --danger: #ef4444;
       --star: #fbbf24;
+      --border: #334155;
     }
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
@@ -21,6 +22,7 @@
       min-height: 100vh;
       display: flex;
       flex-direction: column;
+      overflow-x: hidden;
     }
     
     /* Header toujours visible (Sticky) */
@@ -28,18 +30,27 @@
       position: sticky;
       top: 0;
       z-index: 100;
-      padding: 12px 20px;
+      padding: 10px 16px;
       background: rgba(30, 41, 59, 0.95);
       backdrop-filter: blur(8px);
       -webkit-backdrop-filter: blur(8px);
-      border-bottom: 1px solid #334155;
+      border-bottom: 1px solid var(--border);
       display: flex;
       justify-content: space-between;
       align-items: center;
-      gap: 12px;
+      gap: 10px;
       flex-wrap: wrap;
     }
-    h1 { font-size: 1.2rem; white-space: nowrap; }
+    
+    h1 { 
+      font-size: 1.1rem; 
+      font-weight: 700;
+      white-space: nowrap; 
+      color: var(--text);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
 
     .controls-group {
       display: flex;
@@ -48,28 +59,34 @@
       flex-wrap: wrap;
     }
 
+    /* Formulaire d'ajout inline */
     .input-form {
       display: flex;
-      gap: 4px;
+      align-items: center;
+      gap: 2px;
     }
 
     .custom-input {
       padding: 6px 10px;
-      border-radius: 6px;
-      border: 1px solid #334155;
+      border-radius: 6px 0 0 6px;
+      border: 1px solid var(--border);
+      border-right: none;
       background: #0f172a;
       color: var(--text);
       font-size: 0.85rem;
       outline: none;
+      width: 130px;
+      transition: all 0.2s ease;
     }
 
     .custom-input:focus {
       border-color: var(--accent);
+      width: 160px;
     }
 
     .btn-action {
       background: transparent;
-      border: 1px solid #334155;
+      border: 1px solid var(--border);
       color: #94a3b8;
       padding: 6px 10px;
       border-radius: 6px;
@@ -81,22 +98,27 @@
       gap: 4px;
       transition: all 0.2s ease;
       user-select: none;
+      white-space: nowrap;
+      height: 32px;
     }
 
     .btn-action:hover {
       color: var(--text);
-      background: #334155;
+      background: var(--border);
     }
 
     .btn-add {
       background: #0284c7;
       color: #fff;
-      border: none;
-      font-weight: 600;
+      border: 1px solid #0284c7;
+      border-radius: 0 6px 6px 0;
+      font-weight: 700;
+      padding: 6px 12px;
     }
 
     .btn-add:hover {
       background: #0369a1;
+      border-color: #0369a1;
     }
 
     .btn-reset:hover {
@@ -115,31 +137,24 @@
     /* Conteneur Dropdown */
     .dropdown {
       position: relative;
+      display: inline-block;
     }
 
-    /* Menu déroulant ajusté */
+    /* Menu déroulant ajusté anti-débordement */
     .dropdown-menu {
       display: none;
       position: absolute;
-      top: 100%;
+      top: calc(100% + 6px);
       right: 0;
-      margin-top: 6px;
-      width: 260px;
-      max-width: 90vw;
-      max-height: 320px;
+      width: 280px;
+      max-width: calc(100vw - 24px);
+      max-height: 360px;
       overflow-y: auto;
       background: #1e293b;
-      border: 1px solid #334155;
+      border: 1px solid var(--border);
       border-radius: 8px;
       box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.6);
       z-index: 110;
-    }
-
-    @media (max-width: 600px) {
-      .dropdown-menu {
-        right: auto;
-        left: 0;
-      }
     }
 
     .dropdown-menu.show {
@@ -151,7 +166,7 @@
       font-size: 0.75rem;
       font-weight: 600;
       color: #64748b;
-      border-bottom: 1px solid #334155;
+      border-bottom: 1px solid var(--border);
       text-transform: uppercase;
       letter-spacing: 0.05em;
       display: flex;
@@ -172,7 +187,7 @@
     }
 
     .history-item:hover {
-      background: #334155;
+      background: var(--border);
       color: var(--accent);
     }
 
@@ -199,7 +214,7 @@
       padding: 8px;
       background: transparent;
       border: none;
-      border-top: 1px solid #334155;
+      border-top: 1px solid var(--border);
       color: var(--danger);
       font-size: 0.75rem;
       cursor: pointer;
@@ -210,9 +225,10 @@
       background: rgba(239, 68, 68, 0.1);
     }
 
+    /* Grille de streaming */
     .grid-container {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
       gap: 16px;
       padding: 16px;
       flex: 1;
@@ -223,16 +239,17 @@
       text-align: center;
       padding: 60px 20px;
       color: #64748b;
-      font-size: 1rem;
+      font-size: 0.95rem;
     }
 
     .model-card {
       background: var(--card-bg);
       border-radius: 10px;
       overflow: hidden;
-      border: 1px solid #334155;
+      border: 1px solid var(--border);
       display: flex;
       flex-direction: column;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
     }
 
     .model-header {
@@ -241,7 +258,7 @@
       justify-content: space-between;
       align-items: center;
       background: #0f172a;
-      border-bottom: 1px solid #334155;
+      border-bottom: 1px solid var(--border);
     }
 
     .model-name {
@@ -299,13 +316,29 @@
       height: 122%;
       border: 0;
     }
+
+    @media (max-width: 480px) {
+      header {
+        padding: 8px 10px;
+      }
+      .custom-input {
+        width: 100px;
+      }
+      .custom-input:focus {
+        width: 120px;
+      }
+      .grid-container {
+        grid-template-columns: 1fr;
+        padding: 10px;
+      }
+    }
   </style>
 </head>
 <body>
   <header>
     <h1>Directs Live</h1>
     <div class="controls-group">
-      <!-- Formulaire pour rajouter des modèles -->
+      <!-- Formulaire pour rajouter des modèles en 1 ligne -->
       <form id="addModelForm" class="input-form">
         <input 
           type="text" 
@@ -330,10 +363,10 @@
       </div>
 
       <!-- Bouton Filtre Favoris -->
-      <button id="favFilterBtn" class="btn-action btn-fav-filter" title="Afficher uniquement les favoris">&#9733;</button>
+      <button id="favFilterBtn" class="btn-action btn-fav-filter" title="Afficher uniquement les favoris">★</button>
 
       <!-- Bouton Réinitialiser (Ne garde que les favoris) -->
-      <button id="resetBtn" class="btn-action btn-reset" title="Supprimer tous les modèles non-favoris">🧹 Nettoyer</button>
+      <button id="resetBtn" class="btn-action btn-reset" title="Supprimer tous les modèles non-favoris">🧹</button>
     </div>
   </header>
 
@@ -425,7 +458,7 @@
       }
 
       if (displayModels.length === 0) {
-        grid.innerHTML = `<div class="empty-message">${showOnlyFavorites ? 'Aucun favori enregistré.' : 'Aucun modèle affiché. Utilisez le champ ci-dessus pour ajouter un pseudo.'}</div>`;
+        grid.innerHTML = `<div class="empty-message">${showOnlyFavorites ? 'Aucun favori enregistré.' : 'Aucun modèle affiché. Entrez un pseudo pour commencer.'}</div>`;
         updateHistoryMenu();
         return;
       }
@@ -468,17 +501,29 @@
       });
     }
 
+    /* Positionnement dynamique pour empêcher le débordement écran */
+    function positionHistoryMenu() {
+      historyMenu.style.left = 'auto';
+      historyMenu.style.right = '0px';
+
+      const rect = historyMenu.getBoundingClientRect();
+      const viewportWidth = window.innerWidth;
+
+      if (rect.left < 10) {
+        historyMenu.style.right = 'auto';
+        historyMenu.style.left = '0px';
+      }
+    }
+
     historyBtn.addEventListener('click', (e) => {
       e.stopPropagation();
       const isVisible = historyMenu.classList.contains('show');
-      historyMenu.classList.toggle('show');
-
+      
       if (!isVisible) {
-        const rect = historyMenu.getBoundingClientRect();
-        if (rect.left < 10) {
-          historyMenu.style.right = 'auto';
-          historyMenu.style.left = '0';
-        }
+        historyMenu.classList.add('show');
+        positionHistoryMenu();
+      } else {
+        historyMenu.classList.remove('show');
       }
     });
 
@@ -488,6 +533,12 @@
 
     historyMenu.addEventListener('click', (e) => {
       e.stopPropagation();
+    });
+
+    window.addEventListener('resize', () => {
+      if (historyMenu.classList.contains('show')) {
+        positionHistoryMenu();
+      }
     });
 
     addModelForm.addEventListener('submit', (e) => {
@@ -503,9 +554,7 @@
     window.removeModel = function(username) {
       const lower = username.toLowerCase();
       models = models.filter(m => m.toLowerCase() !== lower);
-      favorites = favorites.filter(f => f !== lower);
       saveModels();
-      saveFavorites();
       renderGrid();
     };
 
@@ -519,22 +568,17 @@
       const nonFavsCount = models.filter(m => !favorites.includes(m.toLowerCase())).length;
 
       if (nonFavsCount === 0) {
-        alert('Aucun modèle non-favori à supprimer.');
         return;
       }
 
-      if (confirm('Voulez-vous supprimer tous les modèles qui ne sont pas marqués en favoris ?')) {
-        models = models.filter(m => favorites.includes(m.toLowerCase()));
-        saveModels();
-        renderGrid();
-      }
+      models = models.filter(m => favorites.includes(m.toLowerCase()));
+      saveModels();
+      renderGrid();
     });
 
     clearHistoryBtn.addEventListener('click', () => {
-      if (confirm('Voulez-vous effacer l\'historique des pseudos enregistrés ?')) {
-        history = [];
-        saveHistory();
-      }
+      history = [];
+      saveHistory();
     });
 
     renderGrid();
