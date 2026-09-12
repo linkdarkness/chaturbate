@@ -3,13 +3,12 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Directs</title>
+  <title>Directs Live</title>
   <style>
     :root {
       --bg: #0f172a;
       --card-bg: #1e293b;
       --accent: #38bdf8;
-      --star: #fbbf24;
       --text: #f8fafc;
       --danger: #ef4444;
       --grid-cols: repeat(auto-fill, minmax(360px, 1fr));
@@ -26,8 +25,6 @@
     header {
       padding: 12px 20px;
       background: rgba(30, 41, 59, 0.95);
-      backdrop-filter: blur(8px);
-      -webkit-backdrop-filter: blur(8px);
       border-bottom: 1px solid #334155;
       display: flex;
       justify-content: space-between;
@@ -57,14 +54,12 @@
       color: var(--text);
       font-size: 0.85rem;
       outline: none;
-      transition: border-color 0.2s ease;
     }
 
     .custom-input:focus {
       border-color: var(--accent);
     }
 
-    /* Boutons compacts de contrôles */
     .btn-action {
       background: transparent;
       border: 1px solid #334155;
@@ -76,9 +71,6 @@
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      gap: 4px;
-      transition: all 0.2s ease;
-      user-select: none;
     }
 
     .btn-action:hover {
@@ -95,26 +87,6 @@
 
     .btn-add:hover {
       background: #0369a1;
-    }
-
-    .btn-reset:hover {
-      color: var(--danger);
-      border-color: var(--danger);
-      background: rgba(239, 68, 68, 0.1);
-    }
-
-    .btn-fav-filter.active {
-      background: rgba(251, 191, 36, 0.15);
-      border-color: var(--star);
-      color: var(--star);
-      font-weight: 600;
-    }
-
-    .btn-blur.active {
-      background: rgba(239, 68, 68, 0.2);
-      border-color: var(--danger);
-      color: var(--danger);
-      font-weight: 600;
     }
 
     .layout-selector {
@@ -135,24 +107,11 @@
       font-weight: 600;
       border-radius: 4px;
       cursor: pointer;
-      transition: all 0.2s ease;
-    }
-
-    .layout-btn:hover {
-      color: var(--text);
     }
 
     .layout-btn.active {
       background: #334155;
       color: var(--accent);
-    }
-    
-    /* Conteneur principal de la grille */
-    .grid-wrapper {
-      position: relative;
-      flex: 1;
-      display: flex;
-      flex-direction: column;
     }
 
     .grid-container {
@@ -161,14 +120,6 @@
       gap: 16px;
       padding: 16px;
       flex: 1;
-      transition: filter 0.3s ease, opacity 0.3s ease;
-    }
-
-    /* Mode discret (Panic Blur) */
-    .grid-container.blurred {
-      filter: blur(25px) grayscale(80%);
-      opacity: 0.2;
-      pointer-events: none;
     }
 
     .model-card {
@@ -178,13 +129,6 @@
       border: 1px solid #334155;
       display: flex;
       flex-direction: column;
-      user-select: none;
-      -webkit-user-select: none;
-      transition: opacity 0.2s ease;
-    }
-
-    .model-card.hidden {
-      display: none !important;
     }
 
     .model-header {
@@ -196,36 +140,9 @@
       border-bottom: 1px solid #334155;
     }
 
-    .header-left {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-
     .model-name {
       font-weight: 600;
       font-size: 0.9rem;
-    }
-
-    .header-actions {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
-
-    /* Bouton Étoile Favori */
-    .btn-fav {
-      background: transparent;
-      border: none;
-      color: #64748b;
-      font-size: 1.1rem;
-      cursor: pointer;
-      line-height: 1;
-      transition: color 0.2s ease;
-    }
-
-    .btn-fav.is-favorite {
-      color: var(--star);
     }
 
     .btn-delete {
@@ -233,26 +150,20 @@
       border: none;
       color: #64748b;
       font-size: 1.2rem;
-      line-height: 1;
       cursor: pointer;
       padding: 2px 4px;
-      border-radius: 4px;
-      transition: all 0.2s ease;
     }
 
     .btn-delete:hover {
       color: var(--danger);
-      background: #1e293b;
     }
 
-    /* Cadre vidéo rogné */
     .player-container {
       width: 100%;
       aspect-ratio: 16 / 9;
       background: #000;
       position: relative;
       overflow: hidden;
-      touch-action: none;
     }
 
     .player-container iframe {
@@ -263,51 +174,12 @@
       height: 122%;
       border: 0;
     }
-
-    .drag-preventer {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      z-index: 10;
-      background: transparent;
-      pointer-events: none;
-    }
-
-    @media (max-width: 768px) {
-      .layout-selector {
-        display: none;
-      }
-    }
-
-    @media (max-width: 480px) {
-      header {
-        flex-direction: column;
-        align-items: stretch;
-      }
-      .controls-group {
-        flex-direction: flex-start;
-      }
-      .input-form {
-        width: 100%;
-      }
-      .custom-input {
-        flex: 1;
-      }
-      .grid-container {
-        grid-template-columns: 1fr !important;
-        padding: 10px;
-        gap: 10px;
-      }
-    }
   </style>
 </head>
 <body>
   <header>
     <h1>Directs Live</h1>
     <div class="controls-group">
-      <!-- Formulaire d'ajout -->
       <form id="addModelForm" class="input-form">
         <input 
           type="text" 
@@ -315,33 +187,10 @@
           class="custom-input" 
           placeholder="Pseudo..." 
           required
-          autocomplete="off"
         >
         <button type="submit" class="btn-action btn-add">+ Ajouter</button>
       </form>
 
-      <!-- Bouton Tri Alphabétique -->
-      <button id="sortBtn" class="btn-action" title="Trier par ordre alphabétique">A-Z</button>
-
-      <!-- Bouton Filtre Favoris -->
-      <button id="favFilterBtn" class="btn-action btn-fav-filter" title="Afficher uniquement les favoris">&#9733;</button>
-
-      <!-- Bouton Réinitialiser -->
-      <button id="resetBtn" class="btn-action btn-reset" title="Réinitialiser la liste d'origine">&#8634;</button>
-
-      <!-- Bouton Mode Discret -->
-      <button id="blurBtn" class="btn-action btn-blur" title="Mode Discret (Raccourci: Touche P)">&#128065;</button>
-
-      <!-- Barre de recherche -->
-      <input 
-        type="text" 
-        id="searchInput" 
-        class="custom-input" 
-        placeholder="Filtrer..."
-        autocomplete="off"
-      >
-
-      <!-- Boutons de disposition -->
       <div class="layout-selector">
         <button class="layout-btn" data-cols="auto">Auto</button>
         <button class="layout-btn" data-cols="1">1</button>
@@ -352,9 +201,7 @@
     </div>
   </header>
 
-  <div class="grid-wrapper">
-    <main class="grid-container" id="grid"></main>
-  </div>
+  <main class="grid-container" id="grid"></main>
 
   <script>
     const defaultModels = [
@@ -363,106 +210,47 @@
       'sweet_sugar87',
       'ellyrockstar',
       'pinkcouplexo',
-      'julcy_peach',
-      'shiny_lily',
-      'olsenspring',
-      'holly_and_honey_69',
-      'naughty_pearls'
+      'julcy_peach'
     ];
 
     let models = JSON.parse(localStorage.getItem('cb_dashboard_models')) || [...defaultModels];
-    let favorites = JSON.parse(localStorage.getItem('cb_dashboard_favs')) || [];
-    let sortAsc = JSON.parse(localStorage.getItem('cb_dashboard_sort')) ?? true;
     let currentCols = localStorage.getItem('cb_dashboard_cols') || 'auto';
-    let showOnlyFavorites = false;
-    let isBlurred = false;
 
     const grid = document.getElementById('grid');
     const addModelForm = document.getElementById('addModelForm');
     const newModelInput = document.getElementById('newModelInput');
-    const resetBtn = document.getElementById('resetBtn');
-    const favFilterBtn = document.getElementById('favFilterBtn');
-    const sortBtn = document.getElementById('sortBtn');
-    const blurBtn = document.getElementById('blurBtn');
-    const searchInput = document.getElementById('searchInput');
     const layoutBtns = document.querySelectorAll('.layout-btn');
 
     function saveModels() { localStorage.setItem('cb_dashboard_models', JSON.stringify(models)); }
-    function saveFavorites() { localStorage.setItem('cb_dashboard_favs', JSON.stringify(favorites)); }
-    function saveSort() { localStorage.setItem('cb_dashboard_sort', JSON.stringify(sortAsc)); }
     function saveCols(cols) { localStorage.setItem('cb_dashboard_cols', cols); }
 
-    // Favori
-    window.toggleFavorite = function(username) {
-      const lower = username.toLowerCase();
-      if (favorites.includes(lower)) {
-        favorites = favorites.filter(f => f !== lower);
-      } else {
-        favorites.push(lower);
-      }
-      saveFavorites();
-      renderGrid();
-    };
-
-    // Création d'une carte
     function createCard(username) {
-      const lower = username.toLowerCase();
-      const isFav = favorites.includes(lower);
-
       const card = document.createElement('div');
       card.className = 'model-card';
-      card.setAttribute('data-username', lower);
-      card.setAttribute('data-fav', isFav ? 'true' : 'false');
 
       card.innerHTML = `
         <div class="model-header">
-          <div class="header-left">
-            <span class="model-name">${username}</span>
-          </div>
-          <div class="header-actions">
-            <button class="btn-fav ${isFav ? 'is-favorite' : ''}" title="Favori" onclick="toggleFavorite('${username}')">&#9733;</button>
-            <button class="btn-delete" title="Supprimer" onclick="removeModel('${username}')">&times;</button>
-          </div>
+          <span class="model-name">${username}</span>
+          <button class="btn-delete" title="Supprimer" onclick="removeModel('${username}')">&times;</button>
         </div>
         <div class="player-container">
           <iframe 
             src="https://chaturbate.com/embed/${encodeURIComponent(username)}/" 
             allow="autoplay; fullscreen" 
-            sandbox="allow-scripts allow-same-origin allow-forms"
-            referrerpolicy="no-referrer-when-downgrade"
             allowfullscreen>
           </iframe>
-          <div class="drag-preventer"></div>
         </div>
       `;
       return card;
     }
 
-    // Rendu de la grille
     function renderGrid() {
       grid.innerHTML = '';
-      
-      const sortedModels = [...models].sort((a, b) => {
-        const aFav = favorites.includes(a.toLowerCase());
-        const bFav = favorites.includes(b.toLowerCase());
-        
-        if (aFav !== bFav) return bFav - aFav;
-        return sortAsc ? a.localeCompare(b) : b.localeCompare(a);
-      });
-
-      sortedModels.forEach(username => {
+      models.forEach(username => {
         grid.appendChild(createCard(username));
       });
-
-      updateSortButtonUI();
-      applyFilters();
     }
 
-    function updateSortButtonUI() {
-      sortBtn.textContent = sortAsc ? 'A-Z' : 'Z-A';
-    }
-
-    // Ajout d'un modèle
     addModelForm.addEventListener('submit', (e) => {
       e.preventDefault();
       const username = newModelInput.value.trim();
@@ -475,82 +263,12 @@
       }
     });
 
-    // Suppression d'un modèle
     window.removeModel = function(username) {
-      const lower = username.toLowerCase();
-      models = models.filter(m => m.toLowerCase() !== lower);
-      favorites = favorites.filter(f => f !== lower);
+      models = models.filter(m => m.toLowerCase() !== username.toLowerCase());
       saveModels();
-      saveFavorites();
       renderGrid();
     };
 
-    // Tri alphabétique
-    sortBtn.addEventListener('click', () => {
-      sortAsc = !sortAsc;
-      saveSort();
-      renderGrid();
-    });
-
-    // Mode Discret (Panic Blur)
-    function toggleBlur() {
-      isBlurred = !isBlurred;
-      grid.classList.toggle('blurred', isBlurred);
-      blurBtn.classList.toggle('active', isBlurred);
-    }
-
-    blurBtn.addEventListener('click', toggleBlur);
-
-    // Raccourci clavier 'P' pour flouter
-    window.addEventListener('keydown', (e) => {
-      if (e.key.toLowerCase() === 'p' && e.target.tagName !== 'INPUT') {
-        toggleBlur();
-      }
-    });
-
-    // Réinitialisation
-    resetBtn.addEventListener('click', () => {
-      if (confirm('Réinitialiser la liste avec les modèles par défaut ?')) {
-        models = [...defaultModels];
-        favorites = [];
-        sortAsc = true;
-        localStorage.removeItem('cb_dashboard_models');
-        localStorage.removeItem('cb_dashboard_favs');
-        localStorage.removeItem('cb_dashboard_sort');
-        renderGrid();
-      }
-    });
-
-    // Filtre favoris
-    favFilterBtn.addEventListener('click', () => {
-      showOnlyFavorites = !showOnlyFavorites;
-      favFilterBtn.classList.toggle('active', showOnlyFavorites);
-      applyFilters();
-    });
-
-    // Application des filtres texte + favoris
-    function applyFilters() {
-      const query = searchInput.value.trim().toLowerCase();
-      const cards = grid.querySelectorAll('.model-card');
-
-      cards.forEach(card => {
-        const username = card.getAttribute('data-username');
-        const isFav = card.getAttribute('data-fav') === 'true';
-
-        const matchesSearch = username.includes(query);
-        const matchesFav = !showOnlyFavorites || isFav;
-
-        if (matchesSearch && matchesFav) {
-          card.classList.remove('hidden');
-        } else {
-          card.classList.add('hidden');
-        }
-      });
-    }
-
-    searchInput.addEventListener('input', applyFilters);
-
-    // Colonnes et disposition
     function applyColumns(cols) {
       layoutBtns.forEach(b => {
         b.classList.toggle('active', b.getAttribute('data-cols') === cols);
@@ -570,9 +288,6 @@
       });
     });
 
-    window.addEventListener('dragstart', (e) => e.preventDefault());
-
-    // Initialisation
     applyColumns(currentCols);
     renderGrid();
   </script>
