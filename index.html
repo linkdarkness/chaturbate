@@ -375,12 +375,13 @@
 
     .btn-delete:hover { color: var(--danger); }
 
-    /* Hauteur doublée par rapport au ratio 16:9 standard */
+    /* Hauteur doublée et interdiction de scrolling (overflow caché) */
     .player-container {
       width: 100%;
       aspect-ratio: 16 / 18;
       background: #000;
       position: relative;
+      overflow: hidden;
     }
 
     .player-container iframe {
@@ -390,9 +391,9 @@
       width: 100%;
       height: 100%;
       border: 0;
+      overflow: hidden;
     }
 
-    /* Modal de gestion des tags */
     .modal-overlay {
       display: none;
       position: fixed;
@@ -447,7 +448,6 @@
       gap: 8px;
     }
 
-    /* Context Menu */
     .context-menu {
       display: none;
       position: fixed;
@@ -739,7 +739,7 @@
         `<span class="tag-badge" title="Cliquer pour supprimer" onclick="removeTag('${username}', '${t}')">${t} &times;</span>`
       ).join('');
 
-      const embedUrl = `https://chaturbate.com/embed/${encodeURIComponent(username)}/`;
+      const embedUrl = `https://chaturbate.com/embed/${encodeURIComponent(username)}/?embed_video_only=0&scrolling=no`;
 
       card.innerHTML = `
         <div class="model-header">
@@ -759,6 +759,7 @@
         <div class="player-container">
           <iframe 
             data-src="${embedUrl}" 
+            scrolling="no"
             allow="autoplay; fullscreen" 
             allowfullscreen>
           </iframe>
