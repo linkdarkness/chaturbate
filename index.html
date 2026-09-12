@@ -11,7 +11,6 @@
       --accent: #38bdf8;
       --text: #f8fafc;
       --danger: #ef4444;
-      --grid-cols: repeat(auto-fill, minmax(360px, 1fr));
     }
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
@@ -96,34 +95,9 @@
       background: rgba(239, 68, 68, 0.1);
     }
 
-    .layout-selector {
-      display: flex;
-      background: #0f172a;
-      border: 1px solid #334155;
-      border-radius: 6px;
-      padding: 2px;
-      gap: 2px;
-    }
-
-    .layout-btn {
-      background: transparent;
-      border: none;
-      color: #94a3b8;
-      padding: 4px 8px;
-      font-size: 0.8rem;
-      font-weight: 600;
-      border-radius: 4px;
-      cursor: pointer;
-    }
-
-    .layout-btn.active {
-      background: #334155;
-      color: var(--accent);
-    }
-
     .grid-container {
       display: grid;
-      grid-template-columns: var(--grid-cols);
+      grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
       gap: 16px;
       padding: 16px;
       flex: 1;
@@ -201,15 +175,6 @@
 
       <!-- Bouton Réinitialiser -->
       <button id="resetBtn" class="btn-action btn-reset" title="Réinitialiser la liste par défaut">&#8634; Réinitialiser</button>
-
-      <!-- Sélecteur de colonnes -->
-      <div class="layout-selector">
-        <button class="layout-btn" data-cols="auto">Auto</button>
-        <button class="layout-btn" data-cols="1">1</button>
-        <button class="layout-btn" data-cols="2">2</button>
-        <button class="layout-btn" data-cols="3">3</button>
-        <button class="layout-btn" data-cols="4">4</button>
-      </div>
     </div>
   </header>
 
@@ -226,16 +191,13 @@
     ];
 
     let models = JSON.parse(localStorage.getItem('cb_dashboard_models')) || [...defaultModels];
-    let currentCols = localStorage.getItem('cb_dashboard_cols') || 'auto';
 
     const grid = document.getElementById('grid');
     const addModelForm = document.getElementById('addModelForm');
     const newModelInput = document.getElementById('newModelInput');
     const resetBtn = document.getElementById('resetBtn');
-    const layoutBtns = document.querySelectorAll('.layout-btn');
 
     function saveModels() { localStorage.setItem('cb_dashboard_models', JSON.stringify(models)); }
-    function saveCols(cols) { localStorage.setItem('cb_dashboard_cols', cols); }
 
     function createCard(username) {
       const card = document.createElement('div');
@@ -293,26 +255,6 @@
       }
     });
 
-    function applyColumns(cols) {
-      layoutBtns.forEach(b => {
-        b.classList.toggle('active', b.getAttribute('data-cols') === cols);
-      });
-
-      if (cols === 'auto') {
-        grid.style.setProperty('--grid-cols', 'repeat(auto-fill, minmax(360px, 1fr))');
-      } else {
-        grid.style.setProperty('--grid-cols', `repeat(${cols}, 1fr)`);
-      }
-      saveCols(cols);
-    }
-
-    layoutBtns.forEach(btn => {
-      btn.addEventListener('click', () => {
-        applyColumns(btn.getAttribute('data-cols'));
-      });
-    });
-
-    applyColumns(currentCols);
     renderGrid();
   </script>
 </body>
