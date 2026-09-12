@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Directs Live Dashboard</title>
+  <title>Directs Live</title>
   <style>
     :root {
       --bg: #0f172a;
@@ -12,7 +12,6 @@
       --text: #f8fafc;
       --danger: #ef4444;
       --star: #fbbf24;
-      --border: #334155;
     }
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
@@ -22,7 +21,6 @@
       min-height: 100vh;
       display: flex;
       flex-direction: column;
-      overflow-x: hidden;
     }
     
     /* Header toujours visible (Sticky) */
@@ -34,49 +32,39 @@
       background: rgba(30, 41, 59, 0.95);
       backdrop-filter: blur(8px);
       -webkit-backdrop-filter: blur(8px);
-      border-bottom: 1px solid var(--border);
+      border-bottom: 1px solid #334155;
       display: flex;
       justify-content: space-between;
       align-items: center;
-      gap: 10px;
-      flex-wrap: wrap;
+      gap: 12px;
     }
-    
-    h1 { 
-      font-size: 1.1rem; 
-      font-weight: 700;
-      white-space: nowrap; 
-      color: var(--text);
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
+    h1 { font-size: 1.1rem; white-space: nowrap; }
 
+    /* Alignement parfait de tous les contrôles sur une ligne */
     .controls-group {
       display: flex;
       align-items: center;
-      gap: 8px;
-      flex-wrap: wrap;
+      gap: 6px;
+      flex-wrap: nowrap;
     }
 
-    /* Formulaire d'ajout inline */
     .input-form {
       display: flex;
       align-items: center;
-      gap: 2px;
+      gap: 0;
     }
 
     .custom-input {
       padding: 6px 10px;
       border-radius: 6px 0 0 6px;
-      border: 1px solid var(--border);
+      border: 1px solid #334155;
       border-right: none;
       background: #0f172a;
       color: var(--text);
       font-size: 0.85rem;
       outline: none;
       width: 130px;
-      transition: all 0.2s ease;
+      transition: width 0.2s ease, border-color 0.2s ease;
     }
 
     .custom-input:focus {
@@ -86,7 +74,7 @@
 
     .btn-action {
       background: transparent;
-      border: 1px solid var(--border);
+      border: 1px solid #334155;
       color: #94a3b8;
       padding: 6px 10px;
       border-radius: 6px;
@@ -99,12 +87,11 @@
       transition: all 0.2s ease;
       user-select: none;
       white-space: nowrap;
-      height: 32px;
     }
 
     .btn-action:hover {
       color: var(--text);
-      background: var(--border);
+      background: #334155;
     }
 
     .btn-add {
@@ -112,8 +99,8 @@
       color: #fff;
       border: 1px solid #0284c7;
       border-radius: 0 6px 6px 0;
-      font-weight: 700;
-      padding: 6px 12px;
+      font-weight: 600;
+      padding: 6px 10px;
     }
 
     .btn-add:hover {
@@ -137,21 +124,21 @@
     /* Conteneur Dropdown */
     .dropdown {
       position: relative;
-      display: inline-block;
     }
 
-    /* Menu déroulant ajusté anti-débordement */
+    /* Menu déroulant de l'historique */
     .dropdown-menu {
       display: none;
       position: absolute;
-      top: calc(100% + 6px);
+      top: 100%;
       right: 0;
-      width: 280px;
-      max-width: calc(100vw - 24px);
-      max-height: 360px;
+      margin-top: 8px;
+      width: 260px;
+      max-width: 90vw;
+      max-height: 320px;
       overflow-y: auto;
       background: #1e293b;
-      border: 1px solid var(--border);
+      border: 1px solid #334155;
       border-radius: 8px;
       box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.6);
       z-index: 110;
@@ -166,7 +153,7 @@
       font-size: 0.75rem;
       font-weight: 600;
       color: #64748b;
-      border-bottom: 1px solid var(--border);
+      border-bottom: 1px solid #334155;
       text-transform: uppercase;
       letter-spacing: 0.05em;
       display: flex;
@@ -181,24 +168,31 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
-      cursor: pointer;
       border-bottom: 1px solid rgba(51, 65, 85, 0.5);
       transition: background 0.15s ease;
+      gap: 8px;
     }
 
     .history-item:hover {
-      background: var(--border);
+      background: #283548;
+    }
+
+    .history-username {
+      flex: 1;
+      cursor: pointer;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .history-username:hover {
       color: var(--accent);
     }
 
-    .history-item.already-added {
-      color: #64748b;
-      cursor: default;
-    }
-
-    .history-item.already-added:hover {
-      background: transparent;
-      color: #64748b;
+    .history-actions {
+      display: flex;
+      align-items: center;
+      gap: 6px;
     }
 
     .badge-added {
@@ -209,12 +203,28 @@
       color: #64748b;
     }
 
+    .btn-remove-hist {
+      background: transparent;
+      border: none;
+      color: #64748b;
+      font-size: 1.1rem;
+      cursor: pointer;
+      line-height: 1;
+      padding: 2px 4px;
+      border-radius: 4px;
+    }
+
+    .btn-remove-hist:hover {
+      color: var(--danger);
+      background: rgba(239, 68, 68, 0.15);
+    }
+
     .btn-clear-history {
       width: 100%;
       padding: 8px;
       background: transparent;
       border: none;
-      border-top: 1px solid var(--border);
+      border-top: 1px solid #334155;
       color: var(--danger);
       font-size: 0.75rem;
       cursor: pointer;
@@ -225,10 +235,9 @@
       background: rgba(239, 68, 68, 0.1);
     }
 
-    /* Grille de streaming */
     .grid-container {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
       gap: 16px;
       padding: 16px;
       flex: 1;
@@ -239,17 +248,16 @@
       text-align: center;
       padding: 60px 20px;
       color: #64748b;
-      font-size: 0.95rem;
+      font-size: 1rem;
     }
 
     .model-card {
       background: var(--card-bg);
       border-radius: 10px;
       overflow: hidden;
-      border: 1px solid var(--border);
+      border: 1px solid #334155;
       display: flex;
       flex-direction: column;
-      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
     }
 
     .model-header {
@@ -258,7 +266,7 @@
       justify-content: space-between;
       align-items: center;
       background: #0f172a;
-      border-bottom: 1px solid var(--border);
+      border-bottom: 1px solid #334155;
     }
 
     .model-name {
@@ -317,19 +325,18 @@
       border: 0;
     }
 
-    @media (max-width: 480px) {
+    @media (max-width: 500px) {
       header {
         padding: 8px 10px;
+      }
+      h1 {
+        display: none;
       }
       .custom-input {
         width: 100px;
       }
       .custom-input:focus {
         width: 120px;
-      }
-      .grid-container {
-        grid-template-columns: 1fr;
-        padding: 10px;
       }
     }
   </style>
@@ -338,7 +345,7 @@
   <header>
     <h1>Directs Live</h1>
     <div class="controls-group">
-      <!-- Formulaire pour rajouter des modèles en 1 ligne -->
+      <!-- Formulaire avec bouton directement collé -->
       <form id="addModelForm" class="input-form">
         <input 
           type="text" 
@@ -358,15 +365,15 @@
         <div id="historyMenu" class="dropdown-menu">
           <div class="dropdown-header">Pseudos récents</div>
           <div id="historyList"></div>
-          <button id="clearHistoryBtn" class="btn-clear-history">Vider l'historique</button>
+          <button id="clearHistoryBtn" class="btn-clear-history">Vider l'historique complet</button>
         </div>
       </div>
 
       <!-- Bouton Filtre Favoris -->
-      <button id="favFilterBtn" class="btn-action btn-fav-filter" title="Afficher uniquement les favoris">★</button>
+      <button id="favFilterBtn" class="btn-action btn-fav-filter" title="Afficher uniquement les favoris">&#9733;</button>
 
       <!-- Bouton Réinitialiser (Ne garde que les favoris) -->
-      <button id="resetBtn" class="btn-action btn-reset" title="Supprimer tous les modèles non-favoris">🧹</button>
+      <button id="resetBtn" class="btn-action btn-reset" title="Supprimer tous les modèles non-favoris">🧹 Nettoyer</button>
     </div>
   </header>
 
@@ -458,7 +465,7 @@
       }
 
       if (displayModels.length === 0) {
-        grid.innerHTML = `<div class="empty-message">${showOnlyFavorites ? 'Aucun favori enregistré.' : 'Aucun modèle affiché. Entrez un pseudo pour commencer.'}</div>`;
+        grid.innerHTML = `<div class="empty-message">${showOnlyFavorites ? 'Aucun favori enregistré.' : 'Aucun modèle affiché. Utilisez le champ ci-dessus pour ajouter un pseudo.'}</div>`;
         updateHistoryMenu();
         return;
       }
@@ -468,6 +475,12 @@
       });
 
       updateHistoryMenu();
+    }
+
+    function removeSingleHistory(username) {
+      const lower = username.toLowerCase();
+      history = history.filter(h => h.toLowerCase() !== lower);
+      saveHistory();
     }
 
     function updateHistoryMenu() {
@@ -484,34 +497,46 @@
         const isPresent = models.map(m => m.toLowerCase()).includes(lower);
 
         const item = document.createElement('div');
-        item.className = `history-item ${isPresent ? 'already-added' : ''}`;
+        item.className = 'history-item';
         
         item.innerHTML = `
-          <span>${username}</span>
-          ${isPresent ? '<span class="badge-added">Actif</span>' : '<span style="font-size:0.75rem; color:var(--accent);">+ Réajouter</span>'}
+          <span class="history-username" title="${isPresent ? 'Déjà affiché' : 'Cliquer pour réajouter'}">${username}</span>
+          <div class="history-actions">
+            ${isPresent ? '<span class="badge-added">Actif</span>' : ''}
+            <button class="btn-remove-hist" title="Supprimer de l'historique">&times;</button>
+          </div>
         `;
 
+        const nameSpan = item.querySelector('.history-username');
         if (!isPresent) {
-          item.addEventListener('click', () => {
+          nameSpan.addEventListener('click', () => {
             addModelToState(username);
           });
         }
+
+        const deleteBtn = item.querySelector('.btn-remove-hist');
+        deleteBtn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          removeSingleHistory(username);
+        });
 
         historyList.appendChild(item);
       });
     }
 
-    /* Positionnement dynamique pour empêcher le débordement écran */
     function positionHistoryMenu() {
       historyMenu.style.left = 'auto';
-      historyMenu.style.right = '0px';
+      historyMenu.style.right = '0';
 
       const rect = historyMenu.getBoundingClientRect();
       const viewportWidth = window.innerWidth;
 
+      if (rect.right > viewportWidth - 10) {
+        historyMenu.style.right = '0';
+      }
       if (rect.left < 10) {
         historyMenu.style.right = 'auto';
-        historyMenu.style.left = '0px';
+        historyMenu.style.left = '0';
       }
     }
 
@@ -533,12 +558,6 @@
 
     historyMenu.addEventListener('click', (e) => {
       e.stopPropagation();
-    });
-
-    window.addEventListener('resize', () => {
-      if (historyMenu.classList.contains('show')) {
-        positionHistoryMenu();
-      }
     });
 
     addModelForm.addEventListener('submit', (e) => {
@@ -568,17 +587,22 @@
       const nonFavsCount = models.filter(m => !favorites.includes(m.toLowerCase())).length;
 
       if (nonFavsCount === 0) {
+        alert('Aucun modèle non-favori à supprimer.');
         return;
       }
 
-      models = models.filter(m => favorites.includes(m.toLowerCase()));
-      saveModels();
-      renderGrid();
+      if (confirm('Voulez-vous supprimer tous les modèles qui ne sont pas marqués en favoris ?')) {
+        models = models.filter(m => favorites.includes(m.toLowerCase()));
+        saveModels();
+        renderGrid();
+      }
     });
 
     clearHistoryBtn.addEventListener('click', () => {
-      history = [];
-      saveHistory();
+      if (confirm('Voulez-vous effacer l\'historique complet des pseudos enregistrés ?')) {
+        history = [];
+        saveHistory();
+      }
     });
 
     renderGrid();
