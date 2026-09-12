@@ -24,7 +24,6 @@
       flex-direction: column;
     }
     
-    /* Header fixe et compact */
     header {
       position: sticky;
       top: 0;
@@ -42,7 +41,6 @@
     }
     h1 { font-size: 1.1rem; white-space: nowrap; }
 
-    /* Zone des contrôles organisée sur deux lignes */
     .controls-wrapper {
       display: flex;
       flex-direction: column;
@@ -50,16 +48,7 @@
       align-items: flex-end;
     }
 
-    /* Première ligne : Saisie pseudo, Favoris, Nettoyage */
-    .controls-row-top {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      flex-wrap: nowrap;
-    }
-
-    /* Deuxième ligne : Filtre Étiquettes, Masqués, Historique */
-    .controls-row-bottom {
+    .controls-row-top, .controls-row-bottom {
       display: flex;
       align-items: center;
       gap: 6px;
@@ -165,7 +154,6 @@
       background: #334155;
     }
 
-    /* Popup d'historique fixé pour éviter le débordement d'écran */
     .dropdown-menu {
       display: none;
       position: fixed;
@@ -180,9 +168,7 @@
       z-index: 1000;
     }
 
-    .dropdown-menu.show {
-      display: block;
-    }
+    .dropdown-menu.show { display: block; }
 
     .dropdown-header {
       padding: 8px 12px;
@@ -192,9 +178,6 @@
       border-bottom: 1px solid #334155;
       text-transform: uppercase;
       letter-spacing: 0.05em;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
     }
 
     .history-item {
@@ -209,9 +192,7 @@
       gap: 8px;
     }
 
-    .history-item:hover {
-      background: #283548;
-    }
+    .history-item:hover { background: #283548; }
 
     .history-username {
       flex: 1;
@@ -221,9 +202,7 @@
       white-space: nowrap;
     }
 
-    .history-username:hover {
-      color: var(--accent);
-    }
+    .history-username:hover { color: var(--accent); }
 
     .history-actions {
       display: flex;
@@ -267,9 +246,7 @@
       text-align: center;
     }
 
-    .btn-clear-history:hover {
-      background: rgba(239, 68, 68, 0.1);
-    }
+    .btn-clear-history:hover { background: rgba(239, 68, 68, 0.1); }
 
     .grid-container {
       display: grid;
@@ -297,9 +274,7 @@
       transition: opacity 0.2s ease;
     }
 
-    .model-card.is-hidden {
-      opacity: 0.5;
-    }
+    .model-card.is-hidden { opacity: 0.5; }
 
     .model-header {
       padding: 8px 12px;
@@ -360,17 +335,8 @@
       border-radius: 4px;
     }
 
-    .btn-icon-subtle:hover {
-      color: var(--text);
-    }
-
-    .btn-hide {
-      color: #64748b;
-    }
-
-    .btn-hide.is-hidden {
-      color: var(--accent);
-    }
+    .btn-icon-subtle:hover { color: var(--text); }
+    .btn-hide.is-hidden { color: var(--accent); }
 
     .btn-fav {
       background: transparent;
@@ -382,9 +348,7 @@
       transition: color 0.2s ease;
     }
 
-    .btn-fav:hover, .btn-fav.is-favorite {
-      color: var(--star);
-    }
+    .btn-fav:hover, .btn-fav.is-favorite { color: var(--star); }
 
     .btn-delete {
       background: transparent;
@@ -396,9 +360,7 @@
       line-height: 1;
     }
 
-    .btn-delete:hover {
-      color: var(--danger);
-    }
+    .btn-delete:hover { color: var(--danger); }
 
     .player-container {
       width: 100%;
@@ -417,15 +379,141 @@
       border: 0;
     }
 
+    /* Style de la fenêtre modale de gestion des tags */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: rgba(15, 23, 42, 0.8);
+      backdrop-filter: blur(4px);
+      z-index: 2000;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .modal-overlay.show { display: flex; }
+
+    .modal-content {
+      background: #1e293b;
+      border: 1px solid #334155;
+      border-radius: 12px;
+      padding: 20px;
+      width: 360px;
+      max-width: 90vw;
+      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5);
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .modal-title {
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--text);
+    }
+
+    .modal-section-title {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: #64748b;
+      margin-bottom: 6px;
+    }
+
+    .tag-chips-wrapper {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      max-height: 120px;
+      overflow-y: auto;
+    }
+
+    .chip-btn {
+      background: #0f172a;
+      border: 1px solid #334155;
+      color: #94a3b8;
+      padding: 4px 10px;
+      border-radius: 20px;
+      font-size: 0.8rem;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .chip-btn:hover {
+      border-color: var(--accent);
+      color: var(--text);
+    }
+
+    .chip-btn.selected {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: #0f172a;
+      font-weight: 600;
+    }
+
+    .chip-btn.active-assigned {
+      background: rgba(56, 189, 248, 0.2);
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    .tag-input-row {
+      display: flex;
+      gap: 6px;
+    }
+
+    .tag-input-row input {
+      flex: 1;
+      background: #0f172a;
+      border: 1px solid #334155;
+      color: var(--text);
+      padding: 6px 10px;
+      border-radius: 6px;
+      font-size: 0.85rem;
+      outline: none;
+    }
+
+    .tag-input-row input:focus { border-color: var(--accent); }
+
+    .modal-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 8px;
+      margin-top: 8px;
+    }
+
+    .btn-modal {
+      padding: 6px 14px;
+      border-radius: 6px;
+      font-size: 0.85rem;
+      cursor: pointer;
+      border: none;
+      font-weight: 500;
+    }
+
+    .btn-modal-cancel {
+      background: #334155;
+      color: var(--text);
+    }
+
+    .btn-modal-cancel:hover { background: #475569; }
+
+    .btn-modal-save {
+      background: #0284c7;
+      color: white;
+    }
+
+    .btn-modal-save:hover { background: #0369a1; }
+
     @media (max-width: 600px) {
-      header {
-        justify-content: center;
-        padding: 8px 10px;
-      }
-      .controls-wrapper {
-        align-items: center;
-        width: 100%;
-      }
+      header { justify-content: center; padding: 8px 10px; }
+      .controls-wrapper { align-items: center; width: 100%; }
     }
   </style>
 </head>
@@ -433,16 +521,9 @@
   <header>
     <h1>Directs Live</h1>
     <div class="controls-wrapper">
-      <!-- LIGNE 1 : Ajout de modèle, Filtre favoris & Nettoyage -->
       <div class="controls-row-top">
         <form id="addModelForm" class="input-form">
-          <input 
-            type="text" 
-            id="newModelInput" 
-            class="custom-input" 
-            placeholder="Pseudo..." 
-            required
-          >
+          <input type="text" id="newModelInput" class="custom-input" placeholder="Pseudo..." required>
           <button type="submit" class="btn-action btn-add" title="Ajouter ce modèle">+</button>
         </form>
 
@@ -450,7 +531,6 @@
         <button id="resetBtn" class="btn-action btn-reset" title="Supprimer tous les modèles non-favoris">🧹 Nettoyer</button>
       </div>
 
-      <!-- LIGNE 2 : Filtre étiquettes, Affichage masqués, Historique -->
       <div class="controls-row-bottom">
         <select id="tagFilterSelect" class="select-tag" title="Filtrer par étiquette">
           <option value="">🏷️ (Tous)</option>
@@ -467,7 +547,6 @@
     </div>
   </header>
 
-  <!-- Popup Historique attaché au body -->
   <div id="historyMenu" class="dropdown-menu">
     <div class="dropdown-header">Pseudos récents</div>
     <div id="historyList"></div>
@@ -475,6 +554,36 @@
   </div>
 
   <main class="grid-container" id="grid"></main>
+
+  <!-- Structure Modale pour l'édition de Tags -->
+  <div id="tagModal" class="modal-overlay">
+    <div class="modal-content">
+      <div class="modal-title" id="tagModalTitle">Étiquettes pour...</div>
+      
+      <div>
+        <div class="modal-section-title">Étiquettes attribuées</div>
+        <div id="assignedTagsList" class="tag-chips-wrapper"></div>
+      </div>
+
+      <div>
+        <div class="modal-section-title">Cliquer pour ajouter un tag existant</div>
+        <div id="suggestedTagsList" class="tag-chips-wrapper"></div>
+      </div>
+
+      <div>
+        <div class="modal-section-title">Créer un nouveau tag</div>
+        <div class="tag-input-row">
+          <input type="text" id="newTagInput" placeholder="Nouveau tag...">
+          <button type="button" class="btn-action" id="addCustomTagBtn">+</button>
+        </div>
+      </div>
+
+      <div class="modal-actions">
+        <button type="button" class="btn-modal btn-modal-cancel" id="cancelTagModal">Annuler</button>
+        <button type="button" class="btn-modal btn-modal-save" id="saveTagModal">Enregistrer</button>
+      </div>
+    </div>
+  </div>
 
   <script>
     let models = JSON.parse(localStorage.getItem('cb_dashboard_models')) || [];
@@ -486,6 +595,8 @@
     let showOnlyFavorites = false;
     let showHiddenModels = false;
     let selectedTagFilter = '';
+    let currentModalUser = null;
+    let tempUserTags = [];
 
     const grid = document.getElementById('grid');
     const addModelForm = document.getElementById('addModelForm');
@@ -500,6 +611,16 @@
     const historyList = document.getElementById('historyList');
     const historyCount = document.getElementById('historyCount');
     const clearHistoryBtn = document.getElementById('clearHistoryBtn');
+
+    /* Éléments Modale */
+    const tagModal = document.getElementById('tagModal');
+    const tagModalTitle = document.getElementById('tagModalTitle');
+    const assignedTagsList = document.getElementById('assignedTagsList');
+    const suggestedTagsList = document.getElementById('suggestedTagsList');
+    const newTagInput = document.getElementById('newTagInput');
+    const addCustomTagBtn = document.getElementById('addCustomTagBtn');
+    const cancelTagModal = document.getElementById('cancelTagModal');
+    const saveTagModal = document.getElementById('saveTagModal');
 
     function saveModels() { localStorage.setItem('cb_dashboard_models', JSON.stringify(models)); }
     function saveFavorites() { localStorage.setItem('cb_dashboard_favs', JSON.stringify(favorites)); }
@@ -552,28 +673,90 @@
       renderGrid();
     };
 
+    /* Gestionnaire de la Modale de Tags */
     window.editTags = function(username) {
+      currentModalUser = username;
       const lower = username.toLowerCase();
-      const currentTags = (tags[lower] || []).join(', ');
-      const existingTags = getAllExistingTags();
+      tempUserTags = [...(tags[lower] || [])];
       
-      let suggestionText = '';
-      if (existingTags.length > 0) {
-        suggestionText = `\n\nÉtiquettes déjà existantes : [ ${existingTags.join(', ')} ]`;
+      tagModalTitle.textContent = `Étiquettes pour ${username}`;
+      newTagInput.value = '';
+      
+      renderModalTags();
+      tagModal.classList.add('show');
+    };
+
+    function renderModalTags() {
+      assignedTagsList.innerHTML = '';
+      suggestedTagsList.innerHTML = '';
+
+      if (tempUserTags.length === 0) {
+        assignedTagsList.innerHTML = '<span style="font-size:0.8rem; color:#64748b;">Aucun tag attribué</span>';
+      } else {
+        tempUserTags.forEach(tag => {
+          const btn = document.createElement('button');
+          btn.className = 'chip-btn selected';
+          btn.innerHTML = `${tag} <span>&times;</span>`;
+          btn.onclick = () => {
+            tempUserTags = tempUserTags.filter(t => t !== tag);
+            renderModalTags();
+          };
+          assignedTagsList.appendChild(btn);
+        });
       }
 
-      const input = prompt(`Étiquettes pour ${username} (séparées par des virgules) :${suggestionText}`, currentTags);
-      
-      if (input !== null) {
-        const parsedTags = input.split(',').map(t => t.trim()).filter(t => t.length > 0);
-        if (parsedTags.length > 0) {
-          tags[lower] = parsedTags;
+      const allTags = getAllExistingTags();
+      const availableSuggestions = allTags.filter(t => !tempUserTags.includes(t));
+
+      if (availableSuggestions.length === 0) {
+        suggestedTagsList.innerHTML = '<span style="font-size:0.8rem; color:#64748b;">Aucune suggestion</span>';
+      } else {
+        availableSuggestions.forEach(tag => {
+          const btn = document.createElement('button');
+          btn.className = 'chip-btn';
+          btn.textContent = `+ ${tag}`;
+          btn.onclick = () => {
+            tempUserTags.push(tag);
+            renderModalTags();
+          };
+          suggestedTagsList.appendChild(btn);
+        });
+      }
+    }
+
+    function handleAddCustomTag() {
+      const val = newTagInput.value.trim();
+      if (val && !tempUserTags.includes(val)) {
+        tempUserTags.push(val);
+        newTagInput.value = '';
+        renderModalTags();
+      }
+    }
+
+    addCustomTagBtn.onclick = handleAddCustomTag;
+    newTagInput.onkeydown = (e) => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        handleAddCustomTag();
+      }
+    };
+
+    cancelTagModal.onclick = () => {
+      tagModal.classList.remove('show');
+    };
+
+    saveTagModal.onclick = () => {
+      if (currentModalUser) {
+        const lower = currentModalUser.toLowerCase();
+        if (tempUserTags.length > 0) {
+          tags[lower] = tempUserTags;
         } else {
           delete tags[lower];
         }
         saveTags();
         renderGrid();
       }
+      tagModal.classList.remove('show');
     };
 
     function updateTagFilterOptions() {
