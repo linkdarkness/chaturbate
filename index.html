@@ -290,6 +290,7 @@
       flex: 1;
     }
 
+    /* Mode Compact */
     .grid-container.compact-mode {
       grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
       gap: 10px;
@@ -300,6 +301,7 @@
       aspect-ratio: 16 / 10;
     }
 
+    /* Mode Miniature (10+ visibles sur smartphone) */
     .grid-container.miniature-mode {
       grid-template-columns: repeat(2, 1fr);
       gap: 6px;
@@ -514,6 +516,7 @@
       background: var(--accent);
     }
 
+    /* Modal Focus / Plein écran */
     .focus-overlay {
       display: none;
       position: fixed;
@@ -528,7 +531,7 @@
       padding: 10px;
     }
     .focus-overlay.show { display: flex; }
-
+    
     .focus-content {
       width: 100%;
       max-width: 900px;
@@ -556,7 +559,7 @@
       height: 100%;
       position: relative;
     }
-
+    
     .focus-body iframe {
       position: absolute;
       top: 0;
@@ -669,7 +672,9 @@
       </select>
 
       <button id="sortToggleBtn" class="btn-action btn-sort" title="Basculer tri alphabétique (A-Z) ou Favoris d'abord">🔤 Tri A-Z</button>
+
       <button id="layoutToggleBtn" class="btn-action btn-layout" title="Changer le mode d'affichage">📐 Mode Standard</button>
+
       <button id="favFilterBtn" class="btn-action btn-fav-filter" title="Afficher uniquement les favoris">&#9733; Favoris</button>
       
       <button id="hideToggleBtn" class="btn-action btn-hide-toggle" title="Afficher/Masquer les modèles masqués">
@@ -681,6 +686,7 @@
       </button>
 
       <button id="exportBtn" class="btn-action" title="Exporter la configuration en JSON">📤 Exporter</button>
+      
       <button id="importBtn" class="btn-action" title="Importer une configuration JSON">📥 Importer</button>
       <input type="file" id="importFile" accept=".json" style="display: none;">
 
@@ -736,7 +742,7 @@
     let hiddenModels = JSON.parse(localStorage.getItem('cb_dashboard_hidden')) || [];
     let history = JSON.parse(localStorage.getItem('cb_dashboard_history')) || [];
     let tags = JSON.parse(localStorage.getItem('cb_dashboard_tags')) || {};
-
+    
     let showOnlyFavorites = false;
     let showHiddenModels = false;
     let alphabeticalSort = false;
@@ -983,10 +989,11 @@
       ).join('');
 
       const embedUrl = `https://chaturbate.com/embed/${encodeURIComponent(username)}/?embed_video_only=0&scrolling=no`;
-      const thumbUrl = `https://img.live-jasmin.com/photos/chaturbate/${encodeURIComponent(username)}.jpg`;
+      const thumbUrl = `https://img.live-jasmin.com/photos/chaturbate/${encodeURIComponent(username)}.jpg`; // Aperçu alternatif standard
 
       let playerInnerHtml = '';
       if (currentLayout === 2) {
+        // En mode Miniature, on affiche l'aperçu statique cliquable pour préserver les ressources mobile
         playerInnerHtml = `
           <div class="thumbnail-preview" style="background-image: url('${thumbUrl}');"></div>
         `;
@@ -1026,6 +1033,7 @@
       const playerContainer = card.querySelector('.player-container');
       
       if (currentLayout === 2) {
+        // Au clic en mode miniature, on charge le vrai flux
         playerContainer.addEventListener('click', () => {
           playerContainer.innerHTML = `<iframe src="${embedUrl}" scrolling="no" allow="autoplay; fullscreen" allowfullscreen></iframe>`;
         });
@@ -1033,6 +1041,7 @@
         streamObserver.observe(playerContainer);
       }
 
+      // Vérification basique du statut en ligne via l'image de profil
       const imgTest = new Image();
       imgTest.onload = () => {
         const dot = card.querySelector(`#dot-${lower}`);
