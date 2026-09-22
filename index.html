@@ -300,7 +300,7 @@
       aspect-ratio: 16 / 10;
     }
 
-    /* Mode Miniature (10+ visibles sur smartphone) */
+    /* Mode Miniature */
     .grid-container.miniature-mode {
       grid-template-columns: repeat(2, 1fr);
       gap: 6px;
@@ -326,7 +326,7 @@
     }
 
     .grid-container.miniature-mode .tags-container {
-      display: none; /* Cache les tags pour gagner de la place en mode miniature */
+      display: none;
     }
 
     .grid-container.miniature-mode .btn-icon-subtle,
@@ -339,7 +339,7 @@
     }
 
     .grid-container.miniature-mode .player-container {
-      aspect-ratio: 1 / 1; /* Format carré compact */
+      aspect-ratio: 1 / 1;
     }
 
     .empty-message {
@@ -524,6 +524,84 @@
       gap: 8px;
     }
 
+    /* Styles pour le Mode Focus */
+    .focus-overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: rgba(15, 23, 42, 0.95);
+      z-index: 4000;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+    }
+
+    .focus-overlay.show { display: flex; }
+
+    .focus-content {
+      position: relative;
+      width: 100%;
+      max-width: 1100px;
+      height: 85vh;
+      background: #000;
+      border: 1px solid #334155;
+      border-radius: 12px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7);
+    }
+
+    .focus-header {
+      background: #0f172a;
+      padding: 10px 16px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid #334155;
+    }
+
+    .focus-title {
+      font-weight: 600;
+      font-size: 1rem;
+      color: var(--text);
+    }
+
+    .btn-close-focus {
+      background: transparent;
+      border: none;
+      color: var(--text);
+      font-size: 1.5rem;
+      cursor: pointer;
+      line-height: 1;
+      padding: 2px 6px;
+      border-radius: 4px;
+    }
+
+    .btn-close-focus:hover {
+      background: rgba(239, 68, 68, 0.2);
+      color: var(--danger);
+    }
+
+    .focus-player-wrapper {
+      flex: 1;
+      position: relative;
+      width: 100%;
+      height: 100%;
+    }
+
+    .focus-player-wrapper iframe {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      border: 0;
+    }
+
     .context-menu {
       display: none;
       position: fixed;
@@ -556,6 +634,7 @@
       .header-top-row { flex-direction: column; align-items: stretch; }
       .header-bottom-row { justify-content: space-between; }
       .select-tag { width: 100%; flex: auto; }
+      .focus-content { height: 95vh; }
     }
   </style>
 </head>
@@ -607,6 +686,7 @@
   </div>
 
   <div id="contextMenu" class="context-menu">
+    <div class="context-item" id="ctxFocus">🔍 Mode Focus</div>
     <div class="context-item" id="ctxFav">⭐ Favori</div>
     <div class="context-item" id="ctxTag">🏷️ Ajouter étiquette...</div>
     <div class="context-item" id="ctxHide">🙈 Masquer</div>
@@ -626,6 +706,17 @@
     </div>
   </div>
 
+  <!-- Overlay Mode Focus -->
+  <div id="focusOverlay" class="focus-overlay">
+    <div class="focus-content">
+      <div class="focus-header">
+        <span class="focus-title" id="focusTitle">Focus Mode</span>
+        <button class="btn-close-focus" id="closeFocusBtn" title="Fermer le mode focus">&times;</button>
+      </div>
+      <div class="focus-player-wrapper" id="focusPlayerWrapper"></div>
+    </div>
+  </div>
+
   <main class="grid-container" id="grid"></main>
 
   <script>
@@ -638,7 +729,6 @@
     let showOnlyFavorites = false;
     let showHiddenModels = false;
     let alphabeticalSort = false;
-    // currentLayout: 0 = Standard, 1 = Compact, 2 = Miniature
     let currentLayout = parseInt(localStorage.getItem('cb_dashboard_layout_mode')) || 0;
     let selectedTagFilter = '';
     let targetTagUser = null;
@@ -672,6 +762,12 @@
     const existingTagsDatalist = document.getElementById('existingTagsDatalist');
     const saveTagBtn = document.getElementById('saveTagBtn');
     const cancelTagBtn = document.getElementById('cancelTagBtn');
+
+    // Éléments du Mode Focus
+    const focusOverlay = document.getElementById('focusOverlay');
+    const focusTitle = document.getElementById('focusTitle');
+    const closeFocusBtn = document.getElementById('closeFocusBtn');
+    const focusPlayerWrapper = document.getElementById('focusPlayerWrapper');
 
     function applyLayout() {
       grid.classList.remove('compact-mode', 'miniature-mode');
@@ -766,6 +862,27 @@
       saveHidden();
       renderGrid();
     }
+
+    // Gestion Mode Focus
+    window.openFocusMode = function(username) {
+      focusTitle.textContent = `Mode Focus : ${username}`;
+      const embedUrl = `https://chaturbate.com/embed/${encodeURIComponent(username)}/?embed_video_only=0&scrolling=no`;
+      focusPlayerWrapper.innerHTML = `<iframe src="${embedUrl}" scrolling="no" allow="autoplay; fullscreen" allowfullscreen></iframe>`;
+      focusOverlay.classList.add('show');
+    };
+
+    function closeFocusMode() {
+      focusOverlay.classList.remove('show');
+      focusPlayerWrapper.innerHTML = ''; // Arrête le stream dans le focus
+    }
+
+    closeFocusBtn.addEventListener('click', closeFocusMode);
+    focusOverlay.addEventListener('click', (e) => {
+      if (e.target === focusOverlay) closeFocusMode();
+    });
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') closeFocusMode();
+    });
 
     window.openTagModal = function(username) {
       targetTagUser = username;
@@ -867,6 +984,7 @@
             <div class="tags-container">${tagsHtml}</div>
           </div>
           <div class="header-actions">
+            <button class="btn-icon-subtle" title="Mode Focus (Agrandir)" onclick="openFocusMode('${username}')">🔍</button>
             <button class="btn-icon-subtle" title="${isHidden ? 'Démasquer' : 'Masquer'}" onclick="toggleHideModel('${username}')">
               ${isHidden ? '👁️' : '🙈'}
             </button>
@@ -902,6 +1020,11 @@
 
       return card;
     }
+
+    document.getElementById('ctxFocus').addEventListener('click', () => {
+      if (contextUser) openFocusMode(contextUser);
+      contextMenu.classList.remove('show');
+    });
 
     document.getElementById('ctxFav').addEventListener('click', () => {
       if (contextUser) toggleFavorite(contextUser);
@@ -1081,7 +1204,7 @@
     });
 
     layoutToggleBtn.addEventListener('click', () => {
-      currentLayout = (currentLayout + 1) % 3; // Alterne entre 0, 1 et 2
+      currentLayout = (currentLayout + 1) % 3;
       applyLayout();
     });
 
