@@ -427,7 +427,7 @@
       border: 1px solid #334155;
       border-radius: 10px;
       width: 90%;
-      max-width: 400px;
+      max-width: 380px;
       padding: 16px;
       box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.8);
       display: flex;
@@ -439,12 +439,6 @@
       font-size: 1rem;
       font-weight: 600;
       color: var(--text);
-    }
-
-    .modal-text {
-      font-size: 0.85rem;
-      color: #94a3b8;
-      line-height: 1.4;
     }
 
     .modal-input {
@@ -557,23 +551,6 @@
     </div>
   </div>
 
-  <!-- Modale d'information flux / m3u8 -->
-  <div id="streamModal" class="modal-overlay">
-    <div class="modal-card">
-      <div class="modal-title" id="streamModalTitle">Lien de la Room</div>
-      <div class="modal-text">
-        VLC nécessite un lien direct au format <b>.m3u8</b>. Pour des raisons de sécurité et de chiffrement des serveurs, les navigateurs ne peuvent pas générer ce lien en un clic. 
-        <br><br>
-        Ouvrez le lien ci-dessous dans votre navigateur, puis récupérez le flux `.m3u8` via l'inspecteur réseau (F12) :
-      </div>
-      <input type="text" id="streamModalInput" class="modal-input" readonly onclick="this.select();">
-      <div class="modal-actions">
-        <button class="btn-action" id="closeStreamModalBtn">Fermer</button>
-        <button class="btn-action" style="background: #0284c7; color: #fff; border-color: #0284c7;" id="copyStreamBtn">Copier le lien</button>
-      </div>
-    </div>
-  </div>
-
   <main class="grid-container" id="grid"></main>
 
   <script>
@@ -611,12 +588,6 @@
     const existingTagsDatalist = document.getElementById('existingTagsDatalist');
     const saveTagBtn = document.getElementById('saveTagBtn');
     const cancelTagBtn = document.getElementById('cancelTagBtn');
-
-    const streamModal = document.getElementById('streamModal');
-    const streamModalTitle = document.getElementById('streamModalTitle');
-    const streamModalInput = document.getElementById('streamModalInput');
-    const copyStreamBtn = document.getElementById('copyStreamBtn');
-    const closeStreamModalBtn = document.getElementById('closeStreamModalBtn');
 
     const streamObserver = new IntersectionObserver((entries) => {
       entries.forEach(entry => {
@@ -691,25 +662,6 @@
       saveHidden();
       renderGrid();
     }
-
-    window.downloadHLSStream = function(username) {
-      const roomUrl = `https://chaturbate.com/${encodeURIComponent(username)}/`;
-      streamModalTitle.textContent = `Flux pour ${username}`;
-      streamModalInput.value = roomUrl;
-      streamModal.classList.add('show');
-    }
-
-    copyStreamBtn.addEventListener('click', () => {
-      streamModalInput.select();
-      navigator.clipboard.writeText(streamModalInput.value).then(() => {
-        copyStreamBtn.textContent = 'Copié !';
-        setTimeout(() => { copyStreamBtn.textContent = 'Copier le lien'; }, 2000);
-      });
-    });
-
-    closeStreamModalBtn.addEventListener('click', () => {
-      streamModal.classList.remove('show');
-    });
 
     window.openTagModal = function(username) {
       targetTagUser = username;
@@ -811,7 +763,6 @@
             <div class="tags-container">${tagsHtml}</div>
           </div>
           <div class="header-actions">
-            <button class="btn-icon-subtle" title="Lien m3u8 / flux" onclick="downloadHLSStream('${username}')">📥</button>
             <button class="btn-icon-subtle" title="${isHidden ? 'Démasquer' : 'Masquer'}" onclick="toggleHideModel('${username}')">
               ${isHidden ? '👁️' : '🙈'}
             </button>
