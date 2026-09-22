@@ -168,6 +168,12 @@
       font-weight: 600;
     }
 
+    .btn-layout.active {
+      background: rgba(56, 189, 248, 0.15);
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
     .dropdown-menu {
       display: none;
       position: fixed;
@@ -275,22 +281,23 @@
 
     .btn-clear-history:hover { background: rgba(239, 68, 68, 0.1); }
 
-    /* Conteneur principal dynamique */
     .grid-container {
       display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
       gap: 16px;
       padding: 16px;
       flex: 1;
     }
 
-    /* Mode Grille Standard */
-    .grid-container.mode-grid {
-      grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+    /* Mode Compact */
+    .grid-container.compact-mode {
+      grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+      gap: 10px;
+      padding: 10px;
     }
 
-    /* Mode Compact / Liste */
-    .grid-container.mode-compact {
-      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    .grid-container.compact-mode .player-container {
+      aspect-ratio: 16 / 10;
     }
 
     .empty-message {
@@ -301,7 +308,6 @@
       font-size: 1rem;
     }
 
-    /* Style Carte Grille Standard */
     .model-card {
       background: var(--card-bg);
       border-radius: 10px;
@@ -424,15 +430,6 @@
       overflow: hidden;
     }
 
-    /* Style Carte Mode Compact */
-    .grid-container.mode-compact .model-card .player-container {
-      display: none; /* Cache la vidéo en mode compact pour une vue dense */
-    }
-
-    .grid-container.mode-compact .model-card {
-      border-radius: 8px;
-    }
-
     .modal-overlay {
       display: none;
       position: fixed;
@@ -535,9 +532,9 @@
         <option value="">🏷️ (Tous)</option>
       </select>
 
-      <button id="viewModeToggleBtn" class="btn-action" title="Basculer entre Grille standard et Mode compact">🖥️ Grille</button>
-
       <button id="sortToggleBtn" class="btn-action btn-sort" title="Basculer tri alphabétique (A-Z) ou Favoris d'abord">🔤 Tri A-Z</button>
+
+      <button id="layoutToggleBtn" class="btn-action btn-layout" title="Basculer entre Vue Grille et Mode Compact">📐 Mode Compact</button>
 
       <button id="favFilterBtn" class="btn-action btn-fav-filter" title="Afficher uniquement les favoris">&#9733; Favoris</button>
       
@@ -548,6 +545,11 @@
       <button id="historyBtn" class="btn-action" title="Historique des modèles">
         📜 Récents <span id="historyCount">(0)</span>
       </button>
+
+      <button id="exportBtn" class="btn-action" title="Exporter la configuration en JSON">📤 Exporter</button>
+      
+      <button id="importBtn" class="btn-action" title="Importer une configuration JSON">📥 Importer</button>
+      <input type="file" id="importFile" accept=".json" style="display: none;">
 
       <button id="resetBtn" class="btn-action btn-reset" title="Supprimer tous les modèles non-favoris">🧹 Nettoyer</button>
     </div>
@@ -582,7 +584,7 @@
     </div>
   </div>
 
-  <main class="grid-container mode-grid" id="grid"></main>
+  <main class="grid-container" id="grid"></main>
 
   <script>
     let models = JSON.parse(localStorage.getItem('cb_dashboard_models')) || [];
@@ -590,11 +592,11 @@
     let hiddenModels = JSON.parse(localStorage.getItem('cb_dashboard_hidden')) || [];
     let history = JSON.parse(localStorage.getItem('cb_dashboard_history')) || [];
     let tags = JSON.parse(localStorage.getItem('cb_dashboard_tags')) || {};
-    let currentViewMode = localStorage.getItem('cb_dashboard_viewmode') || 'grid'; // 'grid' ou 'compact'
     
     let showOnlyFavorites = false;
     let showHiddenModels = false;
     let alphabeticalSort = false; // Par défaut : Favoris d'abord
+    let isCompactMode = JSON.parse(localStorage.getItem('cb_dashboard_compact')) || false;
     let selectedTagFilter = '';
     let targetTagUser = null;
     let contextUser = null;
@@ -606,7 +608,7 @@
     const favFilterBtn = document.getElementById('favFilterBtn');
     const hideToggleBtn = document.getElementById('hideToggleBtn');
     const sortToggleBtn = document.getElementById('sortToggleBtn');
-    const viewModeToggleBtn = document.getElementById('viewModeToggleBtn');
+    const layoutToggleBtn = document.getElementById('layoutToggleBtn');
     const hiddenCount = document.getElementById('hiddenCount');
     const tagFilterSelect = document.getElementById('tagFilterSelect');
     const historyBtn = document.getElementById('historyBtn');
@@ -617,6 +619,10 @@
     const unhideAllBtn = document.getElementById('unhideAllBtn');
     const contextMenu = document.getElementById('contextMenu');
 
+    const exportBtn = document.getElementById('exportBtn');
+    const importBtn = document.getElementById('importBtn');
+    const importFile = document.getElementById('importFile');
+
     const tagModal = document.getElementById('tagModal');
     const modalTagInput = document.getElementById('modalTagInput');
     const tagModalTitle = document.getElementById('tagModalTitle');
@@ -624,10 +630,14 @@
     const saveTagBtn = document.getElementById('saveTagBtn');
     const cancelTagBtn = document.getElementById('cancelTagBtn');
 
-    const streamObserver = new IntersectionObserver((entries) => {
-      // Si on est en mode compact, les iframes ne sont pas rendues
-      if (currentViewMode === 'compact') return;
+    // Appliquer l'état initial du layout
+    if (isCompactMode) {
+      grid.classList.add('compact-mode');
+      layoutToggleBtn.classList.add('active');
+      layoutToggleBtn.textContent = '📐 Mode Standard';
+    }
 
+    const streamObserver = new IntersectionObserver((entries) => {
       entries.forEach(entry => {
         const container = entry.target;
         const iframe = container.querySelector('iframe');
@@ -661,21 +671,6 @@
       updateHistoryMenu();
     }
     function saveTags() { localStorage.setItem('cb_dashboard_tags', JSON.stringify(tags)); }
-    function saveViewMode() { localStorage.setItem('cb_dashboard_viewmode', currentViewMode); }
-
-    function updateViewModeUI() {
-      if (currentViewMode === 'compact') {
-        grid.className = 'grid-container mode-compact';
-        viewModeToggleBtn.textContent = '📄 Compact';
-        viewModeToggleBtn.classList.add('active');
-        viewModeToggleBtn.title = 'Passer en mode Grille standard';
-      } else {
-        grid.className = 'grid-container mode-grid';
-        viewModeToggleBtn.textContent = '🖥️ Grille';
-        viewModeToggleBtn.classList.remove('active');
-        viewModeToggleBtn.title = 'Passer en mode Compact';
-      }
-    }
 
     function getAllExistingTags() {
       const set = new Set();
@@ -834,10 +829,8 @@
         </div>
       `;
 
-      if (currentViewMode === 'grid') {
-        const playerContainer = card.querySelector('.player-container');
-        streamObserver.observe(playerContainer);
-      }
+      const playerContainer = card.querySelector('.player-container');
+      streamObserver.observe(playerContainer);
 
       card.addEventListener('contextmenu', (e) => {
         e.preventDefault();
@@ -882,7 +875,6 @@
       streamObserver.disconnect();
       grid.innerHTML = '';
       
-      updateViewModeUI();
       updateTagFilterOptions();
       updateHiddenCount();
       
@@ -1019,12 +1011,6 @@
       e.stopPropagation();
     });
 
-    viewModeToggleBtn.addEventListener('click', () => {
-      currentViewMode = currentViewMode === 'grid' ? 'compact' : 'grid';
-      saveViewMode();
-      renderGrid();
-    });
-
     hideToggleBtn.addEventListener('click', () => {
       showHiddenModels = !showHiddenModels;
       hideToggleBtn.classList.toggle('active', showHiddenModels);
@@ -1036,6 +1022,75 @@
       sortToggleBtn.classList.toggle('active', alphabeticalSort);
       sortToggleBtn.textContent = alphabeticalSort ? '⭐ Favoris d’abord' : '🔤 Tri A-Z';
       renderGrid();
+    });
+
+    layoutToggleBtn.addEventListener('click', () => {
+      isCompactMode = !isCompactMode;
+      localStorage.setItem('cb_dashboard_compact', JSON.stringify(isCompactMode));
+      grid.classList.toggle('compact-mode', isCompactMode);
+      layoutToggleBtn.classList.toggle('active', isCompactMode);
+      layoutToggleBtn.textContent = isCompactMode ? '📐 Mode Standard' : '📐 Mode Compact';
+    });
+
+    // Gestion Export JSON
+    exportBtn.addEventListener('click', () => {
+      const backupData = {
+        models,
+        favorites,
+        hiddenModels,
+        history,
+        tags,
+        exportDate: new Date().toISOString()
+      };
+
+      const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(backupData, null, 2));
+      const downloadAnchor = document.createElement('a');
+      downloadAnchor.setAttribute("href", dataStr);
+      downloadAnchor.setAttribute("download", `directs-live-backup-${new Date().toISOString().slice(0,10)}.json`);
+      document.body.appendChild(downloadAnchor);
+      downloadAnchor.click();
+      downloadAnchor.remove();
+    });
+
+    // Gestion Import JSON
+    importBtn.addEventListener('click', () => {
+      importFile.click();
+    });
+
+    importFile.addEventListener('change', (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = function(event) {
+        try {
+          const imported = JSON.parse(event.target.result);
+          
+          if (imported.models && Array.isArray(imported.models)) {
+            models = imported.models;
+            favorites = Array.isArray(imported.favorites) ? imported.favorites : [];
+            hiddenModels = Array.isArray(imported.hiddenModels) ? imported.hiddenModels : [];
+            history = Array.isArray(imported.history) ? imported.history : [];
+            tags = (imported.tags && typeof imported.tags === 'object') ? imported.tags : {};
+
+            saveModels();
+            saveFavorites();
+            saveHidden();
+            saveHistory();
+            saveTags();
+
+            renderGrid();
+            alert('Configuration importée avec succès !');
+          } else {
+            alert('Format de fichier JSON invalide.');
+          }
+        } catch (err) {
+          alert('Erreur lors de la lecture du fichier JSON.');
+          console.error(err);
+        }
+        importFile.value = ''; // Réinitialiser l'input file
+      };
+      reader.readAsText(file);
     });
 
     unhideAllBtn.addEventListener('click', (e) => {
