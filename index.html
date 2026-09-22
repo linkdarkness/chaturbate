@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Directs Live - Dashboard Unifié</title>
+  <title>Directs Live - Dashboard Optimisé</title>
   <style>
     :root {
       --bg: #0f172a;
@@ -60,7 +60,7 @@
     }
 
     .custom-input {
-      padding: 8px 36px 8px 12px;
+      padding: 8px 32px 8px 12px;
       border-radius: 6px 0 0 6px;
       border: 1px solid #334155;
       border-right: none;
@@ -77,20 +77,20 @@
       border-color: var(--accent);
     }
 
-    .btn-clear-search {
+    .clear-search-btn {
       position: absolute;
-      right: 4px;
+      right: 50px;
       background: transparent;
       border: none;
       color: #64748b;
       font-size: 1.1rem;
       cursor: pointer;
-      padding: 2px 6px;
       display: none;
-      z-index: 5;
+      padding: 0 6px;
+      line-height: 1;
     }
-    .btn-clear-search:hover { color: var(--danger); }
-    .btn-clear-search.show { display: block; }
+    .clear-search-btn:hover { color: var(--text); }
+    .clear-search-btn.show { display: block; }
 
     .btn-add {
       background: #0284c7;
@@ -127,7 +127,7 @@
       cursor: pointer;
       outline: none;
       flex: 1;
-      min-width: 140px;
+      min-width: 150px;
     }
 
     .select-tag:hover, .select-tag:focus {
@@ -516,6 +516,7 @@
 
     .btn-delete:hover { color: var(--danger); }
 
+    /* Conteneur et iframe parfaitement ajustés et bloquant les scrolls internes */
     .player-container {
       width: 100%;
       aspect-ratio: 16 / 18;
@@ -532,6 +533,7 @@
       height: 100%;
       border: 0;
       overflow: hidden;
+      display: block;
     }
 
     .modal-overlay {
@@ -626,8 +628,8 @@
     <div class="header-top-row">
       <h1>Directs Live</h1>
       <form id="addModelForm" class="input-form">
-        <input type="text" id="newModelInput" class="custom-input" placeholder="🔍 Rechercher ou ajouter un pseudo..." autocomplete="off">
-        <button type="button" id="clearSearchBtn" class="btn-clear-search" title="Effacer la recherche">&times;</button>
+        <input type="text" id="newModelInput" class="custom-input" placeholder="Ajouter ou chercher un pseudo..." autocomplete="off">
+        <button type="button" id="clearSearchBtn" class="clear-search-btn" title="Effacer la recherche">&times;</button>
         <button type="submit" class="btn-add" title="Ajouter ce modèle">+</button>
       </form>
     </div>
@@ -700,7 +702,7 @@
     let showOnlyFavorites = false;
     let showHiddenModels = false;
     let alphabeticalSort = false;
-    let currentLayout = parseInt(localStorage.getItem('cb_dashboard_layout_mode')) || 0; // 0: Standard, 1: Compact, 2: Miniature, 3: Cinéma
+    let currentLayout = parseInt(localStorage.getItem('cb_dashboard_layout_mode')) || 0; 
     let selectedTagFilter = '';
     let searchQuery = '';
     let targetTagUser = null;
@@ -809,6 +811,9 @@
       }
       history = [username, ...history.filter(h => h.toLowerCase() !== lower)];
       saveHistory();
+      searchQuery = '';
+      newModelInput.value = '';
+      clearSearchBtn.classList.remove('show');
       renderGrid();
     }
 
@@ -1010,10 +1015,8 @@
       
       let displayModels = [...models];
 
-      // Filtrage par texte instantané
       if (searchQuery) {
-        const q = searchQuery.toLowerCase();
-        displayModels = displayModels.filter(m => m.toLowerCase().includes(q));
+        displayModels = displayModels.filter(m => m.toLowerCase().includes(searchQuery.toLowerCase()));
       }
 
       if (alphabeticalSort) {
@@ -1044,12 +1047,11 @@
       }
 
       if (displayModels.length === 0) {
-        grid.innerHTML = `<div class="empty-message">Aucun modèle ne correspond à votre recherche.</div>`;
+        grid.innerHTML = `<div class="empty-message">Aucun modèle à afficher pour le moment.</div>`;
         updateHistoryMenu();
         return;
       }
 
-      // --- RENDU MODE CINEMA ---
       if (currentLayout === 3) {
         if (!cinemaSelectedUser || !displayModels.map(m => m.toLowerCase()).includes(cinemaSelectedUser.toLowerCase())) {
           cinemaSelectedUser = displayModels[0];
@@ -1070,9 +1072,7 @@
 
         grid.appendChild(mainArea);
         grid.appendChild(sidebar);
-      } 
-      // --- RENDU STANDARD / COMPACT / MINIATURE ---
-      else {
+      } else {
         displayModels.forEach(username => {
           grid.appendChild(createCard(username));
         });
@@ -1172,7 +1172,6 @@
       e.stopPropagation();
     });
 
-    // Gestion de la saisie unifiée (Recherche instantanée + Ajout)
     newModelInput.addEventListener('input', (e) => {
       searchQuery = e.target.value.trim();
       if (searchQuery.length > 0) {
@@ -1189,19 +1188,6 @@
       clearSearchBtn.classList.remove('show');
       renderGrid();
       newModelInput.focus();
-    });
-
-    addModelForm.addEventListener('submit', (e) => {
-      e.preventDefault();
-      const username = newModelInput.value.trim();
-
-      if (username) {
-        addModelToState(username);
-        newModelInput.value = '';
-        searchQuery = '';
-        clearSearchBtn.classList.remove('show');
-        renderGrid();
-      }
     });
 
     hideToggleBtn.addEventListener('click', () => {
@@ -1295,6 +1281,15 @@
     tagFilterSelect.addEventListener('change', (e) => {
       selectedTagFilter = e.target.value;
       renderGrid();
+    });
+
+    addModelForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const username = newModelInput.value.trim();
+
+      if (username) {
+        addModelToState(username);
+      }
     });
 
     function removeModel(username) {
