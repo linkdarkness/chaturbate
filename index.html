@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Directs Live - Dashboard Optimisé</title>
+  <title>Directs Live - Dashboard Unifié</title>
   <style>
     :root {
       --bg: #0f172a;
@@ -56,10 +56,11 @@
       align-items: center;
       gap: 0;
       flex: 1;
+      position: relative;
     }
 
     .custom-input {
-      padding: 8px 12px;
+      padding: 8px 36px 8px 12px;
       border-radius: 6px 0 0 6px;
       border: 1px solid #334155;
       border-right: none;
@@ -75,6 +76,21 @@
     .custom-input:focus {
       border-color: var(--accent);
     }
+
+    .btn-clear-search {
+      position: absolute;
+      right: 4px;
+      background: transparent;
+      border: none;
+      color: #64748b;
+      font-size: 1.1rem;
+      cursor: pointer;
+      padding: 2px 6px;
+      display: none;
+      z-index: 5;
+    }
+    .btn-clear-search:hover { color: var(--danger); }
+    .btn-clear-search.show { display: block; }
 
     .btn-add {
       background: #0284c7;
@@ -111,7 +127,7 @@
       cursor: pointer;
       outline: none;
       flex: 1;
-      min-width: 150px;
+      min-width: 140px;
     }
 
     .select-tag:hover, .select-tag:focus {
@@ -386,8 +402,6 @@
       }
     }
 
-    .grid-container.cinema-mode:not(:not(*)) { /* fallback style */ }
-
     .empty-message {
       grid-column: 1 / -1;
       text-align: center;
@@ -612,7 +626,8 @@
     <div class="header-top-row">
       <h1>Directs Live</h1>
       <form id="addModelForm" class="input-form">
-        <input type="text" id="newModelInput" class="custom-input" placeholder="Ajouter un pseudo de modèle..." required>
+        <input type="text" id="newModelInput" class="custom-input" placeholder="🔍 Rechercher ou ajouter un pseudo..." autocomplete="off">
+        <button type="button" id="clearSearchBtn" class="btn-clear-search" title="Effacer la recherche">&times;</button>
         <button type="submit" class="btn-add" title="Ajouter ce modèle">+</button>
       </form>
     </div>
@@ -661,7 +676,6 @@
     <div class="context-item danger" id="ctxDelete">❌ Supprimer</div>
   </div>
 
-  <!-- Modal pour les tags -->
   <div id="tagModal" class="modal-overlay">
     <div class="modal-card">
       <div class="modal-title" id="tagModalTitle">Ajouter une étiquette</div>
@@ -688,13 +702,15 @@
     let alphabeticalSort = false;
     let currentLayout = parseInt(localStorage.getItem('cb_dashboard_layout_mode')) || 0; // 0: Standard, 1: Compact, 2: Miniature, 3: Cinéma
     let selectedTagFilter = '';
+    let searchQuery = '';
     let targetTagUser = null;
     let contextUser = null;
-    let cinemaSelectedUser = null; // Suivi du flux actif en mode cinéma
+    let cinemaSelectedUser = null;
 
     const grid = document.getElementById('grid');
     const addModelForm = document.getElementById('addModelForm');
     const newModelInput = document.getElementById('newModelInput');
+    const clearSearchBtn = document.getElementById('clearSearchBtn');
     const resetBtn = document.getElementById('resetBtn');
     const favFilterBtn = document.getElementById('favFilterBtn');
     const hideToggleBtn = document.getElementById('hideToggleBtn');
@@ -994,6 +1010,12 @@
       
       let displayModels = [...models];
 
+      // Filtrage par texte instantané
+      if (searchQuery) {
+        const q = searchQuery.toLowerCase();
+        displayModels = displayModels.filter(m => m.toLowerCase().includes(q));
+      }
+
       if (alphabeticalSort) {
         displayModels.sort((a, b) => a.localeCompare(b, 'fr', { sensitivity: 'base' }));
       } else {
@@ -1022,7 +1044,7 @@
       }
 
       if (displayModels.length === 0) {
-        grid.innerHTML = `<div class="empty-message">Aucun modèle à afficher pour le moment.</div>`;
+        grid.innerHTML = `<div class="empty-message">Aucun modèle ne correspond à votre recherche.</div>`;
         updateHistoryMenu();
         return;
       }
@@ -1150,6 +1172,38 @@
       e.stopPropagation();
     });
 
+    // Gestion de la saisie unifiée (Recherche instantanée + Ajout)
+    newModelInput.addEventListener('input', (e) => {
+      searchQuery = e.target.value.trim();
+      if (searchQuery.length > 0) {
+        clearSearchBtn.classList.add('show');
+      } else {
+        clearSearchBtn.classList.remove('show');
+      }
+      renderGrid();
+    });
+
+    clearSearchBtn.addEventListener('click', () => {
+      newModelInput.value = '';
+      searchQuery = '';
+      clearSearchBtn.classList.remove('show');
+      renderGrid();
+      newModelInput.focus();
+    });
+
+    addModelForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const username = newModelInput.value.trim();
+
+      if (username) {
+        addModelToState(username);
+        newModelInput.value = '';
+        searchQuery = '';
+        clearSearchBtn.classList.remove('show');
+        renderGrid();
+      }
+    });
+
     hideToggleBtn.addEventListener('click', () => {
       showHiddenModels = !showHiddenModels;
       hideToggleBtn.classList.toggle('active', showHiddenModels);
@@ -1164,7 +1218,7 @@
     });
 
     layoutToggleBtn.addEventListener('click', () => {
-      currentLayout = (currentLayout + 1) % 4; // Bascule maintenant entre 0, 1, 2 et 3 (Cinéma)
+      currentLayout = (currentLayout + 1) % 4;
       applyLayout();
     });
 
@@ -1241,16 +1295,6 @@
     tagFilterSelect.addEventListener('change', (e) => {
       selectedTagFilter = e.target.value;
       renderGrid();
-    });
-
-    addModelForm.addEventListener('submit', (e) => {
-      e.preventDefault();
-      const username = newModelInput.value.trim();
-
-      if (username) {
-        addModelToState(username);
-        newModelInput.value = '';
-      }
     });
 
     function removeModel(username) {
