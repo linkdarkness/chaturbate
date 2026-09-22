@@ -111,7 +111,7 @@
       cursor: pointer;
       outline: none;
       flex: 1;
-      min-width: 180px;
+      min-width: 160px;
     }
 
     .select-tag:hover, .select-tag:focus {
@@ -158,6 +158,13 @@
       background: rgba(148, 163, 184, 0.2);
       border-color: var(--hidden);
       color: var(--text);
+      font-weight: 600;
+    }
+
+    .btn-sort.active {
+      background: rgba(56, 189, 248, 0.15);
+      border-color: var(--accent);
+      color: var(--accent);
       font-weight: 600;
     }
 
@@ -508,6 +515,8 @@
         <option value="">🏷️ (Tous)</option>
       </select>
 
+      <button id="sortToggleBtn" class="btn-action btn-sort" title="Basculer tri alphabétique (A-Z) ou Favoris d'abord">🔤 Tri A-Z</button>
+
       <button id="favFilterBtn" class="btn-action btn-fav-filter" title="Afficher uniquement les favoris">&#9733; Favoris</button>
       
       <button id="hideToggleBtn" class="btn-action btn-hide-toggle" title="Afficher/Masquer les modèles masqués">
@@ -562,6 +571,7 @@
     
     let showOnlyFavorites = false;
     let showHiddenModels = false;
+    let alphabeticalSort = false; // Par défaut : Favoris d'abord
     let selectedTagFilter = '';
     let targetTagUser = null;
     let contextUser = null;
@@ -572,6 +582,7 @@
     const resetBtn = document.getElementById('resetBtn');
     const favFilterBtn = document.getElementById('favFilterBtn');
     const hideToggleBtn = document.getElementById('hideToggleBtn');
+    const sortToggleBtn = document.getElementById('sortToggleBtn');
     const hiddenCount = document.getElementById('hiddenCount');
     const tagFilterSelect = document.getElementById('tagFilterSelect');
     const historyBtn = document.getElementById('historyBtn');
@@ -627,13 +638,13 @@
     function getAllExistingTags() {
       const set = new Set();
       Object.values(tags).forEach(list => list.forEach(t => set.add(t)));
-      return Array.from(set).sort();
+      return Array.from(set).sort((a, b) => a.localeCompare(b, 'fr', { sensitivity: 'base' }));
     }
 
     function addModelToState(username) {
       const lower = username.toLowerCase();
       if (!models.map(m => m.toLowerCase()).includes(lower)) {
-        models.unshift(username);
+        models.push(username); // Ajouté à la liste brute
         saveModels();
       }
       history = [username, ...history.filter(h => h.toLowerCase() !== lower)];
@@ -745,7 +756,7 @@
       const lower = username.toLowerCase();
       const isFav = favorites.includes(lower);
       const isHidden = hiddenModels.includes(lower);
-      const modelTags = tags[lower] || [];
+      const modelTags = (tags[lower] || []).sort((a, b) => a.localeCompare(b, 'fr', { sensitivity: 'base' }));
 
       const card = document.createElement('div');
       card.className = `model-card ${isHidden ? 'is-hidden' : ''}`;
@@ -830,11 +841,22 @@
       updateTagFilterOptions();
       updateHiddenCount();
       
-      let displayModels = [...models].sort((a, b) => {
-        const aFav = favorites.includes(a.toLowerCase());
-        const bFav = favorites.includes(b.toLowerCase());
-        return bFav - aFav;
-      });
+      let displayModels = [...models];
+
+      // Gestion du tri
+      if (alphabeticalSort) {
+        // Tri alphabétique strict (A-Z) indépendant des favoris
+        displayModels.sort((a, b) => a.localeCompare(b, 'fr', { sensitivity: 'base' }));
+      } else {
+        // Tri par défaut : Favoris d'abord, puis ordre alphabétique pour le reste
+        displayModels.sort((a, b) => {
+          const aFav = favorites.includes(a.toLowerCase());
+          const bFav = favorites.includes(b.toLowerCase());
+          if (aFav && !bFav) return -1;
+          if (!aFav && bFav) return 1;
+          return a.localeCompare(b, 'fr', { sensitivity: 'base' });
+        });
+      }
 
       if (!showHiddenModels) {
         displayModels = displayModels.filter(m => !hiddenModels.includes(m.toLowerCase()));
@@ -879,7 +901,10 @@
         return;
       }
 
-      history.forEach(username => {
+      // Tri alphabétique de l'historique récent aussi
+      const sortedHistory = [...history].sort((a, b) => a.localeCompare(b, 'fr', { sensitivity: 'base' }));
+
+      sortedHistory.forEach(username => {
         const lower = username.toLowerCase();
         const isPresent = models.map(m => m.toLowerCase()).includes(lower);
 
@@ -956,6 +981,13 @@
     hideToggleBtn.addEventListener('click', () => {
       showHiddenModels = !showHiddenModels;
       hideToggleBtn.classList.toggle('active', showHiddenModels);
+      renderGrid();
+    });
+
+    sortToggleBtn.addEventListener('click', () => {
+      alphabeticalSort = !alphabeticalSort;
+      sortToggleBtn.classList.toggle('active', alphabeticalSort);
+      sortToggleBtn.textContent = alphabeticalSort ? '⭐ Favoris d’abord' : '🔤 Tri A-Z';
       renderGrid();
     });
 
