@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Directs Live - Dashboard Optimisé</title>
+  <title>Directs Live</title>
   <style>
     :root {
       --bg: #0f172a;
@@ -427,7 +427,7 @@
       border: 1px solid #334155;
       border-radius: 10px;
       width: 90%;
-      max-width: 360px;
+      max-width: 380px;
       padding: 16px;
       box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.8);
       display: flex;
@@ -441,18 +441,22 @@
       color: var(--text);
     }
 
+    .modal-text {
+      font-size: 0.85rem;
+      color: #94a3b8;
+      line-height: 1.4;
+    }
+
     .modal-input {
       padding: 8px 12px;
       border-radius: 6px;
       border: 1px solid #334155;
       background: #0f172a;
       color: var(--text);
-      font-size: 0.9rem;
+      font-size: 0.85rem;
       outline: none;
       width: 100%;
     }
-
-    .modal-input:focus { border-color: var(--accent); }
 
     .modal-actions {
       display: flex;
@@ -540,6 +544,7 @@
     <div class="context-item danger" id="ctxDelete">❌ Supprimer</div>
   </div>
 
+  <!-- Modal pour les tags -->
   <div id="tagModal" class="modal-overlay">
     <div class="modal-card">
       <div class="modal-title" id="tagModalTitle">Ajouter une étiquette</div>
@@ -548,6 +553,19 @@
       <div class="modal-actions">
         <button class="btn-action" id="cancelTagBtn">Annuler</button>
         <button class="btn-action" style="background: #0284c7; color: #fff; border-color: #0284c7;" id="saveTagBtn">Valider</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Nouvelle modale propre pour le lien du flux -->
+  <div id="streamModal" class="modal-overlay">
+    <div class="modal-card">
+      <div class="modal-title" id="streamModalTitle">Lien du flux</div>
+      <div class="modal-text">Copiez le lien ci-dessous pour l'ouvrir ou l'analyser dans un lecteur externe (comme VLC) :</div>
+      <input type="text" id="streamModalInput" class="modal-input" readonly onclick="this.select();">
+      <div class="modal-actions">
+        <button class="btn-action" id="closeStreamModalBtn">Fermer</button>
+        <button class="btn-action" style="background: #0284c7; color: #fff; border-color: #0284c7;" id="copyStreamBtn">Copier le lien</button>
       </div>
     </div>
   </div>
@@ -589,6 +607,13 @@
     const existingTagsDatalist = document.getElementById('existingTagsDatalist');
     const saveTagBtn = document.getElementById('saveTagBtn');
     const cancelTagBtn = document.getElementById('cancelTagBtn');
+
+    // Éléments de la modale flux
+    const streamModal = document.getElementById('streamModal');
+    const streamModalTitle = document.getElementById('streamModalTitle');
+    const streamModalInput = document.getElementById('streamModalInput');
+    const copyStreamBtn = document.getElementById('copyStreamBtn');
+    const closeStreamModalBtn = document.getElementById('closeStreamModalBtn');
 
     const streamObserver = new IntersectionObserver((entries) => {
       entries.forEach(entry => {
@@ -664,11 +689,25 @@
       renderGrid();
     }
 
-    // Solution alternative : Ouvre directement la page de la room ou copie le lien de la page du modèle
+    // Ouvre la modale propre avec le lien du profil/flux
     window.downloadHLSStream = function(username) {
       const roomUrl = `https://chaturbate.com/${encodeURIComponent(username)}/`;
-      prompt(`En raison des restrictions de sécurité des navigateurs, l'accès direct par script aux liens cachés .m3u8 n'est pas autorisé. \n\nCopiez le lien ci-dessous pour l'ouvrir ou l'analyser dans un lecteur externe (comme VLC) :`, roomUrl);
-    };
+      streamModalTitle.textContent = `Flux pour ${username}`;
+      streamModalInput.value = roomUrl;
+      streamModal.classList.add('show');
+    }
+
+    copyStreamBtn.addEventListener('click', () => {
+      streamModalInput.select();
+      navigator.clipboard.writeText(streamModalInput.value).then(() => {
+        copyStreamBtn.textContent = 'Copié !';
+        setTimeout(() => { copyStreamBtn.textContent = 'Copier le lien'; }, 2000);
+      });
+    });
+
+    closeStreamModalBtn.addEventListener('click', () => {
+      streamModal.classList.remove('show');
+    });
 
     window.openTagModal = function(username) {
       targetTagUser = username;
