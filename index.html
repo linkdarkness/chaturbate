@@ -300,6 +300,48 @@
       aspect-ratio: 16 / 10;
     }
 
+    /* Mode Miniature (10+ visibles sur smartphone) */
+    .grid-container.miniature-mode {
+      grid-template-columns: repeat(2, 1fr);
+      gap: 6px;
+      padding: 8px;
+    }
+
+    @media (min-width: 600px) {
+      .grid-container.miniature-mode {
+        grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+      }
+    }
+
+    .grid-container.miniature-mode .model-card {
+      border-radius: 6px;
+    }
+
+    .grid-container.miniature-mode .model-header {
+      padding: 4px 6px;
+    }
+
+    .grid-container.miniature-mode .model-name {
+      font-size: 0.75rem;
+    }
+
+    .grid-container.miniature-mode .tags-container {
+      display: none; /* Cache les tags pour gagner de la place en mode miniature */
+    }
+
+    .grid-container.miniature-mode .btn-icon-subtle,
+    .grid-container.miniature-mode .btn-delete {
+      font-size: 0.8rem;
+    }
+
+    .grid-container.miniature-mode .btn-fav {
+      font-size: 0.9rem;
+    }
+
+    .grid-container.miniature-mode .player-container {
+      aspect-ratio: 1 / 1; /* Format carré compact */
+    }
+
     .empty-message {
       grid-column: 1 / -1;
       text-align: center;
@@ -534,7 +576,7 @@
 
       <button id="sortToggleBtn" class="btn-action btn-sort" title="Basculer tri alphabétique (A-Z) ou Favoris d'abord">🔤 Tri A-Z</button>
 
-      <button id="layoutToggleBtn" class="btn-action btn-layout" title="Basculer entre Vue Grille et Mode Compact">📐 Mode Compact</button>
+      <button id="layoutToggleBtn" class="btn-action btn-layout" title="Changer le mode d'affichage">📐 Mode Standard</button>
 
       <button id="favFilterBtn" class="btn-action btn-fav-filter" title="Afficher uniquement les favoris">&#9733; Favoris</button>
       
@@ -595,8 +637,9 @@
     
     let showOnlyFavorites = false;
     let showHiddenModels = false;
-    let alphabeticalSort = false; // Par défaut : Favoris d'abord
-    let isCompactMode = JSON.parse(localStorage.getItem('cb_dashboard_compact')) || false;
+    let alphabeticalSort = false;
+    // currentLayout: 0 = Standard, 1 = Compact, 2 = Miniature
+    let currentLayout = parseInt(localStorage.getItem('cb_dashboard_layout_mode')) || 0;
     let selectedTagFilter = '';
     let targetTagUser = null;
     let contextUser = null;
@@ -630,12 +673,25 @@
     const saveTagBtn = document.getElementById('saveTagBtn');
     const cancelTagBtn = document.getElementById('cancelTagBtn');
 
-    // Appliquer l'état initial du layout
-    if (isCompactMode) {
-      grid.classList.add('compact-mode');
-      layoutToggleBtn.classList.add('active');
-      layoutToggleBtn.textContent = '📐 Mode Standard';
+    function applyLayout() {
+      grid.classList.remove('compact-mode', 'miniature-mode');
+      layoutToggleBtn.classList.remove('active');
+
+      if (currentLayout === 1) {
+        grid.classList.add('compact-mode');
+        layoutToggleBtn.classList.add('active');
+        layoutToggleBtn.textContent = '📐 Mode Compact';
+      } else if (currentLayout === 2) {
+        grid.classList.add('miniature-mode');
+        layoutToggleBtn.classList.add('active');
+        layoutToggleBtn.textContent = '📐 Mode Miniature';
+      } else {
+        layoutToggleBtn.textContent = '📐 Mode Standard';
+      }
+      localStorage.setItem('cb_dashboard_layout_mode', currentLayout);
     }
+
+    applyLayout();
 
     const streamObserver = new IntersectionObserver((entries) => {
       entries.forEach(entry => {
@@ -1025,14 +1081,10 @@
     });
 
     layoutToggleBtn.addEventListener('click', () => {
-      isCompactMode = !isCompactMode;
-      localStorage.setItem('cb_dashboard_compact', JSON.stringify(isCompactMode));
-      grid.classList.toggle('compact-mode', isCompactMode);
-      layoutToggleBtn.classList.toggle('active', isCompactMode);
-      layoutToggleBtn.textContent = isCompactMode ? '📐 Mode Standard' : '📐 Mode Compact';
+      currentLayout = (currentLayout + 1) % 3; // Alterne entre 0, 1 et 2
+      applyLayout();
     });
 
-    // Gestion Export JSON
     exportBtn.addEventListener('click', () => {
       const backupData = {
         models,
@@ -1052,7 +1104,6 @@
       downloadAnchor.remove();
     });
 
-    // Gestion Import JSON
     importBtn.addEventListener('click', () => {
       importFile.click();
     });
@@ -1088,7 +1139,7 @@
           alert('Erreur lors de la lecture du fichier JSON.');
           console.error(err);
         }
-        importFile.value = ''; // Réinitialiser l'input file
+        importFile.value = '';
       };
       reader.readAsText(file);
     });
