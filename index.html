@@ -111,7 +111,7 @@
       cursor: pointer;
       outline: none;
       flex: 1;
-      min-width: 160px;
+      min-width: 150px;
     }
 
     .select-tag:hover, .select-tag:focus {
@@ -275,12 +275,22 @@
 
     .btn-clear-history:hover { background: rgba(239, 68, 68, 0.1); }
 
+    /* Conteneur principal dynamique */
     .grid-container {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
       gap: 16px;
       padding: 16px;
       flex: 1;
+    }
+
+    /* Mode Grille Standard */
+    .grid-container.mode-grid {
+      grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+    }
+
+    /* Mode Compact / Liste */
+    .grid-container.mode-compact {
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
     }
 
     .empty-message {
@@ -291,6 +301,7 @@
       font-size: 1rem;
     }
 
+    /* Style Carte Grille Standard */
     .model-card {
       background: var(--card-bg);
       border-radius: 10px;
@@ -413,6 +424,15 @@
       overflow: hidden;
     }
 
+    /* Style Carte Mode Compact */
+    .grid-container.mode-compact .model-card .player-container {
+      display: none; /* Cache la vidéo en mode compact pour une vue dense */
+    }
+
+    .grid-container.mode-compact .model-card {
+      border-radius: 8px;
+    }
+
     .modal-overlay {
       display: none;
       position: fixed;
@@ -515,6 +535,8 @@
         <option value="">🏷️ (Tous)</option>
       </select>
 
+      <button id="viewModeToggleBtn" class="btn-action" title="Basculer entre Grille standard et Mode compact">🖥️ Grille</button>
+
       <button id="sortToggleBtn" class="btn-action btn-sort" title="Basculer tri alphabétique (A-Z) ou Favoris d'abord">🔤 Tri A-Z</button>
 
       <button id="favFilterBtn" class="btn-action btn-fav-filter" title="Afficher uniquement les favoris">&#9733; Favoris</button>
@@ -560,7 +582,7 @@
     </div>
   </div>
 
-  <main class="grid-container" id="grid"></main>
+  <main class="grid-container mode-grid" id="grid"></main>
 
   <script>
     let models = JSON.parse(localStorage.getItem('cb_dashboard_models')) || [];
@@ -568,6 +590,7 @@
     let hiddenModels = JSON.parse(localStorage.getItem('cb_dashboard_hidden')) || [];
     let history = JSON.parse(localStorage.getItem('cb_dashboard_history')) || [];
     let tags = JSON.parse(localStorage.getItem('cb_dashboard_tags')) || {};
+    let currentViewMode = localStorage.getItem('cb_dashboard_viewmode') || 'grid'; // 'grid' ou 'compact'
     
     let showOnlyFavorites = false;
     let showHiddenModels = false;
@@ -583,6 +606,7 @@
     const favFilterBtn = document.getElementById('favFilterBtn');
     const hideToggleBtn = document.getElementById('hideToggleBtn');
     const sortToggleBtn = document.getElementById('sortToggleBtn');
+    const viewModeToggleBtn = document.getElementById('viewModeToggleBtn');
     const hiddenCount = document.getElementById('hiddenCount');
     const tagFilterSelect = document.getElementById('tagFilterSelect');
     const historyBtn = document.getElementById('historyBtn');
@@ -601,6 +625,9 @@
     const cancelTagBtn = document.getElementById('cancelTagBtn');
 
     const streamObserver = new IntersectionObserver((entries) => {
+      // Si on est en mode compact, les iframes ne sont pas rendues
+      if (currentViewMode === 'compact') return;
+
       entries.forEach(entry => {
         const container = entry.target;
         const iframe = container.querySelector('iframe');
@@ -634,6 +661,21 @@
       updateHistoryMenu();
     }
     function saveTags() { localStorage.setItem('cb_dashboard_tags', JSON.stringify(tags)); }
+    function saveViewMode() { localStorage.setItem('cb_dashboard_viewmode', currentViewMode); }
+
+    function updateViewModeUI() {
+      if (currentViewMode === 'compact') {
+        grid.className = 'grid-container mode-compact';
+        viewModeToggleBtn.textContent = '📄 Compact';
+        viewModeToggleBtn.classList.add('active');
+        viewModeToggleBtn.title = 'Passer en mode Grille standard';
+      } else {
+        grid.className = 'grid-container mode-grid';
+        viewModeToggleBtn.textContent = '🖥️ Grille';
+        viewModeToggleBtn.classList.remove('active');
+        viewModeToggleBtn.title = 'Passer en mode Compact';
+      }
+    }
 
     function getAllExistingTags() {
       const set = new Set();
@@ -644,7 +686,7 @@
     function addModelToState(username) {
       const lower = username.toLowerCase();
       if (!models.map(m => m.toLowerCase()).includes(lower)) {
-        models.push(username); // Ajouté à la liste brute
+        models.push(username);
         saveModels();
       }
       history = [username, ...history.filter(h => h.toLowerCase() !== lower)];
@@ -792,8 +834,10 @@
         </div>
       `;
 
-      const playerContainer = card.querySelector('.player-container');
-      streamObserver.observe(playerContainer);
+      if (currentViewMode === 'grid') {
+        const playerContainer = card.querySelector('.player-container');
+        streamObserver.observe(playerContainer);
+      }
 
       card.addEventListener('contextmenu', (e) => {
         e.preventDefault();
@@ -838,17 +882,15 @@
       streamObserver.disconnect();
       grid.innerHTML = '';
       
+      updateViewModeUI();
       updateTagFilterOptions();
       updateHiddenCount();
       
       let displayModels = [...models];
 
-      // Gestion du tri
       if (alphabeticalSort) {
-        // Tri alphabétique strict (A-Z) indépendant des favoris
         displayModels.sort((a, b) => a.localeCompare(b, 'fr', { sensitivity: 'base' }));
       } else {
-        // Tri par défaut : Favoris d'abord, puis ordre alphabétique pour le reste
         displayModels.sort((a, b) => {
           const aFav = favorites.includes(a.toLowerCase());
           const bFav = favorites.includes(b.toLowerCase());
@@ -901,7 +943,6 @@
         return;
       }
 
-      // Tri alphabétique de l'historique récent aussi
       const sortedHistory = [...history].sort((a, b) => a.localeCompare(b, 'fr', { sensitivity: 'base' }));
 
       sortedHistory.forEach(username => {
@@ -976,6 +1017,12 @@
 
     historyMenu.addEventListener('click', (e) => {
       e.stopPropagation();
+    });
+
+    viewModeToggleBtn.addEventListener('click', () => {
+      currentViewMode = currentViewMode === 'grid' ? 'compact' : 'grid';
+      saveViewMode();
+      renderGrid();
     });
 
     hideToggleBtn.addEventListener('click', () => {
