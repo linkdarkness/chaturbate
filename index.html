@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Directs Live</title>
+  <title>Directs Live - Dashboard Optimisé</title>
   <style>
     :root {
       --bg: #0f172a;
@@ -427,7 +427,7 @@
       border: 1px solid #334155;
       border-radius: 10px;
       width: 90%;
-      max-width: 380px;
+      max-width: 400px;
       padding: 16px;
       box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.8);
       display: flex;
@@ -557,11 +557,15 @@
     </div>
   </div>
 
-  <!-- Nouvelle modale propre pour le lien du flux -->
+  <!-- Modale d'information flux / m3u8 -->
   <div id="streamModal" class="modal-overlay">
     <div class="modal-card">
-      <div class="modal-title" id="streamModalTitle">Lien du flux</div>
-      <div class="modal-text">Copiez le lien ci-dessous pour l'ouvrir ou l'analyser dans un lecteur externe (comme VLC) :</div>
+      <div class="modal-title" id="streamModalTitle">Lien de la Room</div>
+      <div class="modal-text">
+        VLC nécessite un lien direct au format <b>.m3u8</b>. Pour des raisons de sécurité et de chiffrement des serveurs, les navigateurs ne peuvent pas générer ce lien en un clic. 
+        <br><br>
+        Ouvrez le lien ci-dessous dans votre navigateur, puis récupérez le flux `.m3u8` via l'inspecteur réseau (F12) :
+      </div>
       <input type="text" id="streamModalInput" class="modal-input" readonly onclick="this.select();">
       <div class="modal-actions">
         <button class="btn-action" id="closeStreamModalBtn">Fermer</button>
@@ -608,7 +612,6 @@
     const saveTagBtn = document.getElementById('saveTagBtn');
     const cancelTagBtn = document.getElementById('cancelTagBtn');
 
-    // Éléments de la modale flux
     const streamModal = document.getElementById('streamModal');
     const streamModalTitle = document.getElementById('streamModalTitle');
     const streamModalInput = document.getElementById('streamModalInput');
@@ -689,7 +692,6 @@
       renderGrid();
     }
 
-    // Ouvre la modale propre avec le lien du profil/flux
     window.downloadHLSStream = function(username) {
       const roomUrl = `https://chaturbate.com/${encodeURIComponent(username)}/`;
       streamModalTitle.textContent = `Flux pour ${username}`;
@@ -809,7 +811,7 @@
             <div class="tags-container">${tagsHtml}</div>
           </div>
           <div class="header-actions">
-            <button class="btn-icon-subtle" title="Obtenir le lien du flux" onclick="downloadHLSStream('${username}')">📥</button>
+            <button class="btn-icon-subtle" title="Lien m3u8 / flux" onclick="downloadHLSStream('${username}')">📥</button>
             <button class="btn-icon-subtle" title="${isHidden ? 'Démasquer' : 'Masquer'}" onclick="toggleHideModel('${username}')">
               ${isHidden ? '👁️' : '🙈'}
             </button>
