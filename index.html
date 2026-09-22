@@ -664,25 +664,10 @@
       renderGrid();
     }
 
-    // Fonction pour récupérer / copier le lien HLS d'un modèle
-    window.downloadHLSStream = async function(username) {
-      // Chaturbate intègre généralement le flux via un player dont la source hls peut être déduite ou récupérée via l'API publique room_status
-      try {
-        const res = await fetch(`https://chaturbate.com/api/chatvideocontext/${username}/`);
-        const data = await res.json();
-        if (data && data.hls_source) {
-          navigator.clipboard.writeText(data.hls_source);
-          alert(`Lien HLS (.m3u8) pour ${username} copié dans le presse-papier !\n\nVous pouvez le coller dans VLC (Fichier > Ouvrir un flux réseau) ou un gestionnaire de téléchargement.`);
-        } else {
-          // Fallback sur le pattern standard si l'API directe échoue
-          const fallbackUrl = `https://chaturbate.com/embed/${encodeURIComponent(username)}/`;
-          alert(`Impossible de récupérer l'URL directe du flux pour ${username}. Vérifiez que la modèl est en ligne.`);
-        }
-      } catch (err) {
-        // En cas de blocage CORS direct par le navigateur, proposer la page ou une alternative
-        const embedUrl = `https://chaturbate.com/embed/${encodeURIComponent(username)}/`;
-        prompt(`Impossible de requêter l'API à cause des restrictions du navigateur. Voici le lien de la room à inspecter ou ouvrir :`, embedUrl);
-      }
+    // Solution alternative : Ouvre directement la page de la room ou copie le lien de la page du modèle
+    window.downloadHLSStream = function(username) {
+      const roomUrl = `https://chaturbate.com/${encodeURIComponent(username)}/`;
+      prompt(`En raison des restrictions de sécurité des navigateurs, l'accès direct par script aux liens cachés .m3u8 n'est pas autorisé. \n\nCopiez le lien ci-dessous pour l'ouvrir ou l'analyser dans un lecteur externe (comme VLC) :`, roomUrl);
     };
 
     window.openTagModal = function(username) {
@@ -785,7 +770,7 @@
             <div class="tags-container">${tagsHtml}</div>
           </div>
           <div class="header-actions">
-            <button class="btn-icon-subtle" title="Copier le flux HLS (.m3u8)" onclick="downloadHLSStream('${username}')">📥</button>
+            <button class="btn-icon-subtle" title="Obtenir le lien du flux" onclick="downloadHLSStream('${username}')">📥</button>
             <button class="btn-icon-subtle" title="${isHidden ? 'Démasquer' : 'Masquer'}" onclick="toggleHideModel('${username}')">
               ${isHidden ? '👁️' : '🙈'}
             </button>
