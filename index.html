@@ -41,21 +41,31 @@
     .header-top-row {
       display: flex;
       align-items: center;
-      gap: 12px;
+      gap: 8px;
       width: 100%;
+      flex-wrap: wrap;
     }
 
-    h1 {
-      font-size: 1.1rem;
-      white-space: nowrap;
-      flex-shrink: 0;
+    .select-tag {
+      background: #0f172a;
+      border: 1px solid #334155;
+      color: var(--text);
+      padding: 8px 12px;
+      border-radius: 6px;
+      font-size: 0.85rem;
+      cursor: pointer;
+      outline: none;
+      min-width: 140px;
+      height: 38px;
     }
+    .select-tag:hover, .select-tag:focus { border-color: var(--accent); }
 
     .input-form {
       display: flex;
       align-items: center;
       gap: 0;
       flex: 1;
+      min-width: 220px;
       position: relative;
     }
 
@@ -69,7 +79,7 @@
       font-size: 0.9rem;
       outline: none;
       width: 100%;
-      flex: 1;
+      height: 38px;
       transition: border-color 0.2s ease;
     }
 
@@ -100,6 +110,7 @@
       font-size: 0.9rem;
       cursor: pointer;
       white-space: nowrap;
+      height: 38px;
     }
     .btn-add:hover { background: #0369a1; border-color: #0369a1; }
 
@@ -110,19 +121,6 @@
       flex-wrap: wrap;
       width: 100%;
     }
-
-    .select-tag {
-      background: #0f172a;
-      border: 1px solid #334155;
-      color: var(--text);
-      padding: 6px 12px;
-      border-radius: 6px;
-      font-size: 0.85rem;
-      cursor: pointer;
-      outline: none;
-      min-width: 130px;
-    }
-    .select-tag:hover, .select-tag:focus { border-color: var(--accent); }
 
     .btn-action {
       background: transparent;
@@ -140,6 +138,7 @@
       user-select: none;
       white-space: nowrap;
       flex-shrink: 0;
+      height: 36px;
     }
     .btn-action:hover { color: var(--text); background: #334155; }
     .btn-reset:hover { color: var(--danger); border-color: var(--danger); background: rgba(239, 68, 68, 0.1); }
@@ -199,7 +198,6 @@
       flex: 1;
     }
     
-    /* Mode Miniature : colonnes plus serrées et hauteur dynamique adaptée au contenu */
     .grid-container.miniature-mode { 
       grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); 
       gap: 8px; 
@@ -210,7 +208,7 @@
     .grid-container.miniature-mode .tags-container { display: none; }
     .grid-container.miniature-mode .player-container { 
       aspect-ratio: auto; 
-      height: 120px; /* Hauteur fixe compacte pour les miniatures */
+      height: 120px; 
     }
 
     .empty-message { grid-column: 1 / -1; text-align: center; padding: 60px 20px; color: #64748b; font-size: 1rem; }
@@ -266,7 +264,10 @@
 <body>
   <header>
     <div class="header-top-row">
-      <h1>Directs Live</h1>
+      <select id="tagFilterSelect" class="select-tag" title="Filtrer par étiquette">
+        <option value="">🏷️ (Tous)</option>
+      </select>
+
       <form id="addModelForm" class="input-form">
         <input type="text" id="newModelInput" class="custom-input" placeholder="Ajouter un pseudo..." autocomplete="off">
         <button type="button" id="clearSearchBtn" class="clear-search-btn" title="Effacer la recherche">&times;</button>
@@ -275,10 +276,6 @@
     </div>
 
     <div class="header-bottom-row">
-      <select id="tagFilterSelect" class="select-tag" title="Filtrer par étiquette">
-        <option value="">🏷️ (Tous)</option>
-      </select>
-
       <button id="sortToggleBtn" class="btn-action btn-sort" title="Basculer tri A-Z ou Favoris">🔤</button>
       <button id="layoutToggleBtn" class="btn-action btn-layout" title="Changer le mode d'affichage">📐</button>
       <button id="favFilterBtn" class="btn-action btn-fav-filter active" title="Afficher uniquement les favoris">&#9733;</button>
