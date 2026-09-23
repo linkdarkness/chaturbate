@@ -146,90 +146,40 @@
     .btn-layout.active { background: rgba(56, 189, 248, 0.15); border-color: var(--accent); color: var(--accent); }
     .btn-nonfav-toggle.active { background: rgba(56, 189, 248, 0.15); border-color: var(--accent); color: var(--accent); font-weight: 600; }
 
+    /* Volet Plein Écran pour les Non-Favoris */
     .sidebar-container {
       position: fixed;
       top: 0;
-      right: -100%;
-      width: 100%;
-      max-width: 420px;
+      left: 100%;
+      width: 100vw;
       height: 100vh;
-      background: #1e293b;
-      border-left: 1px solid #334155;
+      background: var(--bg);
       z-index: 2000;
       display: flex;
       flex-direction: column;
-      transition: right 0.3s ease-in-out;
-      box-shadow: -10px 0 30px rgba(0,0,0,0.5);
+      transition: left 0.3s ease-in-out;
     }
-    .sidebar-container.open { right: 0; }
+    .sidebar-container.open { left: 0; }
+    
     .sidebar-header {
       padding: 12px 16px;
-      background: #0f172a;
+      background: rgba(30, 41, 59, 0.95);
       border-bottom: 1px solid #334155;
       display: flex;
       justify-content: space-between;
       align-items: center;
       flex-shrink: 0;
     }
-    .sidebar-title { font-size: 0.95rem; font-weight: 600; color: var(--text); }
-    .sidebar-close-btn { background: transparent; border: none; color: #64748b; font-size: 1.3rem; cursor: pointer; padding: 2px 6px; }
+    .sidebar-title { font-size: 1rem; font-weight: 600; color: var(--text); }
+    .sidebar-close-btn { background: transparent; border: none; color: #64748b; font-size: 1.5rem; cursor: pointer; padding: 2px 8px; }
     .sidebar-close-btn:hover { color: var(--danger); }
     
     .sidebar-body { 
       flex: 1; 
       overflow-y: auto; 
-      padding: 12px; 
-      display: flex; 
-      flex-direction: column; 
-      gap: 16px;
     }
 
-    .nonfav-item {
-      background: #0f172a;
-      border-radius: 8px;
-      border: 1px solid #334155;
-      overflow: hidden;
-      display: flex;
-      flex-direction: column;
-      flex-shrink: 0;
-    }
-    .nonfav-item:hover { border-color: var(--accent); }
-    
-    .nonfav-item-header {
-      padding: 8px 10px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      background: #111827;
-      border-bottom: 1px solid #334155;
-    }
-    .nonfav-name { font-weight: 600; font-size: 0.85rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex: 1; margin-right: 8px; }
-    .nonfav-actions { display: flex; gap: 4px; align-items: center; flex-shrink: 0; }
-
-    .btn-icon-subtle { background: transparent; border: none; color: #64748b; font-size: 1rem; cursor: pointer; padding: 2px 4px; }
-    .btn-icon-subtle:hover { color: var(--text); }
-    .btn-fav { background: transparent; border: none; color: #64748b; font-size: 1.1rem; cursor: pointer; }
-    .btn-fav:hover, .btn-fav.is-favorite { color: var(--star); }
-    .btn-delete { background: transparent; border: none; color: #64748b; font-size: 1.2rem; cursor: pointer; padding: 2px 4px; }
-    .btn-delete:hover { color: var(--danger); }
-
-    .nonfav-player-container {
-      width: 100%;
-      aspect-ratio: 16 / 9;
-      background: #000;
-      position: relative;
-      display: block;
-    }
-    .nonfav-player-container iframe {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      border: 0;
-      display: block;
-    }
-
+    /* Grilles standard et miniature */
     .grid-container {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
@@ -282,6 +232,13 @@
     .tag-badge:hover { background: rgba(239, 68, 68, 0.2); color: var(--danger); }
 
     .header-actions { display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
+
+    .btn-icon-subtle { background: transparent; border: none; color: #64748b; font-size: 1rem; cursor: pointer; padding: 2px 4px; }
+    .btn-icon-subtle:hover { color: var(--text); }
+    .btn-fav { background: transparent; border: none; color: #64748b; font-size: 1.1rem; cursor: pointer; }
+    .btn-fav:hover, .btn-fav.is-favorite { color: var(--star); }
+    .btn-delete { background: transparent; border: none; color: #64748b; font-size: 1.2rem; cursor: pointer; padding: 2px 4px; }
+    .btn-delete:hover { color: var(--danger); }
 
     .player-container { width: 100%; aspect-ratio: 16 / 9; background: #000; position: relative; overflow: hidden; }
     .player-container iframe { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: 0; display: block; }
@@ -338,7 +295,7 @@
       <button id="sortToggleBtn" class="btn-action btn-sort" title="Basculer tri A-Z ou Favoris">🔤</button>
       <button id="layoutToggleBtn" class="btn-action btn-layout" title="Changer le mode d'affichage">📐</button>
       
-      <button id="nonFavSidebarBtn" class="btn-action btn-nonfav-toggle" title="Modèles non-favoris">📁 <span id="nonFavCount">(0)</span></button>
+      <button id="nonFavSidebarBtn" class="btn-action btn-nonfav-toggle" title="Modèles hors favoris">📁 <span id="nonFavCount">(0)</span></button>
 
       <button id="exportBtn" class="btn-action" title="Exporter JSON">📤</button>
       <button id="importBtn" class="btn-action" title="Importer JSON">📥</button>
@@ -348,12 +305,13 @@
     </div>
   </header>
 
+  <!-- Volet Plein Écran -->
   <div id="nonFavSidebar" class="sidebar-container">
     <div class="sidebar-header">
       <span class="sidebar-title">Modèles hors favoris</span>
       <button id="nonFavCloseBtn" class="sidebar-close-btn">&times;</button>
     </div>
-    <div class="sidebar-body" id="nonFavListContainer"></div>
+    <div class="sidebar-body grid-container" id="nonFavListContainer"></div>
   </div>
 
   <div id="tagModal" class="modal-overlay">
@@ -375,7 +333,7 @@
     let favorites = JSON.parse(localStorage.getItem('cb_dashboard_favs')) || [];
     let tags = JSON.parse(localStorage.getItem('cb_dashboard_tags')) || {};
     
-    let showOnlyFavorites = true; // Conserve le filtrage par défaut sur les favoris
+    let showOnlyFavorites = true;
     let alphabeticalSort = false;
     let currentLayout = parseInt(localStorage.getItem('cb_dashboard_layout_mode')) || 0; 
     let selectedTagFilter = '';
@@ -451,37 +409,41 @@
       nonFavListContainer.innerHTML = '';
 
       if (nonFavs.length === 0) {
-        nonFavListContainer.innerHTML = '<div style="color: #64748b; text-align: center; padding: 20px; font-size: 0.85rem;">Aucun modèle hors favoris</div>';
+        nonFavListContainer.innerHTML = '<div style="color: #64748b; text-align: center; padding: 60px 20px; font-size: 1rem; grid-column: 1 / -1;">Aucun modèle hors favoris</div>';
         return;
       }
 
       nonFavs.sort((a, b) => a.localeCompare(b, 'fr', { sensitivity: 'base' })).forEach(username => {
         const embedUrl = getEmbedUrl(username);
         const item = document.createElement('div');
-        item.className = 'nonfav-item';
+        item.className = 'model-card';
         item.innerHTML = `
-          <div class="nonfav-item-header">
-            <span class="nonfav-name">${username}</span>
-            <div class="nonfav-actions">
-              <button class="btn-icon-subtle" title="Mettre en favori" onclick="toggleFavorite('${username}'); updateNonFavSidebarList();">&#9733;</button>
+          <div class="model-header">
+            <div class="model-title-area">
+              <span class="model-name">${username}</span>
+            </div>
+            <div class="header-actions">
+              <button class="btn-fav" title="Mettre en favori" onclick="toggleFavorite('${username}'); updateNonFavSidebarList();">&#9733;</button>
               <button class="btn-delete" title="Supprimer" onclick="removeModel('${username}'); updateNonFavSidebarList();">&times;</button>
             </div>
           </div>
-          <div class="nonfav-player-container">
+          <div class="player-container">
             <iframe data-src="${embedUrl}" sandbox="allow-scripts allow-same-origin allow-presentation" scrolling="no" allow="autoplay; fullscreen" allowfullscreen></iframe>
           </div>
         `;
-        nonFavObserver.observe(item.querySelector('.nonfav-player-container'));
+        nonFavObserver.observe(item.querySelector('.player-container'));
         nonFavListContainer.appendChild(item);
       });
     }
 
     function applyLayout() {
       grid.classList.remove('miniature-mode');
+      nonFavListContainer.classList.remove('miniature-mode');
       layoutToggleBtn.classList.remove('active');
 
       if (currentLayout === 1) {
         grid.classList.add('miniature-mode');
+        nonFavListContainer.classList.add('miniature-mode');
         layoutToggleBtn.classList.add('active');
         layoutToggleBtn.title = 'Mode Miniature (Actif)';
       } else {
