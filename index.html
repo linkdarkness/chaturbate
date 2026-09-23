@@ -182,7 +182,7 @@
       padding: 12px; 
       display: flex; 
       flex-direction: column; 
-      gap: 16px; /* Espacement bien visible entre chaque carte */
+      gap: 16px;
     }
 
     .nonfav-item {
@@ -500,6 +500,11 @@
       if (!models.map(m => m.toLowerCase()).includes(lower)) {
         models.push(username);
         saveModels();
+      }
+      // Ajout automatique aux favoris lors de la création
+      if (!favorites.includes(lower)) {
+        favorites.push(lower);
+        saveFavorites();
       }
       searchQuery = '';
       newModelInput.value = '';
