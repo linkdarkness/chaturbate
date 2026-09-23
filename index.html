@@ -142,7 +142,6 @@
     }
     .btn-action:hover { color: var(--text); background: #334155; }
     .btn-reset:hover { color: var(--danger); border-color: var(--danger); background: rgba(239, 68, 68, 0.1); }
-    .btn-sort.active { background: rgba(56, 189, 248, 0.15); border-color: var(--accent); color: var(--accent); font-weight: 600; }
     .btn-layout.active { background: rgba(56, 189, 248, 0.15); border-color: var(--accent); color: var(--accent); }
     .btn-fav-toggle.active { background: rgba(56, 189, 248, 0.15); border-color: var(--accent); color: var(--accent); font-weight: 600; }
 
@@ -259,7 +258,6 @@
     </div>
 
     <div class="header-bottom-row">
-      <button id="sortToggleBtn" class="btn-action btn-sort" title="Trier par ordre alphabétique">AZ</button>
       <button id="layoutToggleBtn" class="btn-action btn-layout" title="Changer le mode d'affichage">⚏</button>
       
       <button id="favToggleBtn" class="btn-action btn-fav-toggle active" title="Afficher uniquement les favoris">⭐ <span id="favStatusText">Favoris</span></button>
@@ -292,7 +290,6 @@
     let tags = JSON.parse(localStorage.getItem('cb_dashboard_tags')) || {};
     
     let showOnlyFavorites = true;
-    let alphabeticalSort = false;
     let currentLayout = parseInt(localStorage.getItem('cb_dashboard_layout_mode')) || 0; 
     let selectedTagFilter = '';
     let searchQuery = '';
@@ -303,7 +300,6 @@
     const newModelInput = document.getElementById('newModelInput');
     const clearSearchBtn = document.getElementById('clearSearchBtn');
     const resetBtn = document.getElementById('resetBtn');
-    const sortToggleBtn = document.getElementById('sortToggleBtn');
     const layoutToggleBtn = document.getElementById('layoutToggleBtn');
     
     const favToggleBtn = document.getElementById('favToggleBtn');
@@ -551,12 +547,16 @@
         displayModels = displayModels.filter(m => m.toLowerCase().includes(searchQuery.toLowerCase()));
       }
 
-      if (alphabeticalSort) {
-        displayModels.sort((a, b) => a.localeCompare(b, 'fr', { sensitivity: 'base' }));
+      if (showOnlyFavorites) {
+        displayModels = displayModels.filter(m => favorites.includes(m.toLowerCase()));
       }
 
-      if (showOnlyFavorites) displayModels = displayModels.filter(m => favorites.includes(m.toLowerCase()));
-      if (selectedTagFilter) displayModels = displayModels.filter(m => (tags[m.toLowerCase()] || []).includes(selectedTagFilter));
+      if (selectedTagFilter) {
+        displayModels = displayModels.filter(m => (tags[m.toLowerCase()] || []).includes(selectedTagFilter));
+      }
+
+      // Tri alphabétique automatique systématique
+      displayModels.sort((a, b) => a.localeCompare(b, 'fr', { sensitivity: 'base' }));
 
       if (displayModels.length === 0) {
         grid.innerHTML = `<div class="empty-message">Aucun modèle à afficher pour le moment.</div>`;
@@ -578,13 +578,6 @@
       clearSearchBtn.classList.remove('show');
       renderGrid();
       newModelInput.focus();
-    });
-
-    sortToggleBtn.addEventListener('click', () => {
-      alphabeticalSort = !alphabeticalSort;
-      sortToggleBtn.classList.toggle('active', alphabeticalSort);
-      sortToggleBtn.title = alphabeticalSort ? 'Tri A-Z (Actif)' : 'Tri par défaut';
-      renderGrid();
     });
 
     layoutToggleBtn.addEventListener('click', () => {
