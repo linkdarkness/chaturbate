@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Directs Live - Dashboard Sécurisé & PiP</title>
+  <title>Directs Live - Dashboard Sécurisé</title>
   <style>
     :root {
       --bg: #0f172a;
@@ -452,34 +452,6 @@
       renderGrid();
     }
 
-    // Fonction Picture-in-Picture (PiP) pour le flux iframe/vidéo
-    window.togglePiP = async function(username) {
-      const card = document.getElementById(`card-${username}`);
-      if (!card) return;
-      const iframe = card.querySelector('iframe');
-      if (!iframe) return;
-
-      try {
-        // Recherche d'un élément vidéo potentiel ou création d'une pop-out si le PiP natif nécessite une balise <video>
-        // Note: Sur les iframes de source tierce restreintes par les règles de sécurité cross-origin, 
-        // la solution standard robuste consiste à ouvrir une mini-fenêtre contextuelle (popup dédiée sans bordure) 
-        // ou d'utiliser le mode PiP si le navigateur prend en charge Document PiP / Video PiP.
-        // Ici, une fenêtre popout sans barre d'outils garantit un fonctionnement fluide et universel pour les flux intégrés.
-        const width = 480;
-        const height = 270;
-        const left = window.screen.width - width - 50;
-        const top = window.screen.height - height - 100;
-        
-        window.open(
-          `https://chaturbate.com/embed/${encodeURIComponent(username)}/?embed_video_only=1&scrolling=no&muted=0`,
-          `pip_${username}`,
-          `width=${width},height=${height},left=${left},top=${top},menubar=no,toolbar=no,location=no,status=no,personalbar=no`
-        );
-      } catch (err) {
-        alert("Impossible d'ouvrir le mode PiP pour ce flux.");
-      }
-    };
-
     window.openTagModal = function(username) {
       targetTagUser = username;
       tagModalTitle.textContent = `Ajouter un tag pour ${username}`;
@@ -575,7 +547,6 @@
             <div class="tags-container">${tagsHtml}</div>
           </div>
           <div class="header-actions">
-            <button class="btn-icon-subtle" onclick="event.stopPropagation(); togglePiP('${username}')" title="Détacher en mode PiP / Fenêtre flottante">📺</button>
             <button class="btn-icon-subtle" onclick="event.stopPropagation(); toggleHideModel('${username}')">${isHidden ? '👁️' : '🙈'}</button>
             <button class="btn-icon-subtle" onclick="event.stopPropagation(); openTagModal('${username}')">🏷️</button>
             <button class="btn-fav ${isFav ? 'is-favorite' : ''}" onclick="event.stopPropagation(); toggleFavorite('${username}')">&#9733;</button>
