@@ -121,8 +121,7 @@
       font-size: 0.85rem;
       cursor: pointer;
       outline: none;
-      flex: 1;
-      min-width: 150px;
+      min-width: 130px;
     }
     .select-tag:hover, .select-tag:focus { border-color: var(--accent); }
 
@@ -132,12 +131,12 @@
       color: #94a3b8;
       padding: 6px 10px;
       border-radius: 6px;
-      font-size: 0.85rem;
+      font-size: 0.95rem;
       cursor: pointer;
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      gap: 6px;
+      gap: 4px;
       transition: all 0.2s ease;
       user-select: none;
       white-space: nowrap;
@@ -278,23 +277,23 @@
         <option value="">🏷️ (Tous)</option>
       </select>
 
-      <button id="sortToggleBtn" class="btn-action btn-sort" title="Basculer tri A-Z ou Favoris">🔤 Tri A-Z</button>
-      <button id="layoutToggleBtn" class="btn-action btn-layout" title="Changer le mode d'affichage">📐 Mode Standard</button>
-      <button id="favFilterBtn" class="btn-action btn-fav-filter" title="Afficher uniquement les favoris">&#9733; Favoris</button>
+      <button id="sortToggleBtn" class="btn-action btn-sort" title="Basculer tri A-Z ou Favoris">🔤</button>
+      <button id="layoutToggleBtn" class="btn-action btn-layout" title="Changer le mode d'affichage">📐</button>
+      <button id="favFilterBtn" class="btn-action btn-fav-filter" title="Afficher uniquement les favoris">&#9733;</button>
       
       <button id="hideToggleBtn" class="btn-action btn-hide-toggle" title="Masqués">
-        🙈 Masqués <span id="hiddenCount">(0)</span>
+        🙈 <span id="hiddenCount">(0)</span>
       </button>
 
       <button id="historyBtn" class="btn-action" title="Historique">
-        📜 Récents <span id="historyCount">(0)</span>
+        📜 <span id="historyCount">(0)</span>
       </button>
 
-      <button id="exportBtn" class="btn-action" title="Exporter JSON">📤 Exporter</button>
-      <button id="importBtn" class="btn-action" title="Importer JSON">📥 Importer</button>
+      <button id="exportBtn" class="btn-action" title="Exporter JSON">📤</button>
+      <button id="importBtn" class="btn-action" title="Importer JSON">📥</button>
       <input type="file" id="importFile" accept=".json" style="display: none;">
 
-      <button id="resetBtn" class="btn-action btn-reset" title="Nettoyer non-favoris">🧹 Nettoyer</button>
+      <button id="resetBtn" class="btn-action btn-reset" title="Nettoyer non-favoris">🧹</button>
     </div>
   </header>
 
@@ -377,9 +376,9 @@
       if (currentLayout === 1) {
         grid.classList.add('miniature-mode');
         layoutToggleBtn.classList.add('active');
-        layoutToggleBtn.textContent = '📐 Mode Miniature';
+        layoutToggleBtn.title = 'Mode Miniature (Actif)';
       } else {
-        layoutToggleBtn.textContent = '📐 Mode Standard';
+        layoutToggleBtn.title = 'Mode Standard (Actif)';
       }
       localStorage.setItem('cb_dashboard_layout_mode', currentLayout);
       renderGrid();
@@ -549,10 +548,10 @@
             <div class="tags-container">${tagsHtml}</div>
           </div>
           <div class="header-actions">
-            <button class="btn-icon-subtle" onclick="event.stopPropagation(); toggleHideModel('${username}')">${isHidden ? '👁️' : '🙈'}</button>
-            <button class="btn-icon-subtle" onclick="event.stopPropagation(); openTagModal('${username}')">🏷️</button>
-            <button class="btn-fav ${isFav ? 'is-favorite' : ''}" onclick="event.stopPropagation(); toggleFavorite('${username}')">&#9733;</button>
-            <button class="btn-delete" onclick="event.stopPropagation(); removeModel('${username}')">&times;</button>
+            <button class="btn-icon-subtle" title="${isHidden ? 'Afficher' : 'Masquer'}" onclick="event.stopPropagation(); toggleHideModel('${username}')">${isHidden ? '👁️' : '🙈'}</button>
+            <button class="btn-icon-subtle" title="Ajouter un tag" onclick="event.stopPropagation(); openTagModal('${username}')">🏷️</button>
+            <button class="btn-fav ${isFav ? 'is-favorite' : ''}" title="Favori" onclick="event.stopPropagation(); toggleFavorite('${username}')">&#9733;</button>
+            <button class="btn-delete" title="Supprimer" onclick="event.stopPropagation(); removeModel('${username}')">&times;</button>
           </div>
         </div>
         <div class="player-container">
@@ -663,7 +662,7 @@
     sortToggleBtn.addEventListener('click', () => {
       alphabeticalSort = !alphabeticalSort;
       sortToggleBtn.classList.toggle('active', alphabeticalSort);
-      sortToggleBtn.textContent = alphabeticalSort ? '🔤 Tri A-Z (Actif)' : '🔤 Tri A-Z';
+      sortToggleBtn.title = alphabeticalSort ? 'Tri A-Z (Actif)' : 'Tri A-Z';
       renderGrid();
     });
 
