@@ -313,7 +313,7 @@
     }
 
     .grid-container.compact-mode .player-container {
-      aspect-ratio: 16 / 10;
+      aspect-ratio: 16 / 9;
     }
 
     /* Mode Miniature */
@@ -355,7 +355,7 @@
     }
 
     .grid-container.miniature-mode .player-container {
-      aspect-ratio: 1 / 1;
+      aspect-ratio: 16 / 9;
     }
 
     /* Mode Cinéma */
@@ -398,7 +398,7 @@
         max-height: calc(100vh - 140px);
       }
       .grid-container.cinema-mode .cinema-sidebar .model-card .player-container {
-        aspect-ratio: 16 / 10;
+        aspect-ratio: 16 / 9;
       }
     }
 
@@ -516,10 +516,10 @@
 
     .btn-delete:hover { color: var(--danger); }
 
-    /* Conteneur et iframe parfaitement ajustés */
+    /* Conteneur et iframe adaptés au format vidéo seul (16/9) */
     .player-container {
       width: 100%;
-      aspect-ratio: 16 / 18;
+      aspect-ratio: 16 / 9;
       background: #000;
       position: relative;
       overflow: hidden;
@@ -739,11 +739,10 @@
     const saveTagBtn = document.getElementById('saveTagBtn');
     const cancelTagBtn = document.getElementById('cancelTagBtn');
 
-    // === GESTION DE L'API D'INTÉGRATION CHATURBATE ===
+    // === API CHATURBATE : VIDÉO SEULE ===
     function getEmbedUrl(username) {
-      // Paramètres standards de l'API d'intégration web
-      const embedVideoOnly = 0; // 0 pour afficher les infos, 1 pour la vidéo seule
-      const scrolling = 'no';   // Bloque le défilement interne
+      const embedVideoOnly = 1; // 1 = Vidéo seule (masque les infos et le chat)
+      const scrolling = 'no';   
       return `https://chaturbate.com/embed/${encodeURIComponent(username)}/?embed_video_only=${embedVideoOnly}&scrolling=${scrolling}`;
     }
 
@@ -938,7 +937,6 @@
         `<span class="tag-badge" title="Cliquer pour supprimer" onclick="event.stopPropagation(); removeTag('${username}', '${t}')">${t} &times;</span>`
       ).join('');
 
-      // Appel de la fonction de l'API Embed
       const embedUrl = getEmbedUrl(username);
 
       card.innerHTML = `
