@@ -535,6 +535,17 @@
       display: block;
     }
 
+    /* Bloque les clics vers le site officiel tout en laissant le lecteur vidéo fonctionner */
+    .player-overlay-blocker {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 10;
+      pointer-events: none;
+    }
+
     .modal-overlay {
       display: none;
       position: fixed;
@@ -844,48 +855,6 @@
       renderGrid();
     }
 
-    // === FONCTION DE CAPTURE D'ÉCRAN (SCREENSHOT) ===
-    window.takeScreenshot = function(username) {
-      const card = document.getElementById(`card-${username}`);
-      if (!card) return;
-
-      // Utilisation de la bibliothèque html2canvas injectée dynamiquement
-      if (typeof html2canvas === 'undefined') {
-        const script = document.createElement('script');
-        script.src = 'https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js';
-        script.onload = () => executeCapture(username, card);
-        document.head.appendChild(script);
-      } else {
-        executeCapture(username, card);
-      }
-    };
-
-    function executeCapture(username, card) {
-      // Masquer temporairement les boutons de l'en-tête pendant la capture pour une image propre
-      const actions = card.querySelector('.header-actions');
-      actions.style.visibility = 'hidden';
-
-      html2canvas(card, {
-        allowTaint: true,
-        useCORS: true,
-        scale: 2 // Haute résolution
-      }).then(canvas => {
-        actions.style.visibility = 'visible';
-        
-        const image = canvas.toDataURL('image/png');
-        const downloadLink = document.createElement('a');
-        downloadLink.href = image;
-        downloadLink.download = `capture-${username}-${new Date().toISOString().slice(0,10)}.png`;
-        document.body.appendChild(downloadLink);
-        downloadLink.click();
-        downloadLink.remove();
-      }).catch(err => {
-        actions.style.visibility = 'visible';
-        alert("Impossible de réaliser la capture en raison des restrictions de sécurité du navigateur (CORS sur l'iframe).");
-        console.error(err);
-      });
-    }
-
     window.openTagModal = function(username) {
       targetTagUser = username;
       tagModalTitle.textContent = `Ajouter un tag pour ${username}`;
@@ -987,7 +956,6 @@
             <div class="tags-container">${tagsHtml}</div>
           </div>
           <div class="header-actions">
-            <button class="btn-icon-subtle" title="Prendre une capture d'écran" onclick="event.stopPropagation(); takeScreenshot('${username}')">📸</button>
             <button class="btn-icon-subtle" title="${isHidden ? 'Démasquer' : 'Masquer'}" onclick="event.stopPropagation(); toggleHideModel('${username}')">
               ${isHidden ? '👁️' : '🙈'}
             </button>
@@ -1003,6 +971,7 @@
             allow="autoplay; fullscreen" 
             allowfullscreen>
           </iframe>
+          <div class="player-overlay-blocker"></div>
         </div>
       `;
 
