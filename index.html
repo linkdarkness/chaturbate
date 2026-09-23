@@ -145,13 +145,13 @@
     .btn-layout.active { background: rgba(56, 189, 248, 0.15); border-color: var(--accent); color: var(--accent); }
     .btn-nonfav-toggle.active { background: rgba(56, 189, 248, 0.15); border-color: var(--accent); color: var(--accent); font-weight: 600; }
 
-    /* Volet Plein Écran pour les Non-Favoris */
+    /* Volet Plein Écran pour les Non-Favoris corrigé pour mobile */
     .sidebar-container {
       position: fixed;
       top: 0;
       left: 100%;
       width: 100vw;
-      height: 100vh;
+      height: 100dvh; /* Utilisation de 100dvh pour éviter les bugs de barre d'adresse mobile */
       background: var(--bg);
       z-index: 2000;
       display: flex;
@@ -174,8 +174,9 @@
     .sidebar-close-btn:hover { color: var(--danger); }
     
     .sidebar-body { 
-      flex: 1; 
+      flex: 1 1 auto; 
       overflow-y: auto; 
+      -webkit-overflow-scrolling: touch;
     }
 
     /* Grille principale */
@@ -220,7 +221,7 @@
       border: 1px solid #334155;
       display: flex;
       flex-direction: column;
-      transition: border-color 0.2s ease;
+      flex-shrink: 0; /* Empêche l'écrasement des cartes sur mobile */
       width: 100%;
     }
 
@@ -250,8 +251,24 @@
     .btn-delete { background: transparent; border: none; color: #64748b; font-size: 1.2rem; cursor: pointer; padding: 2px 4px; }
     .btn-delete:hover { color: var(--danger); }
 
-    .player-container { width: 100%; aspect-ratio: 16 / 9; background: #000; position: relative; overflow: hidden; display: block; }
-    .player-container iframe { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: 0; display: block; }
+    .player-container { 
+      width: 100%; 
+      aspect-ratio: 16 / 9; 
+      background: #000; 
+      position: relative; 
+      overflow: hidden; 
+      display: block; 
+      flex-shrink: 0;
+    }
+    .player-container iframe { 
+      position: absolute; 
+      top: 0; 
+      left: 0; 
+      width: 100%; 
+      height: 100%; 
+      border: 0; 
+      display: block; 
+    }
 
     .modal-overlay {
       display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(15, 23, 42, 0.8); backdrop-filter: blur(4px); z-index: 3000; justify-content: center; align-items: center;
@@ -290,7 +307,6 @@
 <body>
   <header>
     <div class="header-top-row">
-      <!-- Icône des hors favoris placée en haut à gauche -->
       <button id="nonFavSidebarBtn" class="btn-action btn-nonfav-toggle" title="Modèles hors favoris" style="width: auto; flex-shrink: 0; height: 36px;">📁 <span id="nonFavCount">(0)</span></button>
 
       <form id="addModelForm" class="input-form" style="width: 85%;">
@@ -301,7 +317,6 @@
     </div>
 
     <div class="header-bottom-row">
-      <!-- Icône de filtre des tags déplacée dans la barre du bas -->
       <select id="tagFilterSelect" class="select-tag" title="Filtrer par étiquette">
         <option value="">🏷️ (Tous)</option>
       </select>
