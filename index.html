@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Directs Live - Dashboard Optimisé</title>
+  <title>Directs Live - Dashboard Sécurisé</title>
   <style>
     :root {
       --bg: #0f172a;
@@ -546,6 +546,7 @@
 
       const embedUrl = getEmbedUrl(username);
 
+      // Ajout de l'attribut sandbox pour bloquer net toute redirection ou ouverture de popup intempestive
       card.innerHTML = `
         <div class="model-header">
           <div class="model-title-area">
@@ -560,7 +561,7 @@
           </div>
         </div>
         <div class="player-container">
-          <iframe data-src="${embedUrl}" scrolling="no" allow="autoplay; fullscreen" allowfullscreen></iframe>
+          <iframe data-src="${embedUrl}" sandbox="allow-scripts allow-same-origin allow-presentation" scrolling="no" allow="autoplay; fullscreen" allowfullscreen></iframe>
         </div>
       `;
 
