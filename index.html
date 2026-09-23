@@ -43,20 +43,21 @@
       align-items: center;
       gap: 8px;
       width: 100%;
-      flex-wrap: wrap;
     }
 
     .select-tag {
       background: #0f172a;
       border: 1px solid #334155;
       color: var(--text);
-      padding: 8px 12px;
+      padding: 8px 6px;
       border-radius: 6px;
       font-size: 0.85rem;
       cursor: pointer;
       outline: none;
-      min-width: 140px;
+      width: 15%;
+      flex-shrink: 0;
       height: 38px;
+      text-overflow: ellipsis;
     }
     .select-tag:hover, .select-tag:focus { border-color: var(--accent); }
 
@@ -64,8 +65,7 @@
       display: flex;
       align-items: center;
       gap: 0;
-      flex: 1;
-      min-width: 220px;
+      width: 85%;
       position: relative;
     }
 
@@ -559,7 +559,7 @@
 
     function updateTagFilterOptions() {
       const existingTags = getAllExistingTags();
-      tagFilterSelect.innerHTML = `<option value="">🏷️ (Tous) (${models.length})</option>`;
+      tagFilterSelect.innerHTML = `<option value="">🏷️ (${models.length})</option>`;
       
       existingTags.forEach(t => {
         const count = models.filter(m => (tags[m.toLowerCase()] || []).includes(t)).length;
