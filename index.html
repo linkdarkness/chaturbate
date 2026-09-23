@@ -145,13 +145,13 @@
     .btn-layout.active { background: rgba(56, 189, 248, 0.15); border-color: var(--accent); color: var(--accent); }
     .btn-nonfav-toggle.active { background: rgba(56, 189, 248, 0.15); border-color: var(--accent); color: var(--accent); font-weight: 600; }
 
-    /* Volet Plein Écran pour les Non-Favoris corrigé pour mobile */
+    /* Volet Plein Écran pour les Non-Favoris */
     .sidebar-container {
       position: fixed;
       top: 0;
       left: 100%;
       width: 100vw;
-      height: 100dvh; /* Utilisation de 100dvh pour éviter les bugs de barre d'adresse mobile */
+      height: 100dvh;
       background: var(--bg);
       z-index: 2000;
       display: flex;
@@ -221,7 +221,7 @@
       border: 1px solid #334155;
       display: flex;
       flex-direction: column;
-      flex-shrink: 0; /* Empêche l'écrasement des cartes sur mobile */
+      flex-shrink: 0;
       width: 100%;
     }
 
@@ -389,8 +389,9 @@
     const saveTagBtn = document.getElementById('saveTagBtn');
     const cancelTagBtn = document.getElementById('cancelTagBtn');
 
+    // Son activé par défaut (muted=0)
     function getEmbedUrl(username) {
-      return `https://chaturbate.com/embed/${encodeURIComponent(username)}/?embed_video_only=1&scrolling=no&muted=1`;
+      return `https://chaturbate.com/embed/${encodeURIComponent(username)}/?embed_video_only=1&scrolling=no&muted=0`;
     }
 
     nonFavSidebarBtn.addEventListener('click', () => {
