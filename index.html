@@ -708,7 +708,6 @@
     let hiddenModels = JSON.parse(localStorage.getItem('cb_dashboard_hidden')) || [];
     let history = JSON.parse(localStorage.getItem('cb_dashboard_history')) || [];
     let tags = JSON.parse(localStorage.getItem('cb_dashboard_tags')) || {};
-    // Stockage des états de son par modèle (true = muet / false = avec son)
     let audioStates = JSON.parse(localStorage.getItem('cb_dashboard_audio')) || {};
     
     let showOnlyFavorites = false;
@@ -753,7 +752,6 @@
 
     function getEmbedUrl(username) {
       const lower = username.toLowerCase();
-      // Par défaut muet (muted=1), sauf si l'utilisateur a activé le son (muted=0)
       const isMuted = audioStates[lower] !== undefined ? audioStates[lower] : true;
       const embedVideoOnly = 1; 
       const scrolling = 'no';   
@@ -766,12 +764,13 @@
       audioStates[lower] = !currentMuted; // Inverse l'état du son
       localStorage.setItem('cb_dashboard_audio', JSON.stringify(audioStates));
 
-      // Met à jour uniquement la source de l'iframe concernée pour réactiver/couper le son instantanément
       const card = document.getElementById(`card-${username}`);
       if (card) {
         const iframe = card.querySelector('iframe');
         if (iframe) {
-          iframe.src = getEmbedUrl(username);
+          const newUrl = getEmbedUrl(username);
+          iframe.dataset.src = newUrl; // Met à jour le dataset pour le lazy loading
+          iframe.src = newUrl;        // Force le rechargement immédiat de l'iframe avec le bon paramètre de son
         }
         const soundBtn = card.querySelector('.btn-sound');
         if (soundBtn) {
