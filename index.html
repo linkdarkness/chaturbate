@@ -294,6 +294,30 @@
     .modal-card { background: #1e293b; border: 1px solid #334155; border-radius: 10px; width: 90%; max-width: 380px; padding: 16px; display: flex; flex-direction: column; gap: 12px; }
     .modal-title { font-size: 1rem; font-weight: 600; color: var(--text); }
     .modal-input { padding: 8px 12px; border-radius: 6px; border: 1px solid #334155; background: #0f172a; color: var(--text); font-size: 0.85rem; outline: none; width: 100%; }
+    
+    .existing-tags-suggestions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      max-height: 120px;
+      overflow-y: auto;
+      padding: 4px 0;
+    }
+    .suggestion-tag-btn {
+      background: #334155;
+      color: var(--accent);
+      border: 1px solid #475569;
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-size: 0.75rem;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .suggestion-tag-btn:hover {
+      background: #0284c7;
+      color: #fff;
+      border-color: #0284c7;
+    }
     .modal-actions { display: flex; justify-content: flex-end; gap: 8px; }
   </style>
 </head>
@@ -337,8 +361,8 @@
   <div id="tagModal" class="modal-overlay">
     <div class="modal-card">
       <div class="modal-title" id="tagModalTitle">Ajouter une étiquette</div>
-      <input type="text" id="modalTagInput" class="modal-input" placeholder="Saisir ou choisir un tag..." list="existingTagsDatalist">
-      <datalist id="existingTagsDatalist"></datalist>
+      <input type="text" id="modalTagInput" class="modal-input" placeholder="Ou saisir un nouveau tag...">
+      <div id="existingTagsSuggestions" class="existing-tags-suggestions"></div>
       <div class="modal-actions">
         <button class="btn-action" id="cancelTagBtn">Annuler</button>
         <button class="btn-action" style="background: #0284c7; color: #fff; border-color: #0284c7;" id="saveTagBtn">Valider</button>
@@ -383,7 +407,7 @@
     const tagModal = document.getElementById('tagModal');
     const modalTagInput = document.getElementById('modalTagInput');
     const tagModalTitle = document.getElementById('tagModalTitle');
-    const existingTagsDatalist = document.getElementById('existingTagsDatalist');
+    const existingTagsSuggestions = document.getElementById('existingTagsSuggestions');
     const saveTagBtn = document.getElementById('saveTagBtn');
     const cancelTagBtn = document.getElementById('cancelTagBtn');
 
@@ -501,7 +525,6 @@
         models.push(username);
         saveModels();
       }
-      // Ajout automatique aux favoris lors de la création
       if (!favorites.includes(lower)) {
         favorites.push(lower);
         saveFavorites();
@@ -530,12 +553,21 @@
       tagModalTitle.textContent = `Ajouter un tag pour ${username}`;
       modalTagInput.value = '';
       
-      existingTagsDatalist.innerHTML = '';
-      getAllExistingTags().forEach(t => {
-        const opt = document.createElement('option');
-        opt.value = t;
-        existingTagsDatalist.appendChild(opt);
-      });
+      existingTagsSuggestions.innerHTML = '';
+      const allTags = getAllExistingTags();
+      
+      if (allTags.length === 0) {
+        existingTagsSuggestions.innerHTML = '<span style="font-size: 0.8rem; color: #64748b;">Aucun tag existant.</span>';
+      } else {
+        allTags.forEach(t => {
+          const btn = document.createElement('button');
+          btn.type = 'button';
+          btn.className = 'suggestion-tag-btn';
+          btn.textContent = t;
+          btn.onclick = () => applyTagToTarget(t);
+          existingTagsSuggestions.appendChild(btn);
+        });
+      }
 
       tagModal.classList.add('show');
       setTimeout(() => modalTagInput.focus(), 50);
@@ -546,9 +578,9 @@
       targetTagUser = null;
     }
 
-    function submitTagModal() {
+    function applyTagToTarget(tagName) {
       if (!targetTagUser) return;
-      const val = modalTagInput.value.trim();
+      const val = tagName.trim();
       if (val) {
         const lower = targetTagUser.toLowerCase();
         const current = tags[lower] || [];
@@ -559,6 +591,15 @@
         }
       }
       closeTagModal();
+    }
+
+    function submitTagModal() {
+      const val = modalTagInput.value.trim();
+      if (val) {
+        applyTagToTarget(val);
+      } else {
+        closeTagModal();
+      }
     }
 
     saveTagBtn.addEventListener('click', submitTagModal);
