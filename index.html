@@ -535,7 +535,7 @@
       display: block;
     }
 
-    /* Bloque les clics vers le site officiel tout en laissant le lecteur vidéo fonctionner */
+    /* Bloque les clics vers le site officiel sur la vidéo tout en laissant le dashboard interactif */
     .player-overlay-blocker {
       position: absolute;
       top: 0;
@@ -708,6 +708,8 @@
     let hiddenModels = JSON.parse(localStorage.getItem('cb_dashboard_hidden')) || [];
     let history = JSON.parse(localStorage.getItem('cb_dashboard_history')) || [];
     let tags = JSON.parse(localStorage.getItem('cb_dashboard_tags')) || {};
+    // Stockage des états de son par modèle (true = muet / false = avec son)
+    let audioStates = JSON.parse(localStorage.getItem('cb_dashboard_audio')) || {};
     
     let showOnlyFavorites = false;
     let showHiddenModels = false;
@@ -750,9 +752,33 @@
     const cancelTagBtn = document.getElementById('cancelTagBtn');
 
     function getEmbedUrl(username) {
+      const lower = username.toLowerCase();
+      // Par défaut muet (muted=1), sauf si l'utilisateur a activé le son (muted=0)
+      const isMuted = audioStates[lower] !== undefined ? audioStates[lower] : true;
       const embedVideoOnly = 1; 
       const scrolling = 'no';   
-      return `https://chaturbate.com/embed/${encodeURIComponent(username)}/?embed_video_only=${embedVideoOnly}&scrolling=${scrolling}`;
+      return `https://chaturbate.com/embed/${encodeURIComponent(username)}/?embed_video_only=${embedVideoOnly}&scrolling=${scrolling}&muted=${isMuted ? 1 : 0}`;
+    }
+
+    function toggleAudio(username) {
+      const lower = username.toLowerCase();
+      const currentMuted = audioStates[lower] !== undefined ? audioStates[lower] : true;
+      audioStates[lower] = !currentMuted; // Inverse l'état du son
+      localStorage.setItem('cb_dashboard_audio', JSON.stringify(audioStates));
+
+      // Met à jour uniquement la source de l'iframe concernée pour réactiver/couper le son instantanément
+      const card = document.getElementById(`card-${username}`);
+      if (card) {
+        const iframe = card.querySelector('iframe');
+        if (iframe) {
+          iframe.src = getEmbedUrl(username);
+        }
+        const soundBtn = card.querySelector('.btn-sound');
+        if (soundBtn) {
+          soundBtn.textContent = audioStates[lower] ? '🔇' : '🔊';
+          soundBtn.title = audioStates[lower] ? 'Activer le son' : 'Couper le son';
+        }
+      }
     }
 
     function applyLayout() {
@@ -937,6 +963,7 @@
       const lower = username.toLowerCase();
       const isFav = favorites.includes(lower);
       const isHidden = hiddenModels.includes(lower);
+      const isMuted = audioStates[lower] !== undefined ? audioStates[lower] : true;
       const modelTags = (tags[lower] || []).sort((a, b) => a.localeCompare(b, 'fr', { sensitivity: 'base' }));
 
       const card = document.createElement('div');
@@ -956,6 +983,7 @@
             <div class="tags-container">${tagsHtml}</div>
           </div>
           <div class="header-actions">
+            <button class="btn-icon-subtle btn-sound" title="${isMuted ? 'Activer le son' : 'Couper le son'}" onclick="event.stopPropagation(); toggleAudio('${username}')">${isMuted ? '🔇' : '🔊'}</button>
             <button class="btn-icon-subtle" title="${isHidden ? 'Démasquer' : 'Masquer'}" onclick="event.stopPropagation(); toggleHideModel('${username}')">
               ${isHidden ? '👁️' : '🙈'}
             </button>
@@ -1233,6 +1261,7 @@
         hiddenModels,
         history,
         tags,
+        audioStates,
         exportDate: new Date().toISOString()
       };
 
@@ -1264,12 +1293,14 @@
             hiddenModels = Array.isArray(imported.hiddenModels) ? imported.hiddenModels : [];
             history = Array.isArray(imported.history) ? imported.history : [];
             tags = (imported.tags && typeof imported.tags === 'object') ? imported.tags : {};
+            audioStates = (imported.audioStates && typeof imported.audioStates === 'object') ? imported.audioStates : {};
 
             saveModels();
             saveFavorites();
             saveHidden();
             saveHistory();
             saveTags();
+            localStorage.setItem('cb_dashboard_audio', JSON.stringify(audioStates));
 
             renderGrid();
             alert('Configuration importée avec succès !');
@@ -1313,6 +1344,8 @@
     function removeModel(username) {
       const lower = username.toLowerCase();
       models = models.filter(m => m.toLowerCase() !== lower);
+      delete audioStates[lower];
+      localStorage.setItem('cb_dashboard_audio', JSON.stringify(audioStates));
       saveModels();
       renderGrid();
     }
