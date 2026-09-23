@@ -22,6 +22,7 @@
       min-height: 100vh;
       display: flex;
       flex-direction: column;
+      overflow-x: hidden;
     }
     
     header {
@@ -148,6 +149,38 @@
     .btn-hide-toggle.active { background: rgba(148, 163, 184, 0.2); border-color: var(--hidden); color: var(--text); font-weight: 600; }
     .btn-sort.active { background: rgba(56, 189, 248, 0.15); border-color: var(--accent); color: var(--accent); font-weight: 600; }
     .btn-layout.active { background: rgba(56, 189, 248, 0.15); border-color: var(--accent); color: var(--accent); }
+    .btn-sidebar-toggle.active { background: rgba(2, 132, 199, 0.2); border-color: var(--accent); color: var(--accent); font-weight: 600; }
+
+    /* Tiroir latéral pour l'iframe */
+    .sidebar-container {
+      position: fixed;
+      top: 0;
+      right: -100%;
+      width: 100%;
+      max-width: 600px;
+      height: 100vh;
+      background: #1e293b;
+      border-left: 1px solid #334155;
+      z-index: 2000;
+      display: flex;
+      flex-direction: column;
+      transition: right 0.3s ease-in-out;
+      box-shadow: -10px 0 30px rgba(0,0,0,0.5);
+    }
+    .sidebar-container.open { right: 0; }
+    .sidebar-header {
+      padding: 12px 16px;
+      background: #0f172a;
+      border-bottom: 1px solid #334155;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .sidebar-title { font-size: 0.95rem; font-weight: 600; color: var(--text); }
+    .sidebar-close-btn { background: transparent; border: none; color: #64748b; font-size: 1.3rem; cursor: pointer; padding: 2px 6px; }
+    .sidebar-close-btn:hover { color: var(--danger); }
+    .sidebar-body { flex: 1; width: 100%; background: #000; position: relative; }
+    .sidebar-body iframe { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: 0; }
 
     .dropdown-menu {
       display: none;
@@ -277,6 +310,8 @@
         <option value="">🏷️ (Tous)</option>
       </select>
 
+      <button id="sidebarToggleBtn" class="btn-action btn-sidebar-toggle" title="Afficher les listes officielles en iframe">📺 Consulter les directs</button>
+
       <button id="sortToggleBtn" class="btn-action btn-sort" title="Basculer tri A-Z ou Favoris">🔤 Tri A-Z</button>
       <button id="layoutToggleBtn" class="btn-action btn-layout" title="Changer le mode d'affichage">📐 Mode Standard</button>
       <button id="favFilterBtn" class="btn-action btn-fav-filter" title="Afficher uniquement les favoris">&#9733; Favoris</button>
@@ -296,6 +331,17 @@
       <button id="resetBtn" class="btn-action btn-reset" title="Nettoyer non-favoris">🧹 Nettoyer</button>
     </div>
   </header>
+
+  <!-- Tiroir latéral contenant l'iframe officielle -->
+  <div id="sidebarContainer" class="sidebar-container">
+    <div class="sidebar-header">
+      <span class="sidebar-title">Catalogue des directs en ligne</span>
+      <button id="sidebarCloseBtn" class="sidebar-close-btn">&times;</button>
+    </div>
+    <div class="sidebar-body">
+      <iframe id="officialIframe" data-src="https://chaturbate.com/" sandbox="allow-scripts allow-same-origin allow-popups allow-forms"></iframe>
+    </div>
+  </div>
 
   <div id="historyMenu" class="dropdown-menu">
     <div class="dropdown-header">
@@ -344,6 +390,11 @@
     const hideToggleBtn = document.getElementById('hideToggleBtn');
     const sortToggleBtn = document.getElementById('sortToggleBtn');
     const layoutToggleBtn = document.getElementById('layoutToggleBtn');
+    const sidebarToggleBtn = document.getElementById('sidebarToggleBtn');
+    const sidebarContainer = document.getElementById('sidebarContainer');
+    const sidebarCloseBtn = document.getElementById('sidebarCloseBtn');
+    const officialIframe = document.getElementById('officialIframe');
+    
     const hiddenCount = document.getElementById('hiddenCount');
     const tagFilterSelect = document.getElementById('tagFilterSelect');
     const historyBtn = document.getElementById('historyBtn');
@@ -367,6 +418,20 @@
     function getEmbedUrl(username) {
       return `https://chaturbate.com/embed/${encodeURIComponent(username)}/?embed_video_only=1&scrolling=no&muted=1`;
     }
+
+    // Gestion de l'ouverture du tiroir latéral iframe
+    sidebarToggleBtn.addEventListener('click', () => {
+      const isOpen = sidebarContainer.classList.toggle('open');
+      sidebarToggleBtn.classList.toggle('active', isOpen);
+      if (isOpen && !officialIframe.src) {
+        officialIframe.src = officialIframe.dataset.src;
+      }
+    });
+
+    sidebarCloseBtn.addEventListener('click', () => {
+      sidebarContainer.classList.remove('open');
+      sidebarToggleBtn.classList.remove('active');
+    });
 
     function applyLayout() {
       grid.classList.remove('miniature-mode');
