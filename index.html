@@ -54,9 +54,9 @@
       font-size: 0.85rem;
       cursor: pointer;
       outline: none;
-      width: 15%;
+      width: auto;
       flex-shrink: 0;
-      height: 38px;
+      height: 36px;
       text-overflow: ellipsis;
     }
     .select-tag:hover, .select-tag:focus { border-color: var(--accent); }
@@ -291,7 +291,7 @@
   <header>
     <div class="header-top-row">
       <!-- Icône des hors favoris placée en haut à gauche -->
-      <button id="nonFavSidebarBtn" class="btn-action btn-nonfav-toggle" title="Modèles hors favoris" style="width: 15%; flex-shrink: 0; height: 38px;">📁 <span id="nonFavCount">(0)</span></button>
+      <button id="nonFavSidebarBtn" class="btn-action btn-nonfav-toggle" title="Modèles hors favoris" style="width: auto; flex-shrink: 0; height: 36px;">📁 <span id="nonFavCount">(0)</span></button>
 
       <form id="addModelForm" class="input-form" style="width: 85%;">
         <input type="text" id="newModelInput" class="custom-input" placeholder="Ajouter un pseudo..." autocomplete="off" autocapitalize="none" spellcheck="false">
@@ -302,7 +302,7 @@
 
     <div class="header-bottom-row">
       <!-- Icône de filtre des tags déplacée dans la barre du bas -->
-      <select id="tagFilterSelect" class="select-tag" title="Filtrer par étiquette" style="width: auto; flex-shrink: 0; height: 36px;">
+      <select id="tagFilterSelect" class="select-tag" title="Filtrer par étiquette">
         <option value="">🏷️ (Tous)</option>
       </select>
 
@@ -387,27 +387,9 @@
     nonFavCloseBtn.addEventListener('click', () => {
       nonFavSidebar.classList.remove('open');
       nonFavSidebarBtn.classList.remove('active');
-      nonFavObserver.disconnect();
     });
 
-    const nonFavObserver = new IntersectionObserver((entries) => {
-      entries.forEach(entry => {
-        const container = entry.target;
-        const iframe = container.querySelector('iframe');
-        if (!iframe) return;
-
-        const targetSrc = iframe.dataset.src;
-        if (entry.isIntersecting) {
-          if (iframe.src !== targetSrc) iframe.src = targetSrc;
-        } else {
-          if (iframe.src && iframe.src !== 'about:blank') iframe.src = 'about:blank';
-        }
-      });
-    }, { root: nonFavListContainer, rootMargin: '100px', threshold: 0.01 });
-
     function updateNonFavSidebarList() {
-      nonFavObserver.disconnect();
-      
       let nonFavs = models.filter(m => !favorites.includes(m.toLowerCase()));
       if (selectedTagFilter) {
         nonFavs = nonFavs.filter(m => (tags[m.toLowerCase()] || []).includes(selectedTagFilter));
@@ -438,10 +420,9 @@
             </div>
           </div>
           <div class="player-container">
-            <iframe data-src="${embedUrl}" sandbox="allow-scripts allow-same-origin allow-presentation" scrolling="no" allow="autoplay; fullscreen" allowfullscreen></iframe>
+            <iframe src="${embedUrl}" sandbox="allow-scripts allow-same-origin allow-presentation" scrolling="no" allow="autoplay; fullscreen" allowfullscreen></iframe>
           </div>
         `;
-        nonFavObserver.observe(item.querySelector('.player-container'));
         nonFavListContainer.appendChild(item);
       });
     }
