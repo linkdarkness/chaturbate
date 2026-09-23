@@ -389,23 +389,25 @@
     const saveTagBtn = document.getElementById('saveTagBtn');
     const cancelTagBtn = document.getElementById('cancelTagBtn');
 
-    // Son activé par défaut (muted=0)
     function getEmbedUrl(username) {
-      return `https://chaturbate.com/embed/${encodeURIComponent(username)}/?embed_video_only=1&scrolling=no&muted=0`;
+      return `https://chaturbate.com/embed/${encodeURIComponent(username)}/?embed_video_only=1&scrolling=no`;
     }
 
     nonFavSidebarBtn.addEventListener('click', () => {
       const isOpen = nonFavSidebar.classList.toggle('open');
       nonFavSidebarBtn.classList.toggle('active', isOpen);
       if (isOpen) updateNonFavSidebarList();
+      else streamObserver.disconnect(); // Nettoyage lors de la fermeture du volet
     });
 
     nonFavCloseBtn.addEventListener('click', () => {
       nonFavSidebar.classList.remove('open');
       nonFavSidebarBtn.classList.remove('active');
+      streamObserver.disconnect();
     });
 
     function updateNonFavSidebarList() {
+      streamObserver.disconnect();
       let nonFavs = models.filter(m => !favorites.includes(m.toLowerCase()));
       if (selectedTagFilter) {
         nonFavs = nonFavs.filter(m => (tags[m.toLowerCase()] || []).includes(selectedTagFilter));
@@ -436,9 +438,10 @@
             </div>
           </div>
           <div class="player-container">
-            <iframe src="${embedUrl}" sandbox="allow-scripts allow-same-origin allow-presentation allow-forms" scrolling="no" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen" allowfullscreen></iframe>
+            <iframe data-src="${embedUrl}" sandbox="allow-scripts allow-same-origin allow-presentation allow-forms" scrolling="no" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen" allowfullscreen></iframe>
           </div>
         `;
+        streamObserver.observe(item.querySelector('.player-container'));
         nonFavListContainer.appendChild(item);
       });
     }
@@ -653,7 +656,9 @@
     }
 
     function renderGrid() {
-      streamObserver.disconnect();
+      if (!nonFavSidebar.classList.contains('open')) {
+        streamObserver.disconnect();
+      }
       cleanUnusedTags();
       grid.innerHTML = '';
       updateTagFilterOptions();
@@ -664,7 +669,10 @@
       }
       nonFavCount.textContent = `(${nonFavsForCount.length})`;
 
-      if (nonFavSidebar.classList.contains('open')) updateNonFavSidebarList();
+      if (nonFavSidebar.classList.contains('open')) {
+        updateNonFavSidebarList();
+        return;
+      }
       
       let displayModels = [...models];
 
