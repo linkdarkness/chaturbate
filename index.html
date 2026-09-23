@@ -148,6 +148,51 @@
     .btn-hide-toggle.active { background: rgba(148, 163, 184, 0.2); border-color: var(--hidden); color: var(--text); font-weight: 600; }
     .btn-sort.active { background: rgba(56, 189, 248, 0.15); border-color: var(--accent); color: var(--accent); font-weight: 600; }
     .btn-layout.active { background: rgba(56, 189, 248, 0.15); border-color: var(--accent); color: var(--accent); }
+    .btn-nonfav-toggle.active { background: rgba(56, 189, 248, 0.15); border-color: var(--accent); color: var(--accent); font-weight: 600; }
+
+    /* Volet latéral pour les non-favoris */
+    .sidebar-container {
+      position: fixed;
+      top: 0;
+      right: -100%;
+      width: 100%;
+      max-width: 400px;
+      height: 100vh;
+      background: #1e293b;
+      border-left: 1px solid #334155;
+      z-index: 2000;
+      display: flex;
+      flex-direction: column;
+      transition: right 0.3s ease-in-out;
+      box-shadow: -10px 0 30px rgba(0,0,0,0.5);
+    }
+    .sidebar-container.open { right: 0; }
+    .sidebar-header {
+      padding: 12px 16px;
+      background: #0f172a;
+      border-bottom: 1px solid #334155;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .sidebar-title { font-size: 0.95rem; font-weight: 600; color: var(--text); }
+    .sidebar-close-btn { background: transparent; border: none; color: #64748b; font-size: 1.3rem; cursor: pointer; padding: 2px 6px; }
+    .sidebar-close-btn:hover { color: var(--danger); }
+    .sidebar-body { flex: 1; overflow-y: auto; padding: 12px; display: flex; flex-direction: column; gap: 8px; }
+
+    .nonfav-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: #0f172a;
+      padding: 8px 12px;
+      border-radius: 6px;
+      border: 1px solid #334155;
+      font-size: 0.9rem;
+    }
+    .nonfav-item:hover { border-color: var(--accent); }
+    .nonfav-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex: 1; margin-right: 8px; }
+    .nonfav-actions { display: flex; gap: 6px; align-items: center; }
 
     .dropdown-menu {
       display: none;
@@ -264,6 +309,7 @@
 <body>
   <header>
     <div class="header-top-row">
+      <h1>Directs Live</h1>
       <form id="addModelForm" class="input-form">
         <input type="text" id="newModelInput" class="custom-input" placeholder="Ajouter ou chercher un pseudo..." autocomplete="off">
         <button type="button" id="clearSearchBtn" class="clear-search-btn" title="Effacer la recherche">&times;</button>
@@ -280,6 +326,9 @@
       <button id="layoutToggleBtn" class="btn-action btn-layout" title="Changer le mode d'affichage">📐</button>
       <button id="favFilterBtn" class="btn-action btn-fav-filter" title="Afficher uniquement les favoris">&#9733;</button>
       
+      <!-- Bouton du volet des non-favoris -->
+      <button id="nonFavSidebarBtn" class="btn-action btn-nonfav-toggle" title="Modèles non-favoris">📁 <span id="nonFavCount">(0)</span></button>
+
       <button id="hideToggleBtn" class="btn-action btn-hide-toggle" title="Masqués">
         🙈 <span id="hiddenCount">(0)</span>
       </button>
@@ -295,6 +344,17 @@
       <button id="resetBtn" class="btn-action btn-reset" title="Nettoyer non-favoris">🧹</button>
     </div>
   </header>
+
+  <!-- Volet latéral pour les non-favoris -->
+  <div id="nonFavSidebar" class="sidebar-container">
+    <div class="sidebar-header">
+      <span class="sidebar-title">Modèles hors favoris</span>
+      <button id="nonFavCloseBtn" class="sidebar-close-btn">&times;</button>
+    </div>
+    <div class="sidebar-body" id="nonFavListContainer">
+      <!-- Rempli dynamiquement -->
+    </div>
+  </div>
 
   <div id="historyMenu" class="dropdown-menu">
     <div class="dropdown-header">
@@ -344,6 +404,12 @@
     const sortToggleBtn = document.getElementById('sortToggleBtn');
     const layoutToggleBtn = document.getElementById('layoutToggleBtn');
     
+    const nonFavSidebarBtn = document.getElementById('nonFavSidebarBtn');
+    const nonFavSidebar = document.getElementById('nonFavSidebar');
+    const nonFavCloseBtn = document.getElementById('nonFavCloseBtn');
+    const nonFavListContainer = document.getElementById('nonFavListContainer');
+    const nonFavCount = document.getElementById('nonFavCount');
+
     const hiddenCount = document.getElementById('hiddenCount');
     const tagFilterSelect = document.getElementById('tagFilterSelect');
     const historyBtn = document.getElementById('historyBtn');
@@ -366,6 +432,42 @@
 
     function getEmbedUrl(username) {
       return `https://chaturbate.com/embed/${encodeURIComponent(username)}/?embed_video_only=1&scrolling=no&muted=1`;
+    }
+
+    // Gestion du volet latéral des non-favoris
+    nonFavSidebarBtn.addEventListener('click', () => {
+      const isOpen = nonFavSidebar.classList.toggle('open');
+      nonFavSidebarBtn.classList.toggle('active', isOpen);
+      if (isOpen) updateNonFavSidebarList();
+    });
+
+    nonFavCloseBtn.addEventListener('click', () => {
+      nonFavSidebar.classList.remove('open');
+      nonFavSidebarBtn.classList.remove('active');
+    });
+
+    function updateNonFavSidebarList() {
+      const nonFavs = models.filter(m => !favorites.includes(m.toLowerCase()));
+      nonFavCount.textContent = `(${nonFavs.length})`;
+      nonFavListContainer.innerHTML = '';
+
+      if (nonFavs.length === 0) {
+        nonFavListContainer.innerHTML = '<div style="color: #64748b; text-align: center; padding: 20px; font-size: 0.85rem;">Aucun modèle hors favoris</div>';
+        return;
+      }
+
+      nonFavs.sort((a, b) => a.localeCompare(b, 'fr', { sensitivity: 'base' })).forEach(username => {
+        const item = document.createElement('div');
+        item.className = 'nonfav-item';
+        item.innerHTML = `
+          <span class="nonfav-name">${username}</span>
+          <div class="nonfav-actions">
+            <button class="btn-icon-subtle" title="Mettre en favori" onclick="toggleFavorite('${username}'); updateNonFavSidebarList();">&#9733;</button>
+            <button class="btn-delete" title="Supprimer" onclick="removeModel('${username}'); updateNonFavSidebarList();">&times;</button>
+          </div>
+        `;
+        nonFavListContainer.appendChild(item);
+      });
     }
 
     function applyLayout() {
@@ -428,9 +530,10 @@
       newModelInput.value = '';
       clearSearchBtn.classList.remove('show');
       renderGrid();
+      if (nonFavSidebar.classList.contains('open')) updateNonFavSidebarList();
     }
 
-    function toggleFavorite(username) {
+    window.toggleFavorite = function(username) {
       const lower = username.toLowerCase();
       if (favorites.includes(lower)) {
         favorites = favorites.filter(f => f !== lower);
@@ -439,6 +542,7 @@
       }
       saveFavorites();
       renderGrid();
+      if (nonFavSidebar.classList.contains('open')) updateNonFavSidebarList();
     }
 
     function toggleHideModel(username) {
@@ -567,6 +671,8 @@
       grid.innerHTML = '';
       updateTagFilterOptions();
       updateHiddenCount();
+      nonFavCount.textContent = `(${models.filter(m => !favorites.includes(m.toLowerCase())).length})`;
+      if (nonFavSidebar.classList.contains('open')) updateNonFavSidebarList();
       
       let displayModels = [...models];
 
@@ -724,7 +830,7 @@
       if (username) addModelToState(username);
     });
 
-    function removeModel(username) {
+    window.removeModel = function(username) {
       const lower = username.toLowerCase();
       models = models.filter(m => m.toLowerCase() !== lower);
       saveModels();
