@@ -739,6 +739,14 @@
     const saveTagBtn = document.getElementById('saveTagBtn');
     const cancelTagBtn = document.getElementById('cancelTagBtn');
 
+    // === GESTION DE L'API D'INTÉGRATION CHATURBATE ===
+    function getEmbedUrl(username) {
+      // Paramètres standards de l'API d'intégration web
+      const embedVideoOnly = 0; // 0 pour afficher les infos, 1 pour la vidéo seule
+      const scrolling = 'no';   // Bloque le défilement interne
+      return `https://chaturbate.com/embed/${encodeURIComponent(username)}/?embed_video_only=${embedVideoOnly}&scrolling=${scrolling}`;
+    }
+
     function applyLayout() {
       grid.classList.remove('compact-mode', 'miniature-mode', 'cinema-mode');
       layoutToggleBtn.classList.remove('active');
@@ -930,7 +938,8 @@
         `<span class="tag-badge" title="Cliquer pour supprimer" onclick="event.stopPropagation(); removeTag('${username}', '${t}')">${t} &times;</span>`
       ).join('');
 
-      const embedUrl = `https://chaturbate.com/embed/${encodeURIComponent(username)}/?embed_video_only=0&scrolling=no`;
+      // Appel de la fonction de l'API Embed
+      const embedUrl = getEmbedUrl(username);
 
       card.innerHTML = `
         <div class="model-header" ${isCinemaThumb ? 'style="background: #0284c7;"' : ''}>
