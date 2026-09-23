@@ -150,7 +150,6 @@
     .btn-layout.active { background: rgba(56, 189, 248, 0.15); border-color: var(--accent); color: var(--accent); }
     .btn-nonfav-toggle.active { background: rgba(56, 189, 248, 0.15); border-color: var(--accent); color: var(--accent); font-weight: 600; }
 
-    /* Volet latéral pour les non-favoris */
     .sidebar-container {
       position: fixed;
       top: 0;
@@ -324,9 +323,8 @@
 
       <button id="sortToggleBtn" class="btn-action btn-sort" title="Basculer tri A-Z ou Favoris">🔤</button>
       <button id="layoutToggleBtn" class="btn-action btn-layout" title="Changer le mode d'affichage">📐</button>
-      <button id="favFilterBtn" class="btn-action btn-fav-filter" title="Afficher uniquement les favoris">&#9733;</button>
+      <button id="favFilterBtn" class="btn-action btn-fav-filter active" title="Afficher uniquement les favoris">&#9733;</button>
       
-      <!-- Bouton du volet des non-favoris -->
       <button id="nonFavSidebarBtn" class="btn-action btn-nonfav-toggle" title="Modèles non-favoris">📁 <span id="nonFavCount">(0)</span></button>
 
       <button id="hideToggleBtn" class="btn-action btn-hide-toggle" title="Masqués">
@@ -345,15 +343,12 @@
     </div>
   </header>
 
-  <!-- Volet latéral pour les non-favoris -->
   <div id="nonFavSidebar" class="sidebar-container">
     <div class="sidebar-header">
       <span class="sidebar-title">Modèles hors favoris</span>
       <button id="nonFavCloseBtn" class="sidebar-close-btn">&times;</button>
     </div>
-    <div class="sidebar-body" id="nonFavListContainer">
-      <!-- Rempli dynamiquement -->
-    </div>
+    <div class="sidebar-body" id="nonFavListContainer"></div>
   </div>
 
   <div id="historyMenu" class="dropdown-menu">
@@ -386,7 +381,8 @@
     let history = JSON.parse(localStorage.getItem('cb_dashboard_history')) || [];
     let tags = JSON.parse(localStorage.getItem('cb_dashboard_tags')) || {};
     
-    let showOnlyFavorites = false;
+    // Défini sur true par défaut pour n'afficher que les favoris au chargement
+    let showOnlyFavorites = true;
     let showHiddenModels = false;
     let alphabeticalSort = false;
     let currentLayout = parseInt(localStorage.getItem('cb_dashboard_layout_mode')) || 0; 
@@ -434,7 +430,6 @@
       return `https://chaturbate.com/embed/${encodeURIComponent(username)}/?embed_video_only=1&scrolling=no&muted=1`;
     }
 
-    // Gestion du volet latéral des non-favoris
     nonFavSidebarBtn.addEventListener('click', () => {
       const isOpen = nonFavSidebar.classList.toggle('open');
       nonFavSidebarBtn.classList.toggle('active', isOpen);
