@@ -292,16 +292,16 @@
     </div>
 
     <div class="header-bottom-row">
-      <button id="sortToggleBtn" class="btn-action btn-sort" title="Basculer tri A-Z ou Favoris">🔤</button>
-      <button id="layoutToggleBtn" class="btn-action btn-layout" title="Changer le mode d'affichage">📐</button>
+      <button id="sortToggleBtn" class="btn-action btn-sort" title="Trier par ordre alphabétique">AZ</button>
+      <button id="layoutToggleBtn" class="btn-action btn-layout" title="Changer le mode d'affichage">⚏</button>
       
       <button id="nonFavSidebarBtn" class="btn-action btn-nonfav-toggle" title="Modèles hors favoris">📁 <span id="nonFavCount">(0)</span></button>
 
-      <button id="exportBtn" class="btn-action" title="Exporter JSON">📤</button>
-      <button id="importBtn" class="btn-action" title="Importer JSON">📥</button>
+      <button id="exportBtn" class="btn-action" title="Exporter les données">📤</button>
+      <button id="importBtn" class="btn-action" title="Importer des données">📥</button>
       <input type="file" id="importFile" accept=".json" style="display: none;">
 
-      <button id="resetBtn" class="btn-action btn-reset" title="Nettoyer non-favoris">🧹</button>
+      <button id="resetBtn" class="btn-action btn-reset" title="Vider les non-favoris">🧹</button>
     </div>
   </header>
 
@@ -445,8 +445,10 @@
         grid.classList.add('miniature-mode');
         nonFavListContainer.classList.add('miniature-mode');
         layoutToggleBtn.classList.add('active');
+        layoutToggleBtn.textContent = '☩';
         layoutToggleBtn.title = 'Mode Miniature (Actif)';
       } else {
+        layoutToggleBtn.textContent = '⚏';
         layoutToggleBtn.title = 'Mode Standard (Actif)';
       }
       localStorage.setItem('cb_dashboard_layout_mode', currentLayout);
@@ -697,7 +699,7 @@
     sortToggleBtn.addEventListener('click', () => {
       alphabeticalSort = !alphabeticalSort;
       sortToggleBtn.classList.toggle('active', alphabeticalSort);
-      sortToggleBtn.title = alphabeticalSort ? 'Tri A-Z (Actif)' : 'Tri A-Z';
+      sortToggleBtn.title = alphabeticalSort ? 'Tri A-Z (Actif)' : 'Tri par défaut';
       renderGrid();
     });
 
