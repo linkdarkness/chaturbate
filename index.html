@@ -142,7 +142,6 @@
     }
     .btn-action:hover { color: var(--text); background: #334155; }
     .btn-reset:hover { color: var(--danger); border-color: var(--danger); background: rgba(239, 68, 68, 0.1); }
-    .btn-fav-filter.active { background: rgba(251, 191, 36, 0.15); border-color: var(--star); color: var(--star); font-weight: 600; }
     .btn-sort.active { background: rgba(56, 189, 248, 0.15); border-color: var(--accent); color: var(--accent); font-weight: 600; }
     .btn-layout.active { background: rgba(56, 189, 248, 0.15); border-color: var(--accent); color: var(--accent); }
     .btn-nonfav-toggle.active { background: rgba(56, 189, 248, 0.15); border-color: var(--accent); color: var(--accent); font-weight: 600; }
@@ -338,7 +337,6 @@
     <div class="header-bottom-row">
       <button id="sortToggleBtn" class="btn-action btn-sort" title="Basculer tri A-Z ou Favoris">🔤</button>
       <button id="layoutToggleBtn" class="btn-action btn-layout" title="Changer le mode d'affichage">📐</button>
-      <button id="favFilterBtn" class="btn-action btn-fav-filter active" title="Afficher uniquement les favoris">&#9733;</button>
       
       <button id="nonFavSidebarBtn" class="btn-action btn-nonfav-toggle" title="Modèles non-favoris">📁 <span id="nonFavCount">(0)</span></button>
 
@@ -377,7 +375,7 @@
     let favorites = JSON.parse(localStorage.getItem('cb_dashboard_favs')) || [];
     let tags = JSON.parse(localStorage.getItem('cb_dashboard_tags')) || {};
     
-    let showOnlyFavorites = true;
+    let showOnlyFavorites = true; // Conserve le filtrage par défaut sur les favoris
     let alphabeticalSort = false;
     let currentLayout = parseInt(localStorage.getItem('cb_dashboard_layout_mode')) || 0; 
     let selectedTagFilter = '';
@@ -389,7 +387,6 @@
     const newModelInput = document.getElementById('newModelInput');
     const clearSearchBtn = document.getElementById('clearSearchBtn');
     const resetBtn = document.getElementById('resetBtn');
-    const favFilterBtn = document.getElementById('favFilterBtn');
     const sortToggleBtn = document.getElementById('sortToggleBtn');
     const layoutToggleBtn = document.getElementById('layoutToggleBtn');
     
@@ -513,16 +510,7 @@
     function saveFavorites() { localStorage.setItem('cb_dashboard_favs', JSON.stringify(favorites)); }
     function saveTags() { localStorage.setItem('cb_dashboard_tags', JSON.stringify(tags)); }
 
-    // Nettoie automatiquement les tags inutilisés (qui ne sont assignés à aucun modèle existant)
     function cleanUnusedTags() {
-      const activeTags = new Set();
-      models.forEach(m => {
-        const lower = m.toLowerCase();
-        if (tags[lower]) {
-          tags[lower].forEach(t => activeTags.add(t));
-        }
-      });
-
       let changed = false;
       Object.keys(tags).forEach(modelKey => {
         if (!models.map(m => m.toLowerCase()).includes(modelKey)) {
@@ -531,7 +519,6 @@
         }
       });
 
-      // Si le filtre sélectionné n'existe plus, on le réinitialise
       if (selectedTagFilter && !getAllExistingTags().includes(selectedTagFilter)) {
         selectedTagFilter = '';
       }
@@ -812,12 +799,6 @@
       saveTags();
       renderGrid();
     }
-
-    favFilterBtn.addEventListener('click', () => {
-      showOnlyFavorites = !showOnlyFavorites;
-      favFilterBtn.classList.toggle('active', showOnlyFavorites);
-      renderGrid();
-    });
 
     resetBtn.addEventListener('click', () => {
       const nonFavsCount = models.filter(m => !favorites.includes(m.toLowerCase())).length;
