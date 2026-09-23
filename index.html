@@ -516,7 +516,6 @@
 
     .btn-delete:hover { color: var(--danger); }
 
-    /* Conteneur et iframe adaptés au format vidéo seul (16/9) */
     .player-container {
       width: 100%;
       aspect-ratio: 16 / 9;
@@ -739,9 +738,8 @@
     const saveTagBtn = document.getElementById('saveTagBtn');
     const cancelTagBtn = document.getElementById('cancelTagBtn');
 
-    // === API CHATURBATE : VIDÉO SEULE ===
     function getEmbedUrl(username) {
-      const embedVideoOnly = 1; // 1 = Vidéo seule (masque les infos et le chat)
+      const embedVideoOnly = 1; 
       const scrolling = 'no';   
       return `https://chaturbate.com/embed/${encodeURIComponent(username)}/?embed_video_only=${embedVideoOnly}&scrolling=${scrolling}`;
     }
@@ -846,6 +844,48 @@
       renderGrid();
     }
 
+    // === FONCTION DE CAPTURE D'ÉCRAN (SCREENSHOT) ===
+    window.takeScreenshot = function(username) {
+      const card = document.getElementById(`card-${username}`);
+      if (!card) return;
+
+      // Utilisation de la bibliothèque html2canvas injectée dynamiquement
+      if (typeof html2canvas === 'undefined') {
+        const script = document.createElement('script');
+        script.src = 'https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js';
+        script.onload = () => executeCapture(username, card);
+        document.head.appendChild(script);
+      } else {
+        executeCapture(username, card);
+      }
+    };
+
+    function executeCapture(username, card) {
+      // Masquer temporairement les boutons de l'en-tête pendant la capture pour une image propre
+      const actions = card.querySelector('.header-actions');
+      actions.style.visibility = 'hidden';
+
+      html2canvas(card, {
+        allowTaint: true,
+        useCORS: true,
+        scale: 2 // Haute résolution
+      }).then(canvas => {
+        actions.style.visibility = 'visible';
+        
+        const image = canvas.toDataURL('image/png');
+        const downloadLink = document.createElement('a');
+        downloadLink.href = image;
+        downloadLink.download = `capture-${username}-${new Date().toISOString().slice(0,10)}.png`;
+        document.body.appendChild(downloadLink);
+        downloadLink.click();
+        downloadLink.remove();
+      }).catch(err => {
+        actions.style.visibility = 'visible';
+        alert("Impossible de réaliser la capture en raison des restrictions de sécurité du navigateur (CORS sur l'iframe).");
+        console.error(err);
+      });
+    }
+
     window.openTagModal = function(username) {
       targetTagUser = username;
       tagModalTitle.textContent = `Ajouter un tag pour ${username}`;
@@ -931,6 +971,7 @@
       const modelTags = (tags[lower] || []).sort((a, b) => a.localeCompare(b, 'fr', { sensitivity: 'base' }));
 
       const card = document.createElement('div');
+      card.id = `card-${username}`;
       card.className = `model-card ${isHidden ? 'is-hidden' : ''} ${isCinemaThumb ? 'cinema-active-thumb' : ''}`;
 
       const tagsHtml = modelTags.map(t => 
@@ -946,6 +987,7 @@
             <div class="tags-container">${tagsHtml}</div>
           </div>
           <div class="header-actions">
+            <button class="btn-icon-subtle" title="Prendre une capture d'écran" onclick="event.stopPropagation(); takeScreenshot('${username}')">📸</button>
             <button class="btn-icon-subtle" title="${isHidden ? 'Démasquer' : 'Masquer'}" onclick="event.stopPropagation(); toggleHideModel('${username}')">
               ${isHidden ? '👁️' : '🙈'}
             </button>
