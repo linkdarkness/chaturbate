@@ -222,7 +222,11 @@
       display: flex;
       flex-direction: column;
       transition: opacity 0.2s ease, border-color 0.2s ease;
+      cursor: grab;
     }
+    .model-card:active { cursor: grabbing; }
+    .model-card.dragging { opacity: 0.4; border: 2px dashed var(--accent); }
+    .model-card.drag-over { border-color: var(--accent); transform: scale(1.01); }
     .model-card.is-hidden { opacity: 0.5; }
 
     .model-header {
@@ -250,9 +254,9 @@
     .btn-delete { background: transparent; border: none; color: #64748b; font-size: 1.2rem; cursor: pointer; padding: 2px 4px; }
     .btn-delete:hover { color: var(--danger); }
 
-    .player-container { width: 100%; aspect-ratio: 16 / 9; background: #000; position: relative; overflow: hidden; }
+    .player-container { width: 100%; aspect-ratio: 16 / 9; background: #000; position: relative; overflow: hidden; pointer-events: none; }
     .player-container iframe { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: 0; display: block; }
-    .player-overlay-blocker { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 10; pointer-events: none; }
+    .player-overlay-blocker { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 10; }
 
     .modal-overlay {
       display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(15, 23, 42, 0.8); backdrop-filter: blur(4px); z-index: 3000; justify-content: center; align-items: center;
@@ -540,6 +544,45 @@
       const card = document.createElement('div');
       card.id = `card-${username}`;
       card.className = `model-card ${isHidden ? 'is-hidden' : ''}`;
+      card.draggable = true;
+      card.dataset.username = username;
+
+      // Gestion du Drag & Drop
+      card.addEventListener('dragstart', (e) => {
+        e.dataTransfer.setData('text/plain', username);
+        setTimeout(() => card.classList.add('dragging'), 0);
+      });
+
+      card.addEventListener('dragend', () => {
+        card.classList.remove('dragging');
+        document.querySelectorAll('.model-card').forEach(c => c.classList.remove('drag-over'));
+      });
+
+      card.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        card.classList.add('drag-over');
+      });
+
+      card.addEventListener('dragleave', () => {
+        card.classList.remove('drag-over');
+      });
+
+      card.addEventListener('drop', (e) => {
+        e.preventDefault();
+        card.classList.remove('drag-over');
+        const draggedUser = e.dataTransfer.getData('text/plain');
+        if (!draggedUser || draggedUser === username) return;
+
+        const draggedIdx = models.findIndex(m => m.toLowerCase() === draggedUser.toLowerCase());
+        const targetIdx = models.findIndex(m => m.toLowerCase() === username.toLowerCase());
+
+        if (draggedIdx !== -1 && targetIdx !== -1) {
+          models.splice(draggedIdx, 1);
+          models.splice(targetIdx, 0, draggedUser);
+          saveModels();
+          renderGrid();
+        }
+      });
 
       const tagsHtml = modelTags.map(t => 
         `<span class="tag-badge" onclick="event.stopPropagation(); removeTag('${username}', '${t}')">${t} &times;</span>`
@@ -584,14 +627,6 @@
 
       if (alphabeticalSort) {
         displayModels.sort((a, b) => a.localeCompare(b, 'fr', { sensitivity: 'base' }));
-      } else {
-        displayModels.sort((a, b) => {
-          const aFav = favorites.includes(a.toLowerCase());
-          const bFav = favorites.includes(b.toLowerCase());
-          if (aFav && !bFav) return -1;
-          if (!aFav && bFav) return 1;
-          return a.localeCompare(b, 'fr', { sensitivity: 'base' });
-        });
       }
 
       if (!showHiddenModels) displayModels = displayModels.filter(m => !hiddenModels.includes(m.toLowerCase()));
@@ -677,7 +712,7 @@
     sortToggleBtn.addEventListener('click', () => {
       alphabeticalSort = !alphabeticalSort;
       sortToggleBtn.classList.toggle('active', alphabeticalSort);
-      sortToggleBtn.textContent = alphabeticalSort ? '⭐ Favoris d’abord' : '🔤 Tri A-Z';
+      sortToggleBtn.textContent = alphabeticalSort ? '🔤 Tri A-Z (Actif)' : '🔤 Tri A-Z';
       renderGrid();
     });
 
