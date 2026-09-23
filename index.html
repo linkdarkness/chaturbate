@@ -178,8 +178,8 @@
       overflow-y: auto; 
     }
 
-    /* Grilles standard et miniature */
-    .grid-container, .sidebar-grid {
+    /* Grille principale */
+    .grid-container {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
       gap: 16px;
@@ -188,16 +188,25 @@
       align-content: start;
     }
     
-    .grid-container.miniature-mode, .sidebar-grid.miniature-mode { 
+    .grid-container.miniature-mode { 
       grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); 
       gap: 8px; 
       padding: 8px; 
     }
-    .grid-container.miniature-mode .model-header, .sidebar-grid.miniature-mode .model-header { padding: 4px 8px; }
-    .grid-container.miniature-mode .model-name, .sidebar-grid.miniature-mode .model-name { font-size: 0.8rem; }
-    .grid-container.miniature-mode .tags-container, .sidebar-grid.miniature-mode .tags-container { display: none; }
-    .grid-container.miniature-mode .player-container, .sidebar-grid.miniature-mode .player-container { 
+    .grid-container.miniature-mode .model-header { padding: 4px 8px; }
+    .grid-container.miniature-mode .model-name { font-size: 0.8rem; }
+    .grid-container.miniature-mode .tags-container { display: none; }
+    .grid-container.miniature-mode .player-container { 
       aspect-ratio: 4 / 3; 
+    }
+
+    /* Liste dédiée aux non-favoris : 1 colonne verticale (un en dessous de l'autre) */
+    .sidebar-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      padding: 16px;
+      flex: 1;
     }
 
     .empty-message { grid-column: 1 / -1; text-align: center; padding: 60px 20px; color: #64748b; font-size: 1rem; }
@@ -309,7 +318,7 @@
       <span class="sidebar-title">Modèles hors favoris</span>
       <button id="nonFavCloseBtn" class="sidebar-close-btn">&times;</button>
     </div>
-    <div class="sidebar-body sidebar-grid" id="nonFavListContainer"></div>
+    <div class="sidebar-body sidebar-list" id="nonFavListContainer"></div>
   </div>
 
   <div id="tagModal" class="modal-overlay">
@@ -406,7 +415,7 @@
       nonFavListContainer.innerHTML = '';
 
       if (nonFavs.length === 0) {
-        nonFavListContainer.innerHTML = '<div style="color: #64748b; text-align: center; padding: 60px 20px; font-size: 1rem; grid-column: 1 / -1;">Aucun modèle hors favoris</div>';
+        nonFavListContainer.innerHTML = '<div style="color: #64748b; text-align: center; padding: 60px 20px; font-size: 1rem;">Aucun modèle hors favoris</div>';
         return;
       }
 
@@ -435,12 +444,10 @@
 
     function applyLayout() {
       grid.classList.remove('miniature-mode');
-      nonFavListContainer.classList.remove('miniature-mode');
       layoutToggleBtn.classList.remove('active');
 
       if (currentLayout === 1) {
         grid.classList.add('miniature-mode');
-        nonFavListContainer.classList.add('miniature-mode');
         layoutToggleBtn.classList.add('active');
         layoutToggleBtn.textContent = '☩';
         layoutToggleBtn.title = 'Mode Miniature (Actif)';
