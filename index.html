@@ -513,7 +513,33 @@
     function saveFavorites() { localStorage.setItem('cb_dashboard_favs', JSON.stringify(favorites)); }
     function saveTags() { localStorage.setItem('cb_dashboard_tags', JSON.stringify(tags)); }
 
+    // Nettoie automatiquement les tags inutilisés (qui ne sont assignés à aucun modèle existant)
+    function cleanUnusedTags() {
+      const activeTags = new Set();
+      models.forEach(m => {
+        const lower = m.toLowerCase();
+        if (tags[lower]) {
+          tags[lower].forEach(t => activeTags.add(t));
+        }
+      });
+
+      let changed = false;
+      Object.keys(tags).forEach(modelKey => {
+        if (!models.map(m => m.toLowerCase()).includes(modelKey)) {
+          delete tags[modelKey];
+          changed = true;
+        }
+      });
+
+      // Si le filtre sélectionné n'existe plus, on le réinitialise
+      if (selectedTagFilter && !getAllExistingTags().includes(selectedTagFilter)) {
+        selectedTagFilter = '';
+      }
+      if (changed) saveTags();
+    }
+
     function getAllExistingTags() {
+      cleanUnusedTags();
       const set = new Set();
       Object.values(tags).forEach(list => list.forEach(t => set.add(t)));
       return Array.from(set).sort((a, b) => a.localeCompare(b, 'fr', { sensitivity: 'base' }));
@@ -614,6 +640,7 @@
       if (tags[lower]) {
         tags[lower] = tags[lower].filter(t => t !== tagToRemove);
         if (tags[lower].length === 0) delete tags[lower];
+        cleanUnusedTags();
         saveTags();
         renderGrid();
       }
@@ -671,6 +698,7 @@
 
     function renderGrid() {
       streamObserver.disconnect();
+      cleanUnusedTags();
       grid.innerHTML = '';
       updateTagFilterOptions();
       
@@ -753,6 +781,7 @@
             favorites = Array.isArray(imported.favorites) ? imported.favorites : [];
             tags = (imported.tags && typeof imported.tags === 'object') ? imported.tags : {};
 
+            cleanUnusedTags();
             saveModels(); saveFavorites(); saveTags();
             renderGrid();
             alert('Configuration importée avec succès !');
@@ -777,7 +806,10 @@
     window.removeModel = function(username) {
       const lower = username.toLowerCase();
       models = models.filter(m => m.toLowerCase() !== lower);
+      delete tags[lower];
+      cleanUnusedTags();
       saveModels();
+      saveTags();
       renderGrid();
     }
 
@@ -792,7 +824,9 @@
       if (nonFavsCount === 0) { alert('Aucun modèle non-favori à supprimer.'); return; }
       if (confirm('Voulez-vous supprimer tous les modèles non-favoris ?')) {
         models = models.filter(m => favorites.includes(m.toLowerCase()));
+        cleanUnusedTags();
         saveModels();
+        saveTags();
         renderGrid();
       }
     });
