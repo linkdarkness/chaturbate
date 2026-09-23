@@ -198,11 +198,20 @@
       padding: 16px;
       flex: 1;
     }
-    .grid-container.miniature-mode { grid-template-columns: repeat(2, 1fr); gap: 6px; padding: 8px; }
-    @media (min-width: 600px) { .grid-container.miniature-mode { grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); } }
-    .grid-container.miniature-mode .model-header { padding: 4px 6px; }
-    .grid-container.miniature-mode .model-name { font-size: 0.75rem; }
+    
+    /* Mode Miniature : colonnes plus serrées et hauteur dynamique adaptée au contenu */
+    .grid-container.miniature-mode { 
+      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); 
+      gap: 8px; 
+      padding: 8px; 
+    }
+    .grid-container.miniature-mode .model-header { padding: 4px 8px; }
+    .grid-container.miniature-mode .model-name { font-size: 0.8rem; }
     .grid-container.miniature-mode .tags-container { display: none; }
+    .grid-container.miniature-mode .player-container { 
+      aspect-ratio: auto; 
+      height: 120px; /* Hauteur fixe compacte pour les miniatures */
+    }
 
     .empty-message { grid-column: 1 / -1; text-align: center; padding: 60px 20px; color: #64748b; font-size: 1rem; }
 
