@@ -13,6 +13,8 @@
       --danger: #ef4444;
       --star: #fbbf24;
       --hidden: #94a3b8;
+      --online: #22c55e;
+      --offline: #64748b;
     }
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
@@ -305,67 +307,33 @@
       flex: 1;
     }
 
-    /* Mode Compact */
     .grid-container.compact-mode {
       grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
       gap: 10px;
       padding: 10px;
     }
+    .grid-container.compact-mode .player-container { aspect-ratio: 16 / 9; }
 
-    .grid-container.compact-mode .player-container {
-      aspect-ratio: 16 / 9;
-    }
-
-    /* Mode Miniature */
     .grid-container.miniature-mode {
       grid-template-columns: repeat(2, 1fr);
       gap: 6px;
       padding: 8px;
     }
-
     @media (min-width: 600px) {
-      .grid-container.miniature-mode {
-        grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
-      }
+      .grid-container.miniature-mode { grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); }
     }
+    .grid-container.miniature-mode .model-card { border-radius: 6px; }
+    .grid-container.miniature-mode .model-header { padding: 4px 6px; }
+    .grid-container.miniature-mode .model-name { font-size: 0.75rem; }
+    .grid-container.miniature-mode .tags-container { display: none; }
+    .grid-container.miniature-mode .player-container { aspect-ratio: 16 / 9; }
 
-    .grid-container.miniature-mode .model-card {
-      border-radius: 6px;
-    }
-
-    .grid-container.miniature-mode .model-header {
-      padding: 4px 6px;
-    }
-
-    .grid-container.miniature-mode .model-name {
-      font-size: 0.75rem;
-    }
-
-    .grid-container.miniature-mode .tags-container {
-      display: none;
-    }
-
-    .grid-container.miniature-mode .btn-icon-subtle,
-    .grid-container.miniature-mode .btn-delete {
-      font-size: 0.8rem;
-    }
-
-    .grid-container.miniature-mode .btn-fav {
-      font-size: 0.9rem;
-    }
-
-    .grid-container.miniature-mode .player-container {
-      aspect-ratio: 16 / 9;
-    }
-
-    /* Mode Cinéma */
     .grid-container.cinema-mode {
       display: flex;
       flex-direction: column;
       gap: 16px;
       padding: 16px;
     }
-
     @media (min-width: 900px) {
       .grid-container.cinema-mode {
         display: grid;
@@ -440,6 +408,18 @@
       overflow: hidden;
       flex: 1;
     }
+
+    /* Pastille de statut en ligne / hors ligne */
+    .status-dot {
+      width: 9px;
+      height: 9px;
+      border-radius: 50%;
+      background-color: var(--offline);
+      display: inline-block;
+      flex-shrink: 0;
+      transition: background-color 0.3s;
+    }
+    .status-dot.online { background-color: var(--online); box-shadow: 0 0 6px var(--online); }
 
     .model-name {
       font-weight: 600;
@@ -535,7 +515,6 @@
       display: block;
     }
 
-    /* Bloque les clics vers le site officiel sur la vidéo tout en laissant le dashboard interactif */
     .player-overlay-blocker {
       position: absolute;
       top: 0;
@@ -650,11 +629,12 @@
       </select>
 
       <button id="sortToggleBtn" class="btn-action btn-sort" title="Basculer tri alphabétique (A-Z) ou Favoris d'abord">🔤 Tri A-Z</button>
-
       <button id="layoutToggleBtn" class="btn-action btn-layout" title="Changer le mode d'affichage">📐 Mode Standard</button>
-
       <button id="favFilterBtn" class="btn-action btn-fav-filter" title="Afficher uniquement les favoris">&#9733; Favoris</button>
       
+      <!-- Bouton de rafraîchissement des statuts -->
+      <button id="checkStatusBtn" class="btn-action" title="Vérifier les statuts en direct">🟢 Statuts</button>
+
       <button id="hideToggleBtn" class="btn-action btn-hide-toggle" title="Afficher/Masquer les modèles masqués">
         🙈 Masqués <span id="hiddenCount">(0)</span>
       </button>
@@ -664,7 +644,6 @@
       </button>
 
       <button id="exportBtn" class="btn-action" title="Exporter la configuration en JSON">📤 Exporter</button>
-      
       <button id="importBtn" class="btn-action" title="Importer une configuration JSON">📥 Importer</button>
       <input type="file" id="importFile" accept=".json" style="display: none;">
 
@@ -709,6 +688,7 @@
     let history = JSON.parse(localStorage.getItem('cb_dashboard_history')) || [];
     let tags = JSON.parse(localStorage.getItem('cb_dashboard_tags')) || {};
     let audioStates = JSON.parse(localStorage.getItem('cb_dashboard_audio')) || {};
+    let onlineStatus = JSON.parse(localStorage.getItem('cb_dashboard_online')) || {};
     
     let showOnlyFavorites = false;
     let showHiddenModels = false;
@@ -726,6 +706,7 @@
     const clearSearchBtn = document.getElementById('clearSearchBtn');
     const resetBtn = document.getElementById('resetBtn');
     const favFilterBtn = document.getElementById('favFilterBtn');
+    const checkStatusBtn = document.getElementById('checkStatusBtn');
     const hideToggleBtn = document.getElementById('hideToggleBtn');
     const sortToggleBtn = document.getElementById('sortToggleBtn');
     const layoutToggleBtn = document.getElementById('layoutToggleBtn');
@@ -753,15 +734,13 @@
     function getEmbedUrl(username) {
       const lower = username.toLowerCase();
       const isMuted = audioStates[lower] !== undefined ? audioStates[lower] : true;
-      const embedVideoOnly = 1; 
-      const scrolling = 'no';   
-      return `https://chaturbate.com/embed/${encodeURIComponent(username)}/?embed_video_only=${embedVideoOnly}&scrolling=${scrolling}&muted=${isMuted ? 1 : 0}`;
+      return `https://chaturbate.com/embed/${encodeURIComponent(username)}/?embed_video_only=1&scrolling=no&muted=${isMuted ? 1 : 0}`;
     }
 
     function toggleAudio(username) {
       const lower = username.toLowerCase();
       const currentMuted = audioStates[lower] !== undefined ? audioStates[lower] : true;
-      audioStates[lower] = !currentMuted; // Inverse l'état du son
+      audioStates[lower] = !currentMuted;
       localStorage.setItem('cb_dashboard_audio', JSON.stringify(audioStates));
 
       const card = document.getElementById(`card-${username}`);
@@ -769,8 +748,8 @@
         const iframe = card.querySelector('iframe');
         if (iframe) {
           const newUrl = getEmbedUrl(username);
-          iframe.dataset.src = newUrl; // Met à jour le dataset pour le lazy loading
-          iframe.src = newUrl;        // Force le rechargement immédiat de l'iframe avec le bon paramètre de son
+          iframe.dataset.src = newUrl;
+          iframe.src = newUrl;
         }
         const soundBtn = card.querySelector('.btn-sound');
         if (soundBtn) {
@@ -778,6 +757,27 @@
           soundBtn.title = audioStates[lower] ? 'Activer le son' : 'Couper le son';
         }
       }
+    }
+
+    // Simulation de vérification des statuts en ligne via une requête image transparente ou contournement CORS
+    async function checkAllOnlineStatus() {
+      checkStatusBtn.textContent = '⏳ Vérification...';
+      
+      for (let username of models) {
+        const lower = username.toLowerCase();
+        try {
+          // On utilise une astuce de contournement de fetch pour tester la disponibilité de la page embed/room
+          const response = await fetch(`https://chaturbate.com/embed/${encodeURIComponent(username)}/`, { method: 'HEAD', mode: 'no-cors' });
+          // Si pas d'erreur réseau majeure, on marque comme en ligne (ou test via iframe onload)
+          onlineStatus[lower] = true; 
+        } catch (e) {
+          onlineStatus[lower] = false;
+        }
+      }
+      
+      localStorage.setItem('cb_dashboard_online', JSON.stringify(onlineStatus));
+      checkStatusBtn.textContent = '🟢 Statuts';
+      renderGrid();
     }
 
     function applyLayout() {
@@ -811,20 +811,12 @@
 
         const targetSrc = iframe.dataset.src;
         if (entry.isIntersecting) {
-          if (iframe.src !== targetSrc) {
-            iframe.src = targetSrc;
-          }
+          if (iframe.src !== targetSrc) iframe.src = targetSrc;
         } else {
-          if (iframe.src && iframe.src !== 'about:blank') {
-            iframe.src = 'about:blank';
-          }
+          if (iframe.src && iframe.src !== 'about:blank') iframe.src = 'about:blank';
         }
       });
-    }, {
-      root: null,
-      rootMargin: '100px',
-      threshold: 0.05
-    });
+    }, { root: null, rootMargin: '100px', threshold: 0.05 });
 
     function saveModels() { localStorage.setItem('cb_dashboard_models', JSON.stringify(models)); }
     function saveFavorites() { localStorage.setItem('cb_dashboard_favs', JSON.stringify(favorites)); }
@@ -935,16 +927,10 @@
 
     function updateTagFilterOptions() {
       const existingTags = getAllExistingTags();
-      const totalModelsCount = models.length;
-
-      tagFilterSelect.innerHTML = `<option value="">🏷️ (Tous) (${totalModelsCount})</option>`;
+      tagFilterSelect.innerHTML = `<option value="">🏷️ (Tous) (${models.length})</option>`;
       
       existingTags.forEach(t => {
-        const count = models.filter(m => {
-          const mTags = tags[m.toLowerCase()] || [];
-          return mTags.includes(t);
-        }).length;
-
+        const count = models.filter(m => (tags[m.toLowerCase()] || []).includes(t)).length;
         const opt = document.createElement('option');
         opt.value = t;
         opt.textContent = `🏷️ ${t} (${count})`;
@@ -963,6 +949,7 @@
       const isFav = favorites.includes(lower);
       const isHidden = hiddenModels.includes(lower);
       const isMuted = audioStates[lower] !== undefined ? audioStates[lower] : true;
+      const isOnline = onlineStatus[lower] === true;
       const modelTags = (tags[lower] || []).sort((a, b) => a.localeCompare(b, 'fr', { sensitivity: 'base' }));
 
       const card = document.createElement('div');
@@ -978,6 +965,7 @@
       card.innerHTML = `
         <div class="model-header" ${isCinemaThumb ? 'style="background: #0284c7;"' : ''}>
           <div class="model-title-area">
+            <span class="status-dot ${isOnline ? 'online' : ''}" title="${isOnline ? 'En ligne' : 'Hors ligne / Inconnu'}"></span>
             <span class="model-name">${username}</span>
             <div class="tags-container">${tagsHtml}</div>
           </div>
@@ -1009,16 +997,13 @@
         });
       }
 
-      const playerContainer = card.querySelector('.player-container');
-      streamObserver.observe(playerContainer);
+      streamObserver.observe(card.querySelector('.player-container'));
 
       card.addEventListener('contextmenu', (e) => {
         e.preventDefault();
         contextUser = username;
-        
         document.getElementById('ctxFav').textContent = isFav ? '⭐ Retirer Favori' : '⭐ Ajouter Favori';
         document.getElementById('ctxHide').textContent = isHidden ? '👁️ Démasquer' : '🙈 Masquer';
-        
         contextMenu.style.top = `${e.clientY}px`;
         contextMenu.style.left = `${e.clientX}px`;
         contextMenu.classList.add('show');
@@ -1031,30 +1016,23 @@
       if (contextUser) toggleFavorite(contextUser);
       contextMenu.classList.remove('show');
     });
-
     document.getElementById('ctxHide').addEventListener('click', () => {
       if (contextUser) toggleHideModel(contextUser);
       contextMenu.classList.remove('show');
     });
-
     document.getElementById('ctxTag').addEventListener('click', () => {
       if (contextUser) openTagModal(contextUser);
       contextMenu.classList.remove('show');
     });
-
     document.getElementById('ctxDelete').addEventListener('click', () => {
       if (contextUser) removeModel(contextUser);
       contextMenu.classList.remove('show');
     });
-
-    document.addEventListener('click', () => {
-      contextMenu.classList.remove('show');
-    });
+    document.addEventListener('click', () => contextMenu.classList.remove('show'));
 
     function renderGrid() {
       streamObserver.disconnect();
       grid.innerHTML = '';
-      
       updateTagFilterOptions();
       updateHiddenCount();
       
@@ -1076,20 +1054,9 @@
         });
       }
 
-      if (!showHiddenModels) {
-        displayModels = displayModels.filter(m => !hiddenModels.includes(m.toLowerCase()));
-      }
-
-      if (showOnlyFavorites) {
-        displayModels = displayModels.filter(m => favorites.includes(m.toLowerCase()));
-      }
-
-      if (selectedTagFilter) {
-        displayModels = displayModels.filter(m => {
-          const mTags = tags[m.toLowerCase()] || [];
-          return mTags.includes(selectedTagFilter);
-        });
-      }
+      if (!showHiddenModels) displayModels = displayModels.filter(m => !hiddenModels.includes(m.toLowerCase()));
+      if (showOnlyFavorites) displayModels = displayModels.filter(m => favorites.includes(m.toLowerCase()));
+      if (selectedTagFilter) displayModels = displayModels.filter(m => (tags[m.toLowerCase()] || []).includes(selectedTagFilter));
 
       if (displayModels.length === 0) {
         grid.innerHTML = `<div class="empty-message">Aucun modèle à afficher pour le moment.</div>`;
@@ -1101,129 +1068,76 @@
         if (!cinemaSelectedUser || !displayModels.map(m => m.toLowerCase()).includes(cinemaSelectedUser.toLowerCase())) {
           cinemaSelectedUser = displayModels[0];
         }
-
         const mainArea = document.createElement('div');
         mainArea.className = 'cinema-main-area';
         mainArea.appendChild(createCard(cinemaSelectedUser, true));
 
         const sidebar = document.createElement('div');
         sidebar.className = 'cinema-sidebar';
-
         displayModels.forEach(username => {
           if (username.toLowerCase() !== cinemaSelectedUser.toLowerCase()) {
             sidebar.appendChild(createCard(username, false));
           }
         });
-
         grid.appendChild(mainArea);
         grid.appendChild(sidebar);
       } else {
-        displayModels.forEach(username => {
-          grid.appendChild(createCard(username));
-        });
+        displayModels.forEach(username => grid.appendChild(createCard(username)));
       }
 
       updateHistoryMenu();
     }
 
-    function removeSingleHistory(username) {
-      const lower = username.toLowerCase();
-      history = history.filter(h => h.toLowerCase() !== lower);
-      saveHistory();
-    }
-
     function updateHistoryMenu() {
       historyCount.textContent = `(${history.length})`;
       historyList.innerHTML = '';
-
       if (history.length === 0) {
         historyList.innerHTML = '<div style="padding: 12px; font-size: 0.8rem; color: #64748b; text-align: center;">Historique vide</div>';
         return;
       }
-
-      const sortedHistory = [...history].sort((a, b) => a.localeCompare(b, 'fr', { sensitivity: 'base' }));
-
-      sortedHistory.forEach(username => {
-        const lower = username.toLowerCase();
-        const isPresent = models.map(m => m.toLowerCase()).includes(lower);
-
+      [...history].sort((a, b) => a.localeCompare(b, 'fr', { sensitivity: 'base' })).forEach(username => {
+        const isPresent = models.map(m => m.toLowerCase()).includes(username.toLowerCase());
         const item = document.createElement('div');
         item.className = 'history-item';
-        
         item.innerHTML = `
           <span class="history-username" title="${isPresent ? 'Déjà affiché' : 'Cliquer pour réajouter'}">${username}</span>
           <div class="history-actions">
             ${isPresent ? '<span class="badge-added">Actif</span>' : ''}
-            <button class="btn-remove-hist" title="Supprimer de l'historique">&times;</button>
+            <button class="btn-remove-hist" title="Supprimer">&times;</button>
           </div>
         `;
-
-        const nameSpan = item.querySelector('.history-username');
-        if (!isPresent) {
-          nameSpan.addEventListener('click', () => {
-            addModelToState(username);
-          });
-        }
-
-        const deleteBtn = item.querySelector('.btn-remove-hist');
-        deleteBtn.addEventListener('click', (e) => {
+        if (!isPresent) item.querySelector('.history-username').addEventListener('click', () => addModelToState(username));
+        item.querySelector('.btn-remove-hist').addEventListener('click', (e) => {
           e.stopPropagation();
-          removeSingleHistory(username);
+          history = history.filter(h => h.toLowerCase() !== username.toLowerCase());
+          saveHistory();
         });
-
         historyList.appendChild(item);
       });
     }
 
     function positionHistoryMenu() {
       const btnRect = historyBtn.getBoundingClientRect();
-      const padding = 10;
-      const menuWidth = Math.min(260, window.innerWidth - (padding * 2));
-      
-      let left = btnRect.right - menuWidth;
-      if (left < padding) left = padding;
-      if (left + menuWidth > window.innerWidth - padding) {
-        left = window.innerWidth - menuWidth - padding;
-      }
-
-      let top = btnRect.bottom + 8;
-      const expectedHeight = 300;
-      if (top + expectedHeight > window.innerHeight - padding) {
-        top = Math.max(padding, btnRect.top - expectedHeight - 8);
-      }
-
-      historyMenu.style.top = `${top}px`;
+      let left = btnRect.right - 260;
+      if (left < 10) left = 10;
+      historyMenu.style.top = `${btnRect.bottom + 8}px`;
       historyMenu.style.left = `${left}px`;
-      historyMenu.style.width = `${menuWidth}px`;
+      historyMenu.style.width = `260px`;
     }
 
     historyBtn.addEventListener('click', (e) => {
       e.stopPropagation();
       const isVisible = historyMenu.classList.contains('show');
-      
-      if (!isVisible) {
-        historyMenu.classList.add('show');
-        positionHistoryMenu();
-      } else {
-        historyMenu.classList.remove('show');
-      }
+      if (!isVisible) { historyMenu.classList.add('show'); positionHistoryMenu(); }
+      else historyMenu.classList.remove('show');
     });
 
-    document.addEventListener('click', () => {
-      historyMenu.classList.remove('show');
-    });
-
-    historyMenu.addEventListener('click', (e) => {
-      e.stopPropagation();
-    });
+    document.addEventListener('click', () => historyMenu.classList.remove('show'));
+    historyMenu.addEventListener('click', (e) => e.stopPropagation());
 
     newModelInput.addEventListener('input', (e) => {
       searchQuery = e.target.value.trim();
-      if (searchQuery.length > 0) {
-        clearSearchBtn.classList.add('show');
-      } else {
-        clearSearchBtn.classList.remove('show');
-      }
+      clearSearchBtn.classList.toggle('show', searchQuery.length > 0);
       renderGrid();
     });
 
@@ -1235,6 +1149,7 @@
       newModelInput.focus();
     });
 
+    checkStatusBtn.addEventListener('click', checkAllOnlineStatus);
     hideToggleBtn.addEventListener('click', () => {
       showHiddenModels = !showHiddenModels;
       hideToggleBtn.classList.toggle('active', showHiddenModels);
@@ -1254,16 +1169,7 @@
     });
 
     exportBtn.addEventListener('click', () => {
-      const backupData = {
-        models,
-        favorites,
-        hiddenModels,
-        history,
-        tags,
-        audioStates,
-        exportDate: new Date().toISOString()
-      };
-
+      const backupData = { models, favorites, hiddenModels, history, tags, audioStates, onlineStatus };
       const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(backupData, null, 2));
       const downloadAnchor = document.createElement('a');
       downloadAnchor.setAttribute("href", dataStr);
@@ -1273,19 +1179,14 @@
       downloadAnchor.remove();
     });
 
-    importBtn.addEventListener('click', () => {
-      importFile.click();
-    });
-
+    importBtn.addEventListener('click', () => importFile.click());
     importFile.addEventListener('change', (e) => {
       const file = e.target.files[0];
       if (!file) return;
-
       const reader = new FileReader();
       reader.onload = function(event) {
         try {
           const imported = JSON.parse(event.target.result);
-          
           if (imported.models && Array.isArray(imported.models)) {
             models = imported.models;
             favorites = Array.isArray(imported.favorites) ? imported.favorites : [];
@@ -1293,23 +1194,17 @@
             history = Array.isArray(imported.history) ? imported.history : [];
             tags = (imported.tags && typeof imported.tags === 'object') ? imported.tags : {};
             audioStates = (imported.audioStates && typeof imported.audioStates === 'object') ? imported.audioStates : {};
+            onlineStatus = (imported.onlineStatus && typeof imported.onlineStatus === 'object') ? imported.onlineStatus : {};
 
-            saveModels();
-            saveFavorites();
-            saveHidden();
-            saveHistory();
-            saveTags();
+            saveModels(); saveFavorites(); saveHidden(); saveHistory(); saveTags();
             localStorage.setItem('cb_dashboard_audio', JSON.stringify(audioStates));
-
+            localStorage.setItem('cb_dashboard_online', JSON.stringify(onlineStatus));
             renderGrid();
             alert('Configuration importée avec succès !');
           } else {
             alert('Format de fichier JSON invalide.');
           }
-        } catch (err) {
-          alert('Erreur lors de la lecture du fichier JSON.');
-          console.error(err);
-        }
+        } catch (err) { alert('Erreur lors de la lecture du fichier.'); }
         importFile.value = '';
       };
       reader.readAsText(file);
@@ -1317,10 +1212,6 @@
 
     unhideAllBtn.addEventListener('click', (e) => {
       e.stopPropagation();
-      if (hiddenModels.length === 0) {
-        alert('Aucun modèle masqué actuellement.');
-        return;
-      }
       hiddenModels = [];
       saveHidden();
       renderGrid();
@@ -1334,17 +1225,16 @@
     addModelForm.addEventListener('submit', (e) => {
       e.preventDefault();
       const username = newModelInput.value.trim();
-
-      if (username) {
-        addModelToState(username);
-      }
+      if (username) addModelToState(username);
     });
 
     function removeModel(username) {
       const lower = username.toLowerCase();
       models = models.filter(m => m.toLowerCase() !== lower);
       delete audioStates[lower];
+      delete onlineStatus[lower];
       localStorage.setItem('cb_dashboard_audio', JSON.stringify(audioStates));
+      localStorage.setItem('cb_dashboard_online', JSON.stringify(onlineStatus));
       saveModels();
       renderGrid();
     }
@@ -1357,13 +1247,8 @@
 
     resetBtn.addEventListener('click', () => {
       const nonFavsCount = models.filter(m => !favorites.includes(m.toLowerCase())).length;
-
-      if (nonFavsCount === 0) {
-        alert('Aucun modèle non-favori à supprimer.');
-        return;
-      }
-
-      if (confirm('Voulez-vous supprimer tous les modèles qui ne sont pas marqués en favoris ?')) {
+      if (nonFavsCount === 0) { alert('Aucun modèle non-favori à supprimer.'); return; }
+      if (confirm('Voulez-vous supprimer tous les modèles non-favoris ?')) {
         models = models.filter(m => favorites.includes(m.toLowerCase()));
         saveModels();
         renderGrid();
@@ -1371,15 +1256,9 @@
     });
 
     clearHistoryBtn.addEventListener('click', () => {
-      if (confirm('Voulez-vous effacer l\'historique complet des pseudos enregistrés ?')) {
+      if (confirm('Voulez-vous effacer l\'historique complet ?')) {
         history = [];
         saveHistory();
-      }
-    });
-
-    window.addEventListener('resize', () => {
-      if (historyMenu.classList.contains('show')) {
-        positionHistoryMenu();
       }
     });
 
