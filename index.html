@@ -290,11 +290,10 @@
 <body>
   <header>
     <div class="header-top-row">
-      <select id="tagFilterSelect" class="select-tag" title="Filtrer par étiquette">
-        <option value="">🏷️ (Tous)</option>
-      </select>
+      <!-- Icône des hors favoris placée en haut à gauche -->
+      <button id="nonFavSidebarBtn" class="btn-action btn-nonfav-toggle" title="Modèles hors favoris" style="width: 15%; flex-shrink: 0; height: 38px;">📁 <span id="nonFavCount">(0)</span></button>
 
-      <form id="addModelForm" class="input-form">
+      <form id="addModelForm" class="input-form" style="width: 85%;">
         <input type="text" id="newModelInput" class="custom-input" placeholder="Ajouter un pseudo..." autocomplete="off" autocapitalize="none" spellcheck="false">
         <button type="button" id="clearSearchBtn" class="clear-search-btn" title="Effacer la recherche">&times;</button>
         <button type="submit" class="btn-add" title="Ajouter ce modèle">+</button>
@@ -302,9 +301,12 @@
     </div>
 
     <div class="header-bottom-row">
+      <!-- Icône de filtre des tags déplacée dans la barre du bas -->
+      <select id="tagFilterSelect" class="select-tag" title="Filtrer par étiquette" style="width: auto; flex-shrink: 0; height: 36px;">
+        <option value="">🏷️ (Tous)</option>
+      </select>
+
       <button id="layoutToggleBtn" class="btn-action btn-layout" title="Changer le mode d'affichage">⚏</button>
-      
-      <button id="nonFavSidebarBtn" class="btn-action btn-nonfav-toggle" title="Modèles hors favoris">📁 <span id="nonFavCount">(0)</span></button>
 
       <button id="exportBtn" class="btn-action" title="Exporter les données">📤</button>
       <button id="importBtn" class="btn-action" title="Importer des données">📥</button>
