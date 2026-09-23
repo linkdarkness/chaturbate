@@ -179,7 +179,7 @@
     }
 
     /* Grilles standard et miniature */
-    .grid-container {
+    .grid-container, .sidebar-grid {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
       gap: 16px;
@@ -188,15 +188,15 @@
       align-content: start;
     }
     
-    .grid-container.miniature-mode { 
+    .grid-container.miniature-mode, .sidebar-grid.miniature-mode { 
       grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); 
       gap: 8px; 
       padding: 8px; 
     }
-    .grid-container.miniature-mode .model-header { padding: 4px 8px; }
-    .grid-container.miniature-mode .model-name { font-size: 0.8rem; }
-    .grid-container.miniature-mode .tags-container { display: none; }
-    .grid-container.miniature-mode .player-container { 
+    .grid-container.miniature-mode .model-header, .sidebar-grid.miniature-mode .model-header { padding: 4px 8px; }
+    .grid-container.miniature-mode .model-name, .sidebar-grid.miniature-mode .model-name { font-size: 0.8rem; }
+    .grid-container.miniature-mode .tags-container, .sidebar-grid.miniature-mode .tags-container { display: none; }
+    .grid-container.miniature-mode .player-container, .sidebar-grid.miniature-mode .player-container { 
       aspect-ratio: 4 / 3; 
     }
 
@@ -309,7 +309,7 @@
       <span class="sidebar-title">Modèles hors favoris</span>
       <button id="nonFavCloseBtn" class="sidebar-close-btn">&times;</button>
     </div>
-    <div class="sidebar-body grid-container" id="nonFavListContainer"></div>
+    <div class="sidebar-body sidebar-grid" id="nonFavListContainer"></div>
   </div>
 
   <div id="tagModal" class="modal-overlay">
@@ -400,7 +400,6 @@
         nonFavs = nonFavs.filter(m => (tags[m.toLowerCase()] || []).includes(selectedTagFilter));
       }
 
-      // Tri alphabétique automatique pour le volet des hors-favoris
       nonFavs.sort((a, b) => a.localeCompare(b, 'fr', { sensitivity: 'base' }));
 
       nonFavCount.textContent = `(${nonFavs.length})`;
@@ -665,14 +664,12 @@
         displayModels = displayModels.filter(m => m.toLowerCase().includes(searchQuery.toLowerCase()));
       }
 
-      // Par défaut, la grille principale affiche les favoris
       displayModels = displayModels.filter(m => favorites.includes(m.toLowerCase()));
 
       if (selectedTagFilter) {
         displayModels = displayModels.filter(m => (tags[m.toLowerCase()] || []).includes(selectedTagFilter));
       }
 
-      // Tri alphabétique automatique systématique sur la grille principale
       displayModels.sort((a, b) => a.localeCompare(b, 'fr', { sensitivity: 'base' }));
 
       if (displayModels.length === 0) {
