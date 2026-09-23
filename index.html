@@ -410,7 +410,13 @@
 
     function updateNonFavSidebarList() {
       nonFavObserver.disconnect();
-      const nonFavs = models.filter(m => !favorites.includes(m.toLowerCase()));
+      
+      // Filtrer les non-favoris et appliquer le filtre de tag s'il y en a un
+      let nonFavs = models.filter(m => !favorites.includes(m.toLowerCase()));
+      if (selectedTagFilter) {
+        nonFavs = nonFavs.filter(m => (tags[m.toLowerCase()] || []).includes(selectedTagFilter));
+      }
+
       nonFavCount.textContent = `(${nonFavs.length})`;
       nonFavListContainer.innerHTML = '';
 
@@ -612,7 +618,14 @@
       streamObserver.disconnect();
       grid.innerHTML = '';
       updateTagFilterOptions();
-      nonFavCount.textContent = `(${models.filter(m => !favorites.includes(m.toLowerCase())).length})`;
+      
+      // Mise à jour du compteur global des non-favoris (en tenant compte du filtre tag actif)
+      let nonFavsForCount = models.filter(m => !favorites.includes(m.toLowerCase()));
+      if (selectedTagFilter) {
+        nonFavsForCount = nonFavsForCount.filter(m => (tags[m.toLowerCase()] || []).includes(selectedTagFilter));
+      }
+      nonFavCount.textContent = `(${nonFavsForCount.length})`;
+
       if (nonFavSidebar.classList.contains('open')) updateNonFavSidebarList();
       
       let displayModels = [...models];
