@@ -197,17 +197,8 @@
     .grid-container.miniature-mode .model-header { padding: 4px 8px; }
     .grid-container.miniature-mode .model-name { font-size: 0.8rem; }
     .grid-container.miniature-mode .tags-container { display: none; }
-    
-    /* Adaptation de la taille au cadre miniature */
     .grid-container.miniature-mode .player-container { 
-      aspect-ratio: 1 / 1; 
-      width: 100%;
-      height: 100%;
-    }
-    .grid-container.miniature-mode .player-container iframe {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
+      aspect-ratio: 4 / 3; 
     }
 
     /* Liste des non-favoris : Colonne unique verticale stricte */
@@ -406,7 +397,7 @@
       const isOpen = nonFavSidebar.classList.toggle('open');
       nonFavSidebarBtn.classList.toggle('active', isOpen);
       if (isOpen) updateNonFavSidebarList();
-      else streamObserver.disconnect();
+      else streamObserver.disconnect(); // Nettoyage lors de la fermeture du volet
     });
 
     nonFavCloseBtn.addEventListener('click', () => {
