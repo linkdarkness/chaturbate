@@ -197,8 +197,17 @@
     .grid-container.miniature-mode .model-header { padding: 4px 8px; }
     .grid-container.miniature-mode .model-name { font-size: 0.8rem; }
     .grid-container.miniature-mode .tags-container { display: none; }
+    
+    /* Adaptation de la taille au cadre miniature */
     .grid-container.miniature-mode .player-container { 
-      aspect-ratio: 4 / 3; 
+      aspect-ratio: 1 / 1; 
+      width: 100%;
+      height: 100%;
+    }
+    .grid-container.miniature-mode .player-container iframe {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
     }
 
     /* Liste des non-favoris : Colonne unique verticale stricte */
@@ -390,14 +399,15 @@
     const cancelTagBtn = document.getElementById('cancelTagBtn');
 
     function getEmbedUrl(username) {
-      return `https://chaturbate.com/embed/${encodeURIComponent(username)}/?embed_video_only=1&scrolling=no`;
+      // URL d'intégration sans embed_video_only=1 pour permettre l'affichage des contrôles et du son
+      return `https://chaturbate.com/embed/${encodeURIComponent(username)}/?scrolling=no`;
     }
 
     nonFavSidebarBtn.addEventListener('click', () => {
       const isOpen = nonFavSidebar.classList.toggle('open');
       nonFavSidebarBtn.classList.toggle('active', isOpen);
       if (isOpen) updateNonFavSidebarList();
-      else streamObserver.disconnect(); // Nettoyage lors de la fermeture du volet
+      else streamObserver.disconnect();
     });
 
     nonFavCloseBtn.addEventListener('click', () => {
