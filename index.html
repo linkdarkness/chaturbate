@@ -399,8 +399,8 @@
     const cancelTagBtn = document.getElementById('cancelTagBtn');
 
     function getEmbedUrl(username) {
-      // URL d'intégration sans embed_video_only=1 pour permettre l'affichage des contrôles et du son
-      return `https://chaturbate.com/embed/${encodeURIComponent(username)}/?scrolling=no`;
+      // embed_video_only=1 permet de n'afficher que la vidéo pure sans les éléments superflus
+      return `https://chaturbate.com/embed/${encodeURIComponent(username)}/?embed_video_only=1&scrolling=no`;
     }
 
     nonFavSidebarBtn.addEventListener('click', () => {
