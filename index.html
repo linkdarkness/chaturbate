@@ -198,23 +198,24 @@
     .grid-container.miniature-mode .model-name { font-size: 0.8rem; }
     .grid-container.miniature-mode .tags-container { display: none; }
     
-    /* Mode miniature : Carré 1/1, vidéo entière centrée avec bandes noires */
+    /* Mode miniature : Carré 1/1, vidéo entière centrée avec bandes noires en haut et en bas */
     .grid-container.miniature-mode .player-container { 
       aspect-ratio: 1 / 1; 
       width: 100%;
       position: relative;
       background: #000;
+      overflow: hidden;
       display: flex;
       align-items: center;
       justify-content: center;
-      overflow: hidden;
     }
     .grid-container.miniature-mode .player-container iframe {
       position: absolute;
       width: 100%;
-      height: 56.25%; /* Ratio 16/9 exact (9 / 16) */
-      max-width: 100%;
-      max-height: 100%;
+      height: 56.25%; /* Ratio 16/9 exact (9 / 16 = 0.5625) */
+      top: 50%;
+      left: 0;
+      transform: translateY(-50%); /* Centre parfaitement verticalement, créant les bandes noires haut/bas */
       border: 0;
     }
 
@@ -407,7 +408,6 @@
     const cancelTagBtn = document.getElementById('cancelTagBtn');
 
     function getEmbedUrl(username) {
-      // embed_video_only=1 garde uniquement la vidéo et disable_sound=0 autorise le son
       return `https://chaturbate.com/embed/${encodeURIComponent(username)}/?embed_video_only=1&disable_sound=0&scrolling=no`;
     }
 
@@ -794,7 +794,7 @@
       if (nonFavsCount === 0) { alert('Aucun modèle non-favori à supprimer.'); return; }
       if (confirm('Voulez-vous supprimer tous les modèles non-favoris ?')) {
         models = models.filter(m => favorites.includes(m.toLowerCase()));
-        cleanUnusedTags();
+      cleanUnusedTags();
         saveModels();
         saveTags();
         renderGrid();
