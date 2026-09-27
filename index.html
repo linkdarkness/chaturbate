@@ -198,16 +198,21 @@
     .grid-container.miniature-mode .model-name { font-size: 0.8rem; }
     .grid-container.miniature-mode .tags-container { display: none; }
     
-    /* Adaptation de la taille au cadre miniature */
+    /* Adaptation parfaite au cadre miniature carré */
     .grid-container.miniature-mode .player-container { 
       aspect-ratio: 1 / 1; 
       width: 100%;
-      height: 100%;
+      position: relative;
+      overflow: hidden;
     }
     .grid-container.miniature-mode .player-container iframe {
-      width: 100%;
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 177.77%;
       height: 100%;
-      object-fit: cover;
+      transform: translate(-50%, -50%);
+      border: 0;
     }
 
     /* Liste des non-favoris : Colonne unique verticale stricte */
@@ -399,8 +404,8 @@
     const cancelTagBtn = document.getElementById('cancelTagBtn');
 
     function getEmbedUrl(username) {
-      // embed_video_only=1 permet de n'afficher que la vidéo pure sans les éléments superflus
-      return `https://chaturbate.com/embed/${encodeURIComponent(username)}/?embed_video_only=1&scrolling=no`;
+      // embed_video_only=1 garde uniquement la vidéo et disable_sound=0 autorise le son
+      return `https://chaturbate.com/embed/${encodeURIComponent(username)}/?embed_video_only=1&disable_sound=0&scrolling=no`;
     }
 
     nonFavSidebarBtn.addEventListener('click', () => {
