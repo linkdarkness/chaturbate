@@ -143,50 +143,9 @@
     .btn-reset:hover { color: var(--danger); border-color: var(--danger); background: rgba(239, 68, 68, 0.1); }
     .btn-layout.active { background: rgba(56, 189, 248, 0.15); border-color: var(--accent); color: var(--accent); }
     .btn-nonfav-toggle.active { background: rgba(56, 189, 248, 0.15); border-color: var(--accent); color: var(--accent); font-weight: 600; }
-    .btn-online-filter.active { background: rgba(34, 197, 94, 0.15); border-color: var(--success); color: var(--success); font-weight: 600; }
     
     .local-status { font-size: 0.75rem; color: #64748b; margin-left: auto; display: flex; align-items: center; gap: 4px; }
     .local-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--success); display: inline-block; }
-
-    /* Badge de statut en direct */
-    .status-badge {
-      position: absolute;
-      top: 8px;
-      right: 8px;
-      display: flex;
-      align-items: center;
-      gap: 5px;
-      background: rgba(15, 23, 42, 0.85);
-      padding: 3px 8px;
-      border-radius: 10px;
-      font-size: 10px;
-      font-weight: 600;
-      color: #fff;
-      z-index: 10;
-      backdrop-filter: blur(4px);
-      border: 1px solid #334155;
-    }
-    .status-dot {
-      width: 6px;
-      height: 6px;
-      border-radius: 50%;
-      background-color: #64748b;
-    }
-    .status-badge.online .status-dot {
-      background-color: var(--success);
-      box-shadow: 0 0 6px var(--success);
-    }
-    .status-badge.offline .status-dot {
-      background-color: #64748b;
-    }
-
-    .model-card.offline {
-      opacity: 0.65;
-      transition: opacity 0.3s ease;
-    }
-    .model-card.offline:hover {
-      opacity: 0.95;
-    }
 
     /* PLEIN ÉCRAN ADAPTATIF */
     .player-container:fullscreen {
@@ -420,7 +379,6 @@
       </select>
 
       <button id="layoutToggleBtn" class="btn-action btn-layout" title="Changer le mode d'affichage">⚏</button>
-      <button id="onlineFilterBtn" class="btn-action btn-online-filter" title="Filtrer uniquement les modèles en ligne">🟢</button>
       <button id="exportBtn" class="btn-action" title="Exporter la configuration (JSON)">📥</button>
       <button id="importBtn" class="btn-action" title="Importer une configuration (JSON)">📤</button>
       <input type="file" id="importFileInput" accept=".json" style="display: none;">
@@ -467,9 +425,6 @@
     let selectedTagFilter = '';
     let searchQuery = '';
     let targetTagUser = null;
-    let onlineOnlyFilter = false;
-
-    let onlineStatuses = {};
 
     const grid = document.getElementById('grid');
     const addModelForm = document.getElementById('addModelForm');
@@ -477,7 +432,6 @@
     const clearSearchBtn = document.getElementById('clearSearchBtn');
     const resetBtn = document.getElementById('resetBtn');
     const layoutToggleBtn = document.getElementById('layoutToggleBtn');
-    const onlineFilterBtn = document.getElementById('onlineFilterBtn');
     const exportBtn = document.getElementById('exportBtn');
     const importBtn = document.getElementById('importBtn');
     const importFileInput = document.getElementById('importFileInput');
@@ -505,39 +459,6 @@
       localStorage.setItem('cb_dashboard_models', JSON.stringify(models));
       localStorage.setItem('cb_dashboard_favs', JSON.stringify(favorites));
       localStorage.setItem('cb_dashboard_tags', JSON.stringify(tags));
-    }
-
-    async function checkStatuses() {
-      models.forEach(username => {
-        const lower = username.toLowerCase();
-        if (onlineStatuses[lower] === undefined) {
-          onlineStatuses[lower] = Math.random() > 0.3;
-        }
-      });
-      document.querySelectorAll('.model-card').forEach(card => {
-        const user = card.dataset.username;
-        if (user) updateCardStatusUI(user);
-      });
-    }
-
-    function updateCardStatusUI(username) {
-      const lower = username.toLowerCase();
-      const isOnline = onlineStatuses[lower] ?? false;
-      
-      const badge = document.getElementById(`status-${username}`);
-      const card = document.getElementById(`card-${username}`);
-      if (!badge || !card) return;
-
-      const textSpan = badge.querySelector('.status-text');
-      if (isOnline) {
-        badge.className = 'status-badge online';
-        textSpan.textContent = 'En direct';
-        card.classList.remove('offline');
-      } else {
-        badge.className = 'status-badge offline';
-        textSpan.textContent = 'Hors ligne';
-        card.classList.add('offline');
-      }
     }
 
     exportBtn.addEventListener('click', () => {
@@ -600,9 +521,6 @@
       if (selectedTagFilter) {
         nonFavs = nonFavs.filter(m => (tags[m.toLowerCase()] || []).includes(selectedTagFilter));
       }
-      if (onlineOnlyFilter) {
-        nonFavs = nonFavs.filter(m => onlineStatuses[m.toLowerCase()] === true);
-      }
       nonFavs.sort((a, b) => a.localeCompare(b, 'fr', { sensitivity: 'base' }));
 
       nonFavCount.textContent = `(${nonFavs.length})`;
@@ -620,10 +538,6 @@
         item.id = `card-nf-${username}`;
         item.dataset.username = username;
         item.innerHTML = `
-          <div class="status-badge offline" id="status-nf-${username}">
-            <span class="status-dot"></span>
-            <span class="status-text">Vérif...</span>
-          </div>
           <div class="model-header">
             <div class="model-title-area"><span class="model-name">${username}</span></div>
             <div class="header-actions">
@@ -638,7 +552,6 @@
         `;
         streamObserver.observe(item.querySelector('.player-container'));
         nonFavListContainer.appendChild(item);
-        updateCardStatusUI(username);
       });
     }
 
@@ -707,7 +620,6 @@
       if (!favorites.includes(lower)) {
         favorites.push(lower);
       }
-      onlineStatuses[lower] = true;
       searchQuery = '';
       newModelInput.value = '';
       clearSearchBtn.classList.remove('show');
@@ -829,10 +741,6 @@
       const embedUrl = getEmbedUrl(username);
 
       card.innerHTML = `
-        <div class="status-badge offline" id="status-${username}">
-          <span class="status-dot"></span>
-          <span class="status-text">Vérif...</span>
-        </div>
         <div class="model-header">
           <div class="model-title-area">
             <span class="model-name">${username}</span>
@@ -867,9 +775,6 @@
       if (selectedTagFilter) {
         nonFavsForCount = nonFavsForCount.filter(m => (tags[m.toLowerCase()] || []).includes(selectedTagFilter));
       }
-      if (onlineOnlyFilter) {
-        nonFavsForCount = nonFavsForCount.filter(m => onlineStatuses[m.toLowerCase()] === true);
-      }
       nonFavCount.textContent = `(${nonFavsForCount.length})`;
 
       if (nonFavSidebar.classList.contains('open')) {
@@ -885,9 +790,6 @@
       if (selectedTagFilter) {
         displayModels = displayModels.filter(m => (tags[m.toLowerCase()] || []).includes(selectedTagFilter));
       }
-      if (onlineOnlyFilter) {
-        displayModels = displayModels.filter(m => onlineStatuses[m.toLowerCase()] === true);
-      }
       displayModels.sort((a, b) => a.localeCompare(b, 'fr', { sensitivity: 'base' }));
 
       if (displayModels.length === 0) {
@@ -896,7 +798,6 @@
       }
       displayModels.forEach(username => {
         grid.appendChild(createCard(username));
-        updateCardStatusUI(username);
       });
     }
 
@@ -919,12 +820,6 @@
       applyLayout();
     });
 
-    onlineFilterBtn.addEventListener('click', () => {
-      onlineOnlyFilter = !onlineOnlyFilter;
-      onlineFilterBtn.classList.toggle('active', onlineOnlyFilter);
-      renderGrid();
-    });
-
     tagFilterSelect.addEventListener('change', (e) => {
       selectedTagFilter = e.target.value;
       renderGrid();
@@ -940,7 +835,6 @@
       const lower = username.toLowerCase();
       models = models.filter(m => m.toLowerCase() !== lower);
       delete tags[lower];
-      delete onlineStatuses[lower];
       cleanUnusedTags();
       saveToLocalStorage();
       renderGrid();
@@ -958,8 +852,6 @@
     });
 
     applyLayout();
-    checkStatuses();
-    setInterval(checkStatuses, 45000);
   </script>
 </body>
 </html>
