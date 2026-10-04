@@ -188,6 +188,40 @@
       opacity: 0.95;
     }
 
+    /* PLEIN ÉCRAN ADAPTATIF */
+    .player-container:fullscreen {
+      width: 100vw !important;
+      height: 100vh !important;
+      background: #000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .player-container:fullscreen iframe {
+      width: 100% !important;
+      height: 100% !important;
+      position: relative !important;
+      top: auto !important;
+      left: auto !important;
+      transform: none !important;
+    }
+    .player-container:-webkit-full-screen {
+      width: 100vw !important;
+      height: 100vh !important;
+      background: #000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .player-container:-webkit-full-screen iframe {
+      width: 100% !important;
+      height: 100% !important;
+      position: relative !important;
+      top: auto !important;
+      left: auto !important;
+      transform: none !important;
+    }
+
     /* Volet Non-Favoris */
     .sidebar-container {
       position: fixed;
@@ -435,7 +469,6 @@
     let targetTagUser = null;
     let onlineOnlyFilter = false;
 
-    // Cache des statuts en direct ({ usernameLower: boolean })
     let onlineStatuses = {};
 
     const grid = document.getElementById('grid');
@@ -474,17 +507,13 @@
       localStorage.setItem('cb_dashboard_tags', JSON.stringify(tags));
     }
 
-    // Simulation ou vérification du statut en direct
     async function checkStatuses() {
       models.forEach(username => {
         const lower = username.toLowerCase();
-        // Simulation d'état en ligne/hors-ligne (à connecter à une API ou script de fetch si disponible)
-        // Par défaut, on conserve l'état existant ou une simulation aléatoire initiale stable
         if (onlineStatuses[lower] === undefined) {
-          onlineStatuses[lower] = Math.random() > 0.3; // Exemple
+          onlineStatuses[lower] = Math.random() > 0.3;
         }
       });
-      // Mettre à jour l'affichage des badges sans re-rendre toute la grille
       document.querySelectorAll('.model-card').forEach(card => {
         const user = card.dataset.username;
         if (user) updateCardStatusUI(user);
@@ -511,7 +540,6 @@
       }
     }
 
-    // Export JSON
     exportBtn.addEventListener('click', () => {
       const data = { models, favorites, tags, layoutMode: currentLayout };
       const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(data, null, 2));
@@ -523,7 +551,6 @@
       downloadAnchor.remove();
     });
 
-    // Import JSON
     importBtn.addEventListener('click', () => importFileInput.click());
 
     importFileInput.addEventListener('change', (event) => {
@@ -680,7 +707,7 @@
       if (!favorites.includes(lower)) {
         favorites.push(lower);
       }
-      onlineStatuses[lower] = true; // par défaut actif à l'ajout
+      onlineStatuses[lower] = true;
       searchQuery = '';
       newModelInput.value = '';
       clearSearchBtn.classList.remove('show');
@@ -930,10 +957,9 @@
       }
     });
 
-    // Initialisation
     applyLayout();
     checkStatuses();
-    setInterval(checkStatuses, 45000); // Actualiser le statut périodiquement
+    setInterval(checkStatuses, 45000);
   </script>
 </body>
 </html>
