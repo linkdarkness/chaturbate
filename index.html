@@ -143,9 +143,6 @@
     .btn-reset:hover { color: var(--danger); border-color: var(--danger); background: rgba(239, 68, 68, 0.1); }
     .btn-layout.active { background: rgba(56, 189, 248, 0.15); border-color: var(--accent); color: var(--accent); }
     .btn-nonfav-toggle.active { background: rgba(56, 189, 248, 0.15); border-color: var(--accent); color: var(--accent); font-weight: 600; }
-    
-    .local-status { font-size: 0.75rem; color: #64748b; margin-left: auto; display: flex; align-items: center; gap: 4px; }
-    .local-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--success); display: inline-block; }
 
     /* PLEIN ÉCRAN ADAPTATIF */
     .player-container:fullscreen {
@@ -384,11 +381,6 @@
       <input type="file" id="importFileInput" accept=".json" style="display: none;">
       
       <button id="resetBtn" class="btn-action btn-reset" title="Vider les non-favoris">🧹</button>
-
-      <div class="local-status">
-        <span class="local-dot"></span>
-        <span>Local</span>
-      </div>
     </div>
   </header>
 
