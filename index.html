@@ -257,21 +257,25 @@
       width: 100%;
     }
     .grid-container.list-mode .model-card {
-      flex-direction: row;
-      align-items: center;
-      justify-content: space-between;
-      padding: 8px 12px;
+      flex-direction: column;
       background: var(--card-bg);
       border-radius: 6px;
     }
     .grid-container.list-mode .model-header {
       background: transparent;
       border: none;
-      padding: 0;
-      flex: 1;
+      padding: 10px 12px;
+      cursor: pointer;
+    }
+    .grid-container.list-mode .model-header:hover {
+      background: rgba(56, 189, 248, 0.05);
     }
     .grid-container.list-mode .player-container {
       display: none;
+    }
+    .grid-container.list-mode .model-card.expanded .player-container {
+      display: block;
+      border-top: 1px solid #334155;
     }
 
     .sidebar-list {
@@ -733,7 +737,7 @@
       const embedUrl = getEmbedUrl(username);
 
       card.innerHTML = `
-        <div class="model-header">
+        <div class="model-header" id="header-${username}">
           <div class="model-title-area">
             <span class="model-name">${username}</span>
             <div class="tags-container">${tagsHtml}</div>
@@ -749,8 +753,25 @@
           <iframe data-src="${embedUrl}" sandbox="allow-scripts allow-same-origin allow-presentation allow-forms" scrolling="no" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen" allowfullscreen></iframe>
         </div>
       `;
+
+      // Gestion du clic pour dérouler/masquer en mode liste
+      const headerElem = card.querySelector(`#header-${username}`);
+      const playerContainerElem = card.querySelector('.player-container');
+
+      headerElem.addEventListener('click', () => {
+        if (currentLayout === 2) {
+          const isExpanded = card.classList.toggle('expanded');
+          if (isExpanded) {
+            const iframe = playerContainerElem.querySelector('iframe');
+            if (iframe && iframe.src !== iframe.dataset.src) {
+              iframe.src = iframe.dataset.src;
+            }
+          }
+        }
+      });
+
       if (currentLayout !== 2) {
-        streamObserver.observe(card.querySelector('.player-container'));
+        streamObserver.observe(playerContainerElem);
       }
       return card;
     }
