@@ -458,6 +458,7 @@
           <div class="model-header">
             <div class="model-title-area"><span class="model-name">${username}</span></div>
             <div class="header-actions">
+              <button class="btn-icon-subtle" title="Plein écran" onclick="event.stopPropagation(); toggleFullscreen('card-nf-${username}')">⛶</button>
               <button class="btn-fav" title="Favori" onclick="toggleFavorite('${username}'); updateNonFavSidebarList();">&#9733;</button>
               <button class="btn-delete" title="Supprimer" onclick="removeModel('${username}'); updateNonFavSidebarList();">&times;</button>
             </div>
@@ -466,6 +467,7 @@
             <iframe data-src="${embedUrl}" sandbox="allow-scripts allow-same-origin allow-presentation allow-forms" scrolling="no" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen" allowfullscreen></iframe>
           </div>
         `;
+        item.id = `card-nf-${username}`;
         streamObserver.observe(item.querySelector('.player-container'));
         nonFavListContainer.appendChild(item);
       });
@@ -556,6 +558,18 @@
       if (nonFavSidebar.classList.contains('open')) updateNonFavSidebarList();
     }
 
+    window.toggleFullscreen = function(elementId) {
+      const elem = document.getElementById(elementId);
+      if (!elem) return;
+      if (!document.fullscreenElement) {
+        elem.requestFullscreen().catch(err => {
+          alert(`Erreur plein écran: ${err.message}`);
+        });
+      } else {
+        document.exitFullscreen();
+      }
+    };
+
     window.openTagModal = function(username) {
       targetTagUser = username;
       tagModalTitle.textContent = `Ajouter un tag pour ${username}`;
@@ -624,7 +638,7 @@
         const count = models.filter(m => (tags[m.toLowerCase()] || []).includes(t)).length;
         const opt = document.createElement('option');
         opt.value = t;
-        opt.textContent = `🏷️ ${t} (${count})`;
+        opt.textContent = `🏷️️ ${t} (${count})`;
         if (t === selectedTagFilter) opt.selected = true;
         tagFilterSelect.appendChild(opt);
       });
@@ -652,6 +666,7 @@
             <div class="tags-container">${tagsHtml}</div>
           </div>
           <div class="header-actions">
+            <button class="btn-icon-subtle" title="Plein écran" onclick="event.stopPropagation(); toggleFullscreen('card-${username}')">⛶</button>
             <button class="btn-icon-subtle" title="Ajouter un tag" onclick="event.stopPropagation(); openTagModal('${username}')">🏷️</button>
             <button class="btn-fav ${isFav ? 'is-favorite' : ''}" title="Favori" onclick="event.stopPropagation(); toggleFavorite('${username}')">&#9733;</button>
             <button class="btn-delete" title="Supprimer" onclick="event.stopPropagation(); removeModel('${username}')">&times;</button>
