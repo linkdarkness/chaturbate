@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Directs Live - Dashboard Sécurisé</title>
+  <title>Directs Live - Dashboard</title>
   <style>
     :root {
       --bg: #0f172a;
@@ -12,6 +12,7 @@
       --text: #f8fafc;
       --danger: #ef4444;
       --star: #fbbf24;
+      --success: #22c55e;
     }
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
@@ -57,7 +58,6 @@
       width: auto;
       flex-shrink: 0;
       height: 36px;
-      text-overflow: ellipsis;
     }
     .select-tag:hover, .select-tag:focus { border-color: var(--accent); }
 
@@ -82,7 +82,6 @@
       height: 38px;
       transition: border-color 0.2s ease;
     }
-
     .custom-input:focus { border-color: var(--accent); }
 
     .clear-search-btn {
@@ -144,8 +143,11 @@
     .btn-reset:hover { color: var(--danger); border-color: var(--danger); background: rgba(239, 68, 68, 0.1); }
     .btn-layout.active { background: rgba(56, 189, 248, 0.15); border-color: var(--accent); color: var(--accent); }
     .btn-nonfav-toggle.active { background: rgba(56, 189, 248, 0.15); border-color: var(--accent); color: var(--accent); font-weight: 600; }
+    
+    .local-status { font-size: 0.75rem; color: #64748b; margin-left: auto; display: flex; align-items: center; gap: 4px; }
+    .local-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--success); display: inline-block; }
 
-    /* Volet Plein Écran pour les Non-Favoris */
+    /* Volet Non-Favoris */
     .sidebar-container {
       position: fixed;
       top: 0;
@@ -173,11 +175,7 @@
     .sidebar-close-btn { background: transparent; border: none; color: #64748b; font-size: 1.5rem; cursor: pointer; padding: 2px 8px; }
     .sidebar-close-btn:hover { color: var(--danger); }
     
-    .sidebar-body { 
-      flex: 1 1 auto; 
-      overflow-y: auto; 
-      -webkit-overflow-scrolling: touch;
-    }
+    .sidebar-body { flex: 1 1 auto; overflow-y: auto; -webkit-overflow-scrolling: touch; }
 
     /* Grille principale */
     .grid-container {
@@ -198,7 +196,6 @@
     .grid-container.miniature-mode .model-name { font-size: 0.8rem; }
     .grid-container.miniature-mode .tags-container { display: none; }
     
-    /* Mode miniature : Carré 1/1, vidéo entière centrée avec bandes noires en haut et en bas */
     .grid-container.miniature-mode .player-container { 
       aspect-ratio: 1 / 1; 
       width: 100%;
@@ -212,14 +209,40 @@
     .grid-container.miniature-mode .player-container iframe {
       position: absolute;
       width: 100%;
-      height: 56.25%; /* Ratio 16/9 exact (9 / 16 = 0.5625) */
+      height: 56.25%; 
       top: 50%;
       left: 0;
-      transform: translateY(-50%); /* Centre parfaitement verticalement, créant les bandes noires haut/bas */
+      transform: translateY(-50%);
       border: 0;
     }
 
-    /* Liste des non-favoris : Colonne unique verticale stricte */
+    /* VUE LISTE COMPACTE */
+    .grid-container.list-mode {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      max-width: 800px;
+      margin: 0 auto;
+      width: 100%;
+    }
+    .grid-container.list-mode .model-card {
+      flex-direction: row;
+      align-items: center;
+      justify-content: space-between;
+      padding: 8px 12px;
+      background: var(--card-bg);
+      border-radius: 6px;
+    }
+    .grid-container.list-mode .model-header {
+      background: transparent;
+      border: none;
+      padding: 0;
+      flex: 1;
+    }
+    .grid-container.list-mode .player-container {
+      display: none;
+    }
+
     .sidebar-list {
       display: flex;
       flex-direction: column;
@@ -252,7 +275,6 @@
       border-bottom: 1px solid #334155;
     }
     .model-title-area { display: flex; align-items: center; gap: 8px; overflow: hidden; flex: 1; }
-
     .model-name { font-weight: 600; font-size: 0.9rem; white-space: nowrap; }
     .tags-container { display: flex; gap: 4px; flex-wrap: wrap; align-items: center; }
     .tag-badge {
@@ -261,7 +283,6 @@
     .tag-badge:hover { background: rgba(239, 68, 68, 0.2); color: var(--danger); }
 
     .header-actions { display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
-
     .btn-icon-subtle { background: transparent; border: none; color: #64748b; font-size: 1rem; cursor: pointer; padding: 2px 4px; }
     .btn-icon-subtle:hover { color: var(--text); }
     .btn-fav { background: transparent; border: none; color: #64748b; font-size: 1.1rem; cursor: pointer; }
@@ -297,28 +318,12 @@
     .modal-input { padding: 8px 12px; border-radius: 6px; border: 1px solid #334155; background: #0f172a; color: var(--text); font-size: 0.85rem; outline: none; width: 100%; }
     
     .existing-tags-suggestions {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 6px;
-      max-height: 120px;
-      overflow-y: auto;
-      padding: 4px 0;
+      display: flex; flex-wrap: wrap; gap: 6px; max-height: 120px; overflow-y: auto; padding: 4px 0;
     }
     .suggestion-tag-btn {
-      background: #334155;
-      color: var(--accent);
-      border: 1px solid #475569;
-      padding: 4px 8px;
-      border-radius: 4px;
-      font-size: 0.75rem;
-      cursor: pointer;
-      transition: background 0.2s;
+      background: #334155; color: var(--accent); border: 1px solid #475569; padding: 4px 8px; border-radius: 4px; font-size: 0.75rem; cursor: pointer;
     }
-    .suggestion-tag-btn:hover {
-      background: #0284c7;
-      color: #fff;
-      border-color: #0284c7;
-    }
+    .suggestion-tag-btn:hover { background: #0284c7; color: #fff; border-color: #0284c7; }
     .modal-actions { display: flex; justify-content: flex-end; gap: 8px; }
   </style>
 </head>
@@ -340,16 +345,16 @@
       </select>
 
       <button id="layoutToggleBtn" class="btn-action btn-layout" title="Changer le mode d'affichage">⚏</button>
-
-      <button id="exportBtn" class="btn-action" title="Exporter les données">📤</button>
-      <button id="importBtn" class="btn-action" title="Importer des données">📥</button>
-      <input type="file" id="importFile" accept=".json" style="display: none;">
-
       <button id="resetBtn" class="btn-action btn-reset" title="Vider les non-favoris">🧹</button>
+
+      <div class="local-status">
+        <span class="local-dot"></span>
+        <span>Local</span>
+      </div>
     </div>
   </header>
 
-  <!-- Volet Plein Écran pour les Non-Favoris -->
+  <!-- Volet Non-Favoris -->
   <div id="nonFavSidebar" class="sidebar-container">
     <div class="sidebar-header">
       <span class="sidebar-title">Modèles hors favoris</span>
@@ -358,6 +363,7 @@
     <div class="sidebar-body sidebar-list" id="nonFavListContainer"></div>
   </div>
 
+  <!-- Modal Tags -->
   <div id="tagModal" class="modal-overlay">
     <div class="modal-card">
       <div class="modal-title" id="tagModalTitle">Ajouter une étiquette</div>
@@ -377,6 +383,7 @@
     let favorites = JSON.parse(localStorage.getItem('cb_dashboard_favs')) || [];
     let tags = JSON.parse(localStorage.getItem('cb_dashboard_tags')) || {};
     
+    // 0 = Standard (16/9), 1 = Miniature (1/1), 2 = Liste compacte
     let currentLayout = parseInt(localStorage.getItem('cb_dashboard_layout_mode')) || 0; 
     let selectedTagFilter = '';
     let searchQuery = '';
@@ -396,9 +403,6 @@
     const nonFavCount = document.getElementById('nonFavCount');
 
     const tagFilterSelect = document.getElementById('tagFilterSelect');
-    const exportBtn = document.getElementById('exportBtn');
-    const importBtn = document.getElementById('importBtn');
-    const importFile = document.getElementById('importFile');
 
     const tagModal = document.getElementById('tagModal');
     const modalTagInput = document.getElementById('modalTagInput');
@@ -409,6 +413,12 @@
 
     function getEmbedUrl(username) {
       return `https://chaturbate.com/embed/${encodeURIComponent(username)}/?embed_video_only=1&disable_sound=0&scrolling=no`;
+    }
+
+    function saveToLocalStorage() {
+      localStorage.setItem('cb_dashboard_models', JSON.stringify(models));
+      localStorage.setItem('cb_dashboard_favs', JSON.stringify(favorites));
+      localStorage.setItem('cb_dashboard_tags', JSON.stringify(tags));
     }
 
     nonFavSidebarBtn.addEventListener('click', () => {
@@ -430,7 +440,6 @@
       if (selectedTagFilter) {
         nonFavs = nonFavs.filter(m => (tags[m.toLowerCase()] || []).includes(selectedTagFilter));
       }
-
       nonFavs.sort((a, b) => a.localeCompare(b, 'fr', { sensitivity: 'base' }));
 
       nonFavCount.textContent = `(${nonFavs.length})`;
@@ -447,11 +456,9 @@
         item.className = 'model-card';
         item.innerHTML = `
           <div class="model-header">
-            <div class="model-title-area">
-              <span class="model-name">${username}</span>
-            </div>
+            <div class="model-title-area"><span class="model-name">${username}</span></div>
             <div class="header-actions">
-              <button class="btn-fav" title="Mettre en favori" onclick="toggleFavorite('${username}'); updateNonFavSidebarList();">&#9733;</button>
+              <button class="btn-fav" title="Favori" onclick="toggleFavorite('${username}'); updateNonFavSidebarList();">&#9733;</button>
               <button class="btn-delete" title="Supprimer" onclick="removeModel('${username}'); updateNonFavSidebarList();">&times;</button>
             </div>
           </div>
@@ -465,17 +472,22 @@
     }
 
     function applyLayout() {
-      grid.classList.remove('miniature-mode');
+      grid.classList.remove('miniature-mode', 'list-mode');
       layoutToggleBtn.classList.remove('active');
 
       if (currentLayout === 1) {
         grid.classList.add('miniature-mode');
         layoutToggleBtn.classList.add('active');
         layoutToggleBtn.textContent = '☩';
-        layoutToggleBtn.title = 'Mode Miniature (Actif)';
+        layoutToggleBtn.title = 'Mode Miniature 1/1 (Actif)';
+      } else if (currentLayout === 2) {
+        grid.classList.add('list-mode');
+        layoutToggleBtn.classList.add('active');
+        layoutToggleBtn.textContent = '☰';
+        layoutToggleBtn.title = 'Mode Liste Compacte (Actif)';
       } else {
         layoutToggleBtn.textContent = '⚏';
-        layoutToggleBtn.title = 'Mode Standard (Actif)';
+        layoutToggleBtn.title = 'Mode Standard 16/9 (Actif)';
       }
       localStorage.setItem('cb_dashboard_layout_mode', currentLayout);
       renderGrid();
@@ -486,7 +498,6 @@
         const container = entry.target;
         const iframe = container.querySelector('iframe');
         if (!iframe) return;
-
         const targetSrc = iframe.dataset.src;
         if (entry.isIntersecting) {
           if (iframe.src !== targetSrc) iframe.src = targetSrc;
@@ -496,10 +507,6 @@
       });
     }, { root: null, rootMargin: '100px', threshold: 0.05 });
 
-    function saveModels() { localStorage.setItem('cb_dashboard_models', JSON.stringify(models)); }
-    function saveFavorites() { localStorage.setItem('cb_dashboard_favs', JSON.stringify(favorites)); }
-    function saveTags() { localStorage.setItem('cb_dashboard_tags', JSON.stringify(tags)); }
-
     function cleanUnusedTags() {
       let changed = false;
       Object.keys(tags).forEach(modelKey => {
@@ -508,11 +515,10 @@
           changed = true;
         }
       });
-
       if (selectedTagFilter && !getAllExistingTags().includes(selectedTagFilter)) {
         selectedTagFilter = '';
       }
-      if (changed) saveTags();
+      if (changed) saveToLocalStorage();
     }
 
     function getAllExistingTags() {
@@ -526,15 +532,14 @@
       const lower = username.toLowerCase();
       if (!models.map(m => m.toLowerCase()).includes(lower)) {
         models.push(username);
-        saveModels();
       }
       if (!favorites.includes(lower)) {
         favorites.push(lower);
-        saveFavorites();
       }
       searchQuery = '';
       newModelInput.value = '';
       clearSearchBtn.classList.remove('show');
+      saveToLocalStorage();
       renderGrid();
       if (nonFavSidebar.classList.contains('open')) updateNonFavSidebarList();
     }
@@ -546,7 +551,7 @@
       } else {
         favorites.push(lower);
       }
-      saveFavorites();
+      saveToLocalStorage();
       renderGrid();
       if (nonFavSidebar.classList.contains('open')) updateNonFavSidebarList();
     }
@@ -555,7 +560,6 @@
       targetTagUser = username;
       tagModalTitle.textContent = `Ajouter un tag pour ${username}`;
       modalTagInput.value = '';
-      
       existingTagsSuggestions.innerHTML = '';
       const allTags = getAllExistingTags();
       
@@ -571,7 +575,6 @@
           existingTagsSuggestions.appendChild(btn);
         });
       }
-
       tagModal.classList.add('show');
       setTimeout(() => modalTagInput.focus(), 50);
     };
@@ -589,28 +592,19 @@
         const current = tags[lower] || [];
         if (!current.includes(val)) {
           tags[lower] = [...current, val];
-          saveTags();
+          saveToLocalStorage();
           renderGrid();
         }
       }
       closeTagModal();
     }
 
-    function submitTagModal() {
+    saveTagBtn.addEventListener('click', () => {
       const val = modalTagInput.value.trim();
-      if (val) {
-        applyTagToTarget(val);
-      } else {
-        closeTagModal();
-      }
-    }
-
-    saveTagBtn.addEventListener('click', submitTagModal);
-    cancelTagBtn.addEventListener('click', closeTagModal);
-    modalTagInput.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter') submitTagModal();
-      if (e.key === 'Escape') closeTagModal();
+      if (val) applyTagToTarget(val);
+      else closeTagModal();
     });
+    cancelTagBtn.addEventListener('click', closeTagModal);
 
     window.removeTag = function(username, tagToRemove) {
       const lower = username.toLowerCase();
@@ -618,7 +612,7 @@
         tags[lower] = tags[lower].filter(t => t !== tagToRemove);
         if (tags[lower].length === 0) delete tags[lower];
         cleanUnusedTags();
-        saveTags();
+        saveToLocalStorage();
         renderGrid();
       }
     };
@@ -626,7 +620,6 @@
     function updateTagFilterOptions() {
       const existingTags = getAllExistingTags();
       tagFilterSelect.innerHTML = `<option value="">🏷️ (${models.length})</option>`;
-      
       existingTags.forEach(t => {
         const count = models.filter(m => (tags[m.toLowerCase()] || []).includes(t)).length;
         const opt = document.createElement('option');
@@ -668,8 +661,9 @@
           <iframe data-src="${embedUrl}" sandbox="allow-scripts allow-same-origin allow-presentation allow-forms" scrolling="no" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen" allowfullscreen></iframe>
         </div>
       `;
-
-      streamObserver.observe(card.querySelector('.player-container'));
+      if (currentLayout !== 2) {
+        streamObserver.observe(card.querySelector('.player-container'));
+      }
       return card;
     }
 
@@ -693,24 +687,19 @@
       }
       
       let displayModels = [...models];
-
       if (searchQuery) {
         displayModels = displayModels.filter(m => m.toLowerCase().includes(searchQuery.toLowerCase()));
       }
-
       displayModels = displayModels.filter(m => favorites.includes(m.toLowerCase()));
-
       if (selectedTagFilter) {
         displayModels = displayModels.filter(m => (tags[m.toLowerCase()] || []).includes(selectedTagFilter));
       }
-
       displayModels.sort((a, b) => a.localeCompare(b, 'fr', { sensitivity: 'base' }));
 
       if (displayModels.length === 0) {
         grid.innerHTML = `<div class="empty-message">Aucun modèle favori à afficher pour le moment.</div>`;
         return;
       }
-
       displayModels.forEach(username => grid.appendChild(createCard(username)));
     }
 
@@ -729,43 +718,8 @@
     });
 
     layoutToggleBtn.addEventListener('click', () => {
-      currentLayout = currentLayout === 0 ? 1 : 0;
+      currentLayout = (currentLayout + 1) % 3; // Alterne entre 0 (Standard), 1 (Miniature), et 2 (Liste)
       applyLayout();
-    });
-
-    exportBtn.addEventListener('click', () => {
-      const backupData = { models, favorites, tags };
-      const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(backupData, null, 2));
-      const downloadAnchor = document.createElement('a');
-      downloadAnchor.setAttribute("href", dataStr);
-      downloadAnchor.setAttribute("download", `directs-live-backup-${new Date().toISOString().slice(0,10)}.json`);
-      document.body.appendChild(downloadAnchor);
-      downloadAnchor.click();
-      downloadAnchor.remove();
-    });
-
-    importBtn.addEventListener('click', () => importFile.click());
-    importFile.addEventListener('change', (e) => {
-      const file = e.target.files[0];
-      if (!file) return;
-      const reader = new FileReader();
-      reader.onload = function(event) {
-        try {
-          const imported = JSON.parse(event.target.result);
-          if (imported.models && Array.isArray(imported.models)) {
-            models = imported.models;
-            favorites = Array.isArray(imported.favorites) ? imported.favorites : [];
-            tags = (imported.tags && typeof imported.tags === 'object') ? imported.tags : {};
-
-            cleanUnusedTags();
-            saveModels(); saveFavorites(); saveTags();
-            renderGrid();
-            alert('Configuration importée avec succès !');
-          }
-        } catch (err) { alert('Erreur lors de la lecture du fichier.'); }
-        importFile.value = '';
-      };
-      reader.readAsText(file);
     });
 
     tagFilterSelect.addEventListener('change', (e) => {
@@ -784,8 +738,7 @@
       models = models.filter(m => m.toLowerCase() !== lower);
       delete tags[lower];
       cleanUnusedTags();
-      saveModels();
-      saveTags();
+      saveToLocalStorage();
       renderGrid();
     }
 
@@ -794,13 +747,13 @@
       if (nonFavsCount === 0) { alert('Aucun modèle non-favori à supprimer.'); return; }
       if (confirm('Voulez-vous supprimer tous les modèles non-favoris ?')) {
         models = models.filter(m => favorites.includes(m.toLowerCase()));
-      cleanUnusedTags();
-        saveModels();
-        saveTags();
+        cleanUnusedTags();
+        saveToLocalStorage();
         renderGrid();
       }
     });
 
+    // Lancement au démarrage
     applyLayout();
   </script>
 </body>
