@@ -345,6 +345,10 @@
       </select>
 
       <button id="layoutToggleBtn" class="btn-action btn-layout" title="Changer le mode d'affichage">⚏</button>
+      <button id="exportBtn" class="btn-action" title="Exporter la configuration (JSON)">📥</button>
+      <button id="importBtn" class="btn-action" title="Importer une configuration (JSON)">📤</button>
+      <input type="file" id="importFileInput" accept=".json" style="display: none;">
+      
       <button id="resetBtn" class="btn-action btn-reset" title="Vider les non-favoris">🧹</button>
 
       <div class="local-status">
@@ -394,6 +398,9 @@
     const clearSearchBtn = document.getElementById('clearSearchBtn');
     const resetBtn = document.getElementById('resetBtn');
     const layoutToggleBtn = document.getElementById('layoutToggleBtn');
+    const exportBtn = document.getElementById('exportBtn');
+    const importBtn = document.getElementById('importBtn');
+    const importFileInput = document.getElementById('importFileInput');
     
     const nonFavSidebarBtn = document.getElementById('nonFavSidebarBtn');
     const nonFavSidebar = document.getElementById('nonFavSidebar');
@@ -419,6 +426,60 @@
       localStorage.setItem('cb_dashboard_favs', JSON.stringify(favorites));
       localStorage.setItem('cb_dashboard_tags', JSON.stringify(tags));
     }
+
+    // Gestion Export JSON
+    exportBtn.addEventListener('click', () => {
+      const data = {
+        models: models,
+        favorites: favorites,
+        tags: tags,
+        layoutMode: currentLayout
+      };
+      const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(data, null, 2));
+      const downloadAnchor = document.createElement('a');
+      downloadAnchor.setAttribute("href", dataStr);
+      downloadAnchor.setAttribute("download", `directs_live_backup_${new Date().toISOString().slice(0, 10)}.json`);
+      document.body.appendChild(downloadAnchor);
+      downloadAnchor.click();
+      downloadAnchor.remove();
+    });
+
+    // Gestion Import JSON
+    importBtn.addEventListener('click', () => {
+      importFileInput.click();
+    });
+
+    importFileInput.addEventListener('change', (event) => {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        try {
+          const importedData = JSON.parse(e.target.result);
+          if (importedData && Array.isArray(importedData.models)) {
+            models = importedData.models;
+            favorites = Array.isArray(importedData.favorites) ? importedData.favorites : [];
+            tags = (importedData.tags && typeof importedData.tags === 'object') ? importedData.tags : {};
+            if (typeof importedData.layoutMode === 'number') {
+              currentLayout = importedData.layoutMode;
+            }
+            saveToLocalStorage();
+            applyLayout();
+            if (nonFavSidebar.classList.contains('open')) {
+              updateNonFavSidebarList();
+            }
+            alert('Importation réussie avec succès !');
+          } else {
+            alert('Format de fichier JSON invalide.');
+          }
+        } catch (err) {
+          alert('Erreur lors de la lecture du fichier JSON : ' + err.message);
+        }
+        importFileInput.value = ''; // Réinitialiser l'input file
+      };
+      reader.readAsText(file);
+    });
 
     nonFavSidebarBtn.addEventListener('click', () => {
       const isOpen = nonFavSidebar.classList.toggle('open');
@@ -664,7 +725,7 @@
           </div>
           <div class="header-actions">
             <button class="btn-icon-subtle" title="Plein écran vidéo" onclick="event.stopPropagation(); toggleFullscreen('player-${username}')">⛶</button>
-            <button class="btn-icon-subtle" title="Ajouter un tag" onclick="event.stopPropagation(); openTagModal('${username}')">🏷️️</button>
+            <button class="btn-icon-subtle" title="Ajouter un tag" onclick="event.stopPropagation(); openTagModal('${username}')">🏷</button>
             <button class="btn-fav ${isFav ? 'is-favorite' : ''}" title="Favori" onclick="event.stopPropagation(); toggleFavorite('${username}')">&#9733;</button>
             <button class="btn-delete" title="Supprimer" onclick="event.stopPropagation(); removeModel('${username}')">&times;</button>
           </div>
