@@ -320,8 +320,6 @@
     .header-actions { display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
     .btn-icon-subtle { background: transparent; border: none; color: #64748b; font-size: 1rem; cursor: pointer; padding: 2px 4px; }
     .btn-icon-subtle:hover { color: var(--text); }
-    .btn-sound { background: transparent; border: none; color: #64748b; font-size: 1rem; cursor: pointer; padding: 2px 4px; }
-    .btn-sound:hover, .btn-sound.sound-on { color: var(--accent); }
     .btn-fav { background: transparent; border: none; color: #64748b; font-size: 1.1rem; cursor: pointer; }
     .btn-fav:hover, .btn-fav.is-favorite { color: var(--star); }
     .btn-delete { background: transparent; border: none; color: #64748b; font-size: 1.2rem; cursor: pointer; padding: 2px 4px; }
@@ -418,7 +416,6 @@
     let models = JSON.parse(localStorage.getItem('cb_dashboard_models')) || [];
     let favorites = JSON.parse(localStorage.getItem('cb_dashboard_favs')) || [];
     let tags = JSON.parse(localStorage.getItem('cb_dashboard_tags')) || {};
-    let soundStates = JSON.parse(localStorage.getItem('cb_dashboard_sound')) || {}; // true = son activé, false = muet
     
     let currentLayout = parseInt(localStorage.getItem('cb_dashboard_layout_mode')) || 0; 
     let selectedTagFilter = '';
@@ -451,21 +448,18 @@
     const cancelTagBtn = document.getElementById('cancelTagBtn');
 
     function getEmbedUrl(username) {
-      const lower = username.toLowerCase();
-      const isSoundOn = !!soundStates[lower];
-      // disable_sound=0 active la gestion du son par le lecteur
-      return `https://chaturbate.com/embed/${encodeURIComponent(username)}/?embed_video_only=1&disable_sound=0&scrolling=no&mute=${isSoundOn ? '0' : '1'}`;
+      // Intégration standard avec les contrôles natifs du lecteur pour la gestion du son
+      return `https://chaturbate.com/embed/${encodeURIComponent(username)}/?embed_video_only=0&disable_sound=0&scrolling=no`;
     }
 
     function saveToLocalStorage() {
       localStorage.setItem('cb_dashboard_models', JSON.stringify(models));
       localStorage.setItem('cb_dashboard_favs', JSON.stringify(favorites));
       localStorage.setItem('cb_dashboard_tags', JSON.stringify(tags));
-      localStorage.setItem('cb_dashboard_sound', JSON.stringify(soundStates));
     }
 
     exportBtn.addEventListener('click', () => {
-      const data = { models, favorites, tags, soundStates, layoutMode: currentLayout };
+      const data = { models, favorites, tags, layoutMode: currentLayout };
       const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(data, null, 2));
       const downloadAnchor = document.createElement('a');
       downloadAnchor.setAttribute("href", dataStr);
@@ -489,7 +483,6 @@
             models = importedData.models;
             favorites = Array.isArray(importedData.favorites) ? importedData.favorites : [];
             tags = (importedData.tags && typeof importedData.tags === 'object') ? importedData.tags : {};
-            soundStates = (importedData.soundStates && typeof importedData.soundStates === 'object') ? importedData.soundStates : {};
             if (typeof importedData.layoutMode === 'number') currentLayout = importedData.layoutMode;
             saveToLocalStorage();
             applyLayout();
@@ -536,25 +529,22 @@
       }
 
       nonFavs.forEach(username => {
-        const lower = username.toLowerCase();
-        const isSoundOn = !!soundStates[lower];
         const embedUrl = getEmbedUrl(username);
         const item = document.createElement('div');
         item.className = 'model-card';
         item.id = `card-nf-${username}`;
         item.dataset.username = username;
         item.innerHTML = `
-          <div class="model-header" id="header-nf-${username}">
+          <div class="model-header">
             <div class="model-title-area"><span class="model-name">${username}</span></div>
             <div class="header-actions">
-              <button class="btn-sound ${isSoundOn ? 'sound-on' : ''}" id="sound-btn-nf-${username}" title="${isSoundOn ? 'Couper le son' : 'Activer le son'}" onclick="event.stopPropagation(); toggleSound('${username}')">${isSoundOn ? '🔊' : '🔇'}</button>
               <button class="btn-icon-subtle" title="Plein écran vidéo" onclick="event.stopPropagation(); toggleFullscreen('player-nf-${username}')">⛶</button>
               <button class="btn-fav" title="Favori" onclick="toggleFavorite('${username}'); updateNonFavSidebarList();">&#9733;</button>
               <button class="btn-delete" title="Supprimer" onclick="removeModel('${username}'); updateNonFavSidebarList();">&times;</button>
             </div>
           </div>
           <div class="player-container" id="player-nf-${username}">
-            <iframe id="iframe-nf-${username}" data-src="${embedUrl}" src="${embedUrl}" sandbox="allow-scripts allow-same-origin allow-presentation allow-forms" scrolling="no" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen" allowfullscreen></iframe>
+            <iframe data-src="${embedUrl}" sandbox="allow-scripts allow-same-origin allow-presentation allow-forms" scrolling="no" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen" allowfullscreen></iframe>
           </div>
         `;
         streamObserver.observe(item.querySelector('.player-container'));
@@ -634,30 +624,6 @@
       renderGrid();
       if (nonFavSidebar.classList.contains('open')) updateNonFavSidebarList();
     }
-
-    window.toggleSound = function(username) {
-      const lower = username.toLowerCase();
-      soundStates[lower] = !soundStates[lower];
-      saveToLocalStorage();
-
-      // Mettre à jour l'iframe et le bouton concernés sans recharger toute la grille
-      const newUrl = getEmbedUrl(username);
-      
-      ['', 'nf-'].forEach(prefix => {
-        const iframe = document.getElementById(`iframe-${prefix}${username}`);
-        if (iframe) {
-          iframe.dataset.src = newUrl;
-          iframe.src = newUrl;
-        }
-        const btn = document.getElementById(`sound-btn-${prefix}${username}`);
-        if (btn) {
-          const isSoundOn = soundStates[lower];
-          btn.className = `btn-sound ${isSoundOn ? 'sound-on' : ''}`;
-          btn.title = isSoundOn ? 'Couper le son' : 'Activer le son';
-          btn.textContent = isSoundOn ? '🔊' : '🔇';
-        }
-      });
-    };
 
     window.toggleFavorite = function(username) {
       const lower = username.toLowerCase();
@@ -758,7 +724,6 @@
     function createCard(username) {
       const lower = username.toLowerCase();
       const isFav = favorites.includes(lower);
-      const isSoundOn = !!soundStates[lower];
       const modelTags = (tags[lower] || []).sort((a, b) => a.localeCompare(b, 'fr', { sensitivity: 'base' }));
 
       const card = document.createElement('div');
@@ -779,7 +744,6 @@
             <div class="tags-container">${tagsHtml}</div>
           </div>
           <div class="header-actions">
-            <button class="btn-sound ${isSoundOn ? 'sound-on' : ''}" id="sound-btn-${username}" title="${isSoundOn ? 'Couper le son' : 'Activer le son'}" onclick="event.stopPropagation(); toggleSound('${username}')">${isSoundOn ? '🔊' : '🔇'}</button>
             <button class="btn-icon-subtle" title="Plein écran vidéo" onclick="event.stopPropagation(); toggleFullscreen('player-${username}')">⛶</button>
             <button class="btn-icon-subtle" title="Ajouter un tag" onclick="event.stopPropagation(); openTagModal('${username}')">🏷</button>
             <button class="btn-fav ${isFav ? 'is-favorite' : ''}" title="Favori" onclick="event.stopPropagation(); toggleFavorite('${username}')">&#9733;</button>
@@ -787,7 +751,7 @@
           </div>
         </div>
         <div class="player-container" id="player-${username}">
-          <iframe id="iframe-${username}" data-src="${embedUrl}" src="${embedUrl}" sandbox="allow-scripts allow-same-origin allow-presentation allow-forms" scrolling="no" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen" allowfullscreen></iframe>
+          <iframe data-src="${embedUrl}" sandbox="allow-scripts allow-same-origin allow-presentation allow-forms" scrolling="no" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen" allowfullscreen></iframe>
         </div>
       `;
 
@@ -797,7 +761,13 @@
 
       headerElem.addEventListener('click', () => {
         if (currentLayout === 2) {
-          card.classList.toggle('expanded');
+          const isExpanded = card.classList.toggle('expanded');
+          if (isExpanded) {
+            const iframe = playerContainerElem.querySelector('iframe');
+            if (iframe && iframe.src !== iframe.dataset.src) {
+              iframe.src = iframe.dataset.src;
+            }
+          }
         }
       });
 
@@ -879,7 +849,6 @@
       const lower = username.toLowerCase();
       models = models.filter(m => m.toLowerCase() !== lower);
       delete tags[lower];
-      delete soundStates[lower];
       cleanUnusedTags();
       saveToLocalStorage();
       renderGrid();
