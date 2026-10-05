@@ -144,7 +144,7 @@
     .btn-layout.active { background: rgba(56, 189, 248, 0.15); border-color: var(--accent); color: var(--accent); }
     .btn-nonfav-toggle.active { background: rgba(56, 189, 248, 0.15); border-color: var(--accent); color: var(--accent); font-weight: 600; }
 
-    /* PLEIN ÉCRAN ADAPTATIF */
+    /* PLEIN ÉCRAN ADAPTATIF AVEC SCROLL AUTORISÉ SI DÉPASSEMENT */
     .player-container:fullscreen {
       width: 100vw !important;
       height: 100vh !important;
@@ -152,6 +152,7 @@
       display: flex;
       align-items: center;
       justify-content: center;
+      overflow: auto !important;
     }
     .player-container:fullscreen iframe {
       width: 100% !important;
@@ -168,6 +169,7 @@
       display: flex;
       align-items: center;
       justify-content: center;
+      overflow: auto !important;
     }
     .player-container:-webkit-full-screen iframe {
       width: 100% !important;
@@ -448,7 +450,6 @@
     const cancelTagBtn = document.getElementById('cancelTagBtn');
 
     function getEmbedUrl(username) {
-      // embed_video_only=1 pour n'afficher que la vidéo en entier sans interface parasite et mute=1 pour couper le son
       return `https://chaturbate.com/embed/${encodeURIComponent(username)}/?embed_video_only=1&mute=1&scrolling=no`;
     }
 
@@ -755,7 +756,6 @@
         </div>
       `;
 
-      // Gestion du clic pour dérouler/masquer en mode liste
       const headerElem = card.querySelector(`#header-${username}`);
       const playerContainerElem = card.querySelector('.player-container');
 
