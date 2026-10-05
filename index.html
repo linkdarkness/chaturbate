@@ -144,7 +144,7 @@
     .btn-layout.active { background: rgba(56, 189, 248, 0.15); border-color: var(--accent); color: var(--accent); }
     .btn-nonfav-toggle.active { background: rgba(56, 189, 248, 0.15); border-color: var(--accent); color: var(--accent); font-weight: 600; }
 
-    /* PLEIN ÉCRAN ADAPTATIF AVEC SCROLL AUTORISÉ SI DÉPASSEMENT */
+    /* PLEIN ÉCRAN PLEINEMENT ADAPTÉ AUX RATIOS (VIGNETTES & STANDARD) */
     .player-container:fullscreen {
       width: 100vw !important;
       height: 100vh !important;
@@ -157,6 +157,9 @@
     .player-container:fullscreen iframe {
       width: 100% !important;
       height: 100% !important;
+      max-width: 100vw !important;
+      max-height: 100vh !important;
+      object-fit: contain !important;
       position: relative !important;
       top: auto !important;
       left: auto !important;
@@ -174,6 +177,9 @@
     .player-container:-webkit-full-screen iframe {
       width: 100% !important;
       height: 100% !important;
+      max-width: 100vw !important;
+      max-height: 100vh !important;
+      object-fit: contain !important;
       position: relative !important;
       top: auto !important;
       left: auto !important;
