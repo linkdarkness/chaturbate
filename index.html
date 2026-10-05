@@ -448,8 +448,8 @@
     const cancelTagBtn = document.getElementById('cancelTagBtn');
 
     function getEmbedUrl(username) {
-      // Intégration standard avec les contrôles natifs du lecteur pour la gestion du son
-      return `https://chaturbate.com/embed/${encodeURIComponent(username)}/?embed_video_only=0&disable_sound=0&scrolling=no`;
+      // embed_video_only=1 pour n'afficher que la vidéo en entier sans interface parasite et mute=1 pour couper le son
+      return `https://chaturbate.com/embed/${encodeURIComponent(username)}/?embed_video_only=1&mute=1&scrolling=no`;
     }
 
     function saveToLocalStorage() {
