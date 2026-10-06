@@ -144,7 +144,7 @@
     .btn-layout.active { background: rgba(56, 189, 248, 0.15); border-color: var(--accent); color: var(--accent); }
     .btn-nonfav-toggle.active { background: rgba(56, 189, 248, 0.15); border-color: var(--accent); color: var(--accent); font-weight: 600; }
 
-    /* PLEIN ÉCRAN PLEINEMENT ADAPTÉ AUX RATIOS (VIGNETTES & STANDARD) */
+    /* PLEIN ÉCRAN PLEINEMENT ADAPTÉ AUX RATIOS */
     .player-container:fullscreen {
       width: 100vw !important;
       height: 100vh !important;
@@ -492,7 +492,6 @@
     .album-item:hover .album-item-delete { opacity: 1; }
     .album-item-delete:hover { background: var(--danger); color: #fff; }
 
-    /* Barre de sélection multiple bas de dossier */
     .folder-bulk-bar {
       display: none;
       justify-content: space-between;
@@ -506,7 +505,6 @@
       display: flex;
     }
 
-    /* Visionneuse plein écran d'une photo */
     .lightbox-overlay {
       display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0, 0, 0, 0.95); z-index: 4000; justify-content: center; align-items: center; flex-direction: column; padding: 20px;
     }
@@ -727,7 +725,7 @@
           <div class="model-header">
             <div class="model-title-area"><span class="model-name">${username}</span></div>
             <div class="header-actions">
-              <button class="btn-icon-subtle" title="Album photos" onclick="event.stopPropagation(); openAlbumModal('${username}')">📸</button>
+              <button class="btn-icon-subtle" title="Album photos" onclick="event.stopPropagation(); window.openAlbumModal('${username}')">📸</button>
               <button class="btn-icon-subtle" title="Plein écran vidéo" onclick="event.stopPropagation(); toggleFullscreen('player-nf-${username}')">🖥️</button>
               <button class="btn-fav" title="Favori" onclick="toggleFavorite('${username}'); updateNonFavSidebarList();">&#9733;</button>
               <button class="btn-delete" title="Supprimer" onclick="removeModel('${username}'); updateNonFavSidebarList();">&times;</button>
@@ -838,7 +836,7 @@
       }
     };
 
-    // --- Gestion Avancée des Albums Photos & Dossiers ---
+    // --- Gestion Avancée des Albums Photos & Dossiers (Exposée globalement) ---
     window.openAlbumModal = function(username) {
       currentAlbumUser = username;
       albumModalTitle.textContent = `Album de ${username}`;
@@ -1141,8 +1139,8 @@
             <div class="tags-container">${tagsHtml}</div>
           </div>
           <div class="header-actions">
-            <button class="btn-icon-subtle" title="Album photos" onclick="event.stopPropagation(); openAlbumModal('${username}')">📸</button>
-            <button class="btn-icon-subtle" title="Plein écran vidéo" onclick="event.stopPropagation(); toggleFullscreen('player-${username}')">🖥️</button>
+            <button class="btn-icon-subtle" title="Album photos" onclick="event.stopPropagation(); window.openAlbumModal('${username}')">📸</button>
+            <button class="btn-icon-subtle" title="Plein écran vidéo" onclick="event.stopPropagation(); toggleFullscreen('player-${username}')">🖥️️</button>
             <button class="btn-icon-subtle" title="Ajouter un tag" onclick="event.stopPropagation(); openTagModal('${username}')">🏷</button>
             <button class="btn-fav ${isFav ? 'is-favorite' : ''}" title="Favori" onclick="event.stopPropagation(); toggleFavorite('${username}')">&#9733;</button>
             <button class="btn-delete" title="Supprimer" onclick="event.stopPropagation(); removeModel('${username}')">&times;</button>
