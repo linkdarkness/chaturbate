@@ -566,18 +566,19 @@
     <div class="modal-card album-modal-card">
       <div style="display: flex; justify-content: space-between; align-items: center;">
         <div class="modal-title" id="albumModalTitle">Album Photos</div>
-        <button class="sidebar-close-btn" onclick="window.closeAlbumModal()">&times;</button>
+        <button class="sidebar-close-btn" onclick="closeAlbumModal()">&times;</button>
       </div>
       <div style="display: flex; gap: 8px; align-items: center;">
-        <button type="button" class="btn-action" style="background: #0284c7; color: #fff; border-color: #0284c7; flex: 1;" onclick="window.triggerPhotoCapture()">📸 Importer des photos (Multi-sélection)</button>
-        <input type="file" id="photoCaptureInput" accept="image/*" multiple style="display: none;">
+        <button class="btn-action" style="background: #0284c7; color: #fff; border-color: #0284c7; flex: 1;" onclick="triggerPhotoCapture()">📸 Importer des photos (Illimité)</button>
+        <!-- L'attribut multiple et pas de limite imposée pour permettre la sélection en masse -->
+        <input type="file" id="photoCaptureInput" accept="image/*" multiple style="display: none;" onchange="handlePhotoCaptureFiles(event)">
       </div>
       <div class="album-body" id="albumBodyContainer"></div>
     </div>
   </div>
 
   <!-- Visionneuse Lightbox -->
-  <div id="lightboxOverlay" class="lightbox-overlay" onclick="window.closeLightbox()">
+  <div id="lightboxOverlay" class="lightbox-overlay" onclick="closeLightbox()">
     <button class="lightbox-close">&times;</button>
     <img id="lightboxImg" class="lightbox-img" src="" alt="Zoom photo">
     <div style="margin-top: 12px; display: flex; gap: 10px;">
@@ -638,10 +639,14 @@
     }
 
     function saveToLocalStorage() {
-      localStorage.setItem('cb_dashboard_models', JSON.stringify(models));
-      localStorage.setItem('cb_dashboard_favs', JSON.stringify(favorites));
-      localStorage.setItem('cb_dashboard_tags', JSON.stringify(tags));
-      localStorage.setItem('cb_dashboard_albums', JSON.stringify(albums));
+      try {
+        localStorage.setItem('cb_dashboard_models', JSON.stringify(models));
+        localStorage.setItem('cb_dashboard_favs', JSON.stringify(favorites));
+        localStorage.setItem('cb_dashboard_tags', JSON.stringify(tags));
+        localStorage.setItem('cb_dashboard_albums', JSON.stringify(albums));
+      } catch (e) {
+        alert('Attention : Stockage plein (localStorage saturé par la taille des photos). Pensez à exporter vos données ou à supprimer quelques photos.');
+      }
     }
 
     exportBtn.addEventListener('click', () => {
@@ -725,10 +730,10 @@
           <div class="model-header">
             <div class="model-title-area"><span class="model-name">${username}</span></div>
             <div class="header-actions">
-              <button type="button" class="btn-icon-subtle" title="Album photos" onclick="event.stopPropagation(); window.openAlbumModal('${username}')">📸</button>
-              <button type="button" class="btn-icon-subtle" title="Plein écran vidéo" onclick="event.stopPropagation(); window.toggleFullscreen('player-nf-${username}')">🖥️</button>
-              <button type="button" class="btn-fav" title="Favori" onclick="window.toggleFavorite('${username}'); updateNonFavSidebarList();">&#9733;</button>
-              <button type="button" class="btn-delete" title="Supprimer" onclick="window.removeModel('${username}'); updateNonFavSidebarList();">&times;</button>
+              <button class="btn-icon-subtle" title="Album photos" onclick="event.stopPropagation(); window.openAlbumModal('${username}')">📸</button>
+              <button class="btn-icon-subtle" title="Plein écran vidéo" onclick="event.stopPropagation(); toggleFullscreen('player-nf-${username}')">🖥️</button>
+              <button class="btn-fav" title="Favori" onclick="toggleFavorite('${username}'); updateNonFavSidebarList();">&#9733;</button>
+              <button class="btn-delete" title="Supprimer" onclick="removeModel('${username}'); updateNonFavSidebarList();">&times;</button>
             </div>
           </div>
           <div class="player-container" id="player-nf-${username}">
@@ -836,7 +841,7 @@
       }
     };
 
-    // --- Gestion des Albums Photos & Captures rattachée explicitement à window ---
+    // --- Gestion Avancée des Albums Photos & Dossiers (Illimité & Compression) ---
     window.openAlbumModal = function(username) {
       currentAlbumUser = username;
       albumModalTitle.textContent = `Album de ${username}`;
@@ -853,7 +858,7 @@
       photoCaptureInput.click();
     };
 
-    photoCaptureInput.addEventListener('change', (event) => {
+    window.handlePhotoCaptureFiles = function(event) {
       const files = event.target.files;
       if (!files || files.length === 0 || !currentAlbumUser) return;
       
@@ -866,24 +871,57 @@
       if (!albums[lower]) albums[lower] = {};
       if (!albums[lower][dateFolderName]) albums[lower][dateFolderName] = [];
 
-      let loadedCount = 0;
+      let processedCount = 0;
+      const totalFiles = files.length;
+
       Array.from(files).forEach(file => {
         const reader = new FileReader();
         reader.onload = function(e) {
-          albums[lower][dateFolderName].unshift(e.target.result);
-          loadedCount++;
-          if (loadedCount === files.length) {
-            saveToLocalStorage();
-            renderAlbumPhotos();
-            photoCaptureInput.value = '';
-          }
+          const img = new Image();
+          img.onload = function() {
+            // Compression optionnelle pour éviter la saturation du stockage du navigateur
+            const canvas = document.createElement('canvas');
+            const MAX_WIDTH = 1280;
+            const MAX_HEIGHT = 1280;
+            let width = img.width;
+            let height = img.height;
+
+            if (width > height) {
+              if (width > MAX_WIDTH) {
+                height *= MAX_WIDTH / width;
+                width = MAX_WIDTH;
+              }
+            } else {
+              if (height > MAX_HEIGHT) {
+                width *= MAX_HEIGHT / height;
+                height = MAX_HEIGHT;
+              }
+            }
+
+            canvas.width = width;
+            canvas.height = height;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(img, 0, 0, width, height);
+
+            // Conversion en JPEG compressé (qualité 0.8) pour stocker beaucoup plus de photos sans saturer le localStorage
+            const dataUrl = canvas.toDataURL('image/jpeg', 0.8);
+            albums[lower][dateFolderName].unshift(dataUrl);
+
+            processedCount++;
+            if (processedCount === totalFiles) {
+              saveToLocalStorage();
+              renderAlbumPhotos();
+              photoCaptureInput.value = ''; // Réinitialisation de l'input pour pouvoir ré-importer les mêmes fichiers si besoin
+            }
+          };
+          img.src = e.target.result;
         };
         reader.readAsDataURL(file);
       });
-    });
+    };
 
     window.deletePhotoFromAlbum = function(dateFolder, index, event) {
-      if (event) event.stopPropagation();
+      event.stopPropagation();
       if (!currentAlbumUser) return;
       const lower = currentAlbumUser.toLowerCase();
       if (albums[lower] && albums[lower][dateFolder]) {
@@ -1005,10 +1043,10 @@
         let gridHtml = '';
         photos.forEach((src, idx) => {
           gridHtml += `
-            <div class="album-item" onclick="window.handlePhotoItemClick('${dateFolder}', ${idx}, event, this)">
+            <div class="album-item" onclick="handlePhotoItemClick('${dateFolder}', ${idx}, event, this)">
               <input type="checkbox" class="album-item-checkbox" onclick="event.stopPropagation()">
               <img src="${src}" alt="Capture">
-              <button type="button" class="album-item-delete" title="Supprimer la photo" onclick="window.deletePhotoFromAlbum('${dateFolder}', ${idx}, event)">&times;</button>
+              <button class="album-item-delete" title="Supprimer la photo" onclick="deletePhotoFromAlbum('${dateFolder}', ${idx}, event)">&times;</button>
             </div>
           `;
         });
@@ -1017,13 +1055,13 @@
           <div class="album-folder-header">
             <div class="album-folder-title">📁 ${dateFolder} (${photos.length})</div>
             <div class="album-folder-actions">
-              <button type="button" class="btn-folder-action btn-select-toggle" onclick="window.toggleFolderSelectMode('${dateFolder}')">Sélectionner</button>
-              <button type="button" class="btn-folder-action danger" title="Supprimer tout le dossier" onclick="window.deleteAllPhotosInFolder('${dateFolder}')">🗑️ Vider</button>
+              <button class="btn-folder-action btn-select-toggle" onclick="toggleFolderSelectMode('${dateFolder}')">Sélectionner</button>
+              <button class="btn-folder-action danger" title="Supprimer tout le dossier" onclick="deleteAllPhotosInFolder('${dateFolder}')">🗑️ Vider</button>
             </div>
           </div>
           <div class="folder-bulk-bar">
             <span style="font-size:0.75rem; color:#94a3b8;">Gestion par sélection :</span>
-            <button type="button" class="btn-folder-action danger" onclick="window.deleteSelectedPhotosInFolder('${dateFolder}')">Supprimer la sélection</button>
+            <button class="btn-folder-action danger" onclick="deleteSelectedPhotosInFolder('${dateFolder}')">Supprimer la sélection</button>
           </div>
           <div class="album-grid">${gridHtml}</div>
         `;
@@ -1127,7 +1165,7 @@
       card.dataset.username = username;
 
       const tagsHtml = modelTags.map(t => 
-        `<span class="tag-badge" onclick="event.stopPropagation(); window.removeTag('${username}', '${t}')">${t} &times;</span>`
+        `<span class="tag-badge" onclick="event.stopPropagation(); removeTag('${username}', '${t}')">${t} &times;</span>`
       ).join('');
 
       const embedUrl = getEmbedUrl(username);
@@ -1139,11 +1177,11 @@
             <div class="tags-container">${tagsHtml}</div>
           </div>
           <div class="header-actions">
-            <button type="button" class="btn-icon-subtle" title="Album photos" onclick="event.stopPropagation(); window.openAlbumModal('${username}')">📸</button>
-            <button type="button" class="btn-icon-subtle" title="Plein écran vidéo" onclick="event.stopPropagation(); window.toggleFullscreen('player-${username}')">🖥</button>
-            <button type="button" class="btn-icon-subtle" title="Ajouter un tag" onclick="event.stopPropagation(); window.openTagModal('${username}')">🏷</button>
-            <button type="button" class="btn-fav ${isFav ? 'is-favorite' : ''}" title="Favori" onclick="event.stopPropagation(); window.toggleFavorite('${username}')">&#9733;</button>
-            <button type="button" class="btn-delete" title="Supprimer" onclick="event.stopPropagation(); window.removeModel('${username}')">&times;</button>
+            <button class="btn-icon-subtle" title="Album photos" onclick="event.stopPropagation(); window.openAlbumModal('${username}')">📸</button>
+            <button class="btn-icon-subtle" title="Plein écran vidéo" onclick="event.stopPropagation(); toggleFullscreen('player-${username}')">🖥</button>
+            <button class="btn-icon-subtle" title="Ajouter un tag" onclick="event.stopPropagation(); openTagModal('${username}')">🏷</button>
+            <button class="btn-fav ${isFav ? 'is-favorite' : ''}" title="Favori" onclick="event.stopPropagation(); toggleFavorite('${username}')">&#9733;</button>
+            <button class="btn-delete" title="Supprimer" onclick="event.stopPropagation(); removeModel('${username}')">&times;</button>
           </div>
         </div>
         <div class="player-container" id="player-${username}">
@@ -1192,7 +1230,7 @@
       }
       
       let displayModels = [...models];
-      if (searchQuery) {
+      if, (searchQuery) {
         displayModels = displayModels.filter(m => m.toLowerCase().includes(searchQuery.toLowerCase()));
       }
       displayModels = displayModels.filter(m => favorites.includes(m.toLowerCase()));
