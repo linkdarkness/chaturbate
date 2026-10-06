@@ -352,8 +352,9 @@
       display: block; 
     }
 
+    /* Modal générique & Albums photos */
     .modal-overlay {
-      display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(15, 23, 42, 0.8); backdrop-filter: blur(4px); z-index: 3000; justify-content: center; align-items: center;
+      display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(15, 23, 42, 0.85); backdrop-filter: blur(4px); z-index: 3000; justify-content: center; align-items: center;
     }
     .modal-overlay.show { display: flex; }
     .modal-card { background: #1e293b; border: 1px solid #334155; border-radius: 10px; width: 90%; max-width: 380px; padding: 16px; display: flex; flex-direction: column; gap: 12px; }
@@ -368,6 +369,67 @@
     }
     .suggestion-tag-btn:hover { background: #0284c7; color: #fff; border-color: #0284c7; }
     .modal-actions { display: flex; justify-content: flex-end; gap: 8px; }
+
+    /* Styles spécifiques Album Photos */
+    .album-modal-card {
+      width: 95%;
+      max-width: 650px;
+      max-height: 85vh;
+      display: flex;
+      flex-direction: column;
+    }
+    .album-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+      gap: 10px;
+      overflow-y: auto;
+      max-height: 50vh;
+      padding: 4px;
+    }
+    .album-item {
+      position: relative;
+      aspect-ratio: 1 / 1;
+      border-radius: 6px;
+      overflow: hidden;
+      border: 1px solid #334155;
+      background: #000;
+      cursor: pointer;
+    }
+    .album-item img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: transform 0.2s;
+    }
+    .album-item:hover img { transform: scale(1.05); }
+    .album-item-delete {
+      position: absolute;
+      top: 4px;
+      right: 4px;
+      background: rgba(15, 23, 42, 0.8);
+      color: var(--danger);
+      border: none;
+      border-radius: 4px;
+      width: 24px;
+      height: 24px;
+      font-size: 1rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      transition: opacity 0.2s;
+    }
+    .album-item:hover .album-item-delete { opacity: 1; }
+    .album-item-delete:hover { background: var(--danger); color: #fff; }
+
+    /* Visionneuse plein écran d'une photo */
+    .lightbox-overlay {
+      display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0, 0, 0, 0.95); z-index: 4000; justify-content: center; align-items: center; flex-direction: column; padding: 20px;
+    }
+    .lightbox-overlay.show { display: flex; }
+    .lightbox-img { max-width: 100%; max-height: 80vh; object-fit: contain; border-radius: 6px; }
+    .lightbox-close { position: absolute; top: 20px; right: 20px; background: transparent; border: none; color: #fff; font-size: 2rem; cursor: pointer; }
   </style>
 </head>
 <body>
@@ -418,17 +480,43 @@
     </div>
   </div>
 
+  <!-- Modal Album Photos -->
+  <div id="albumModal" class="modal-overlay">
+    <div class="modal-card album-modal-card">
+      <div style="display: flex; justify-content: space-between; align-items: center;">
+        <div class="modal-title" id="albumModalTitle">Album Photos</div>
+        <button class="sidebar-close-btn" onclick="closeAlbumModal()">&times;</button>
+      </div>
+      <div style="display: flex; gap: 8px; align-items: center;">
+        <button class="btn-action" style="background: #0284c7; color: #fff; border-color: #0284c7; flex: 1;" onclick="triggerPhotoCapture()">📸 Prendre / Importer une photo</button>
+        <input type="file" id="photoCaptureInput" accept="image/*" style="display: none;" onchange="handlePhotoCaptureFile(event)">
+      </div>
+      <div class="album-grid" id="albumGridContainer"></div>
+    </div>
+  </div>
+
+  <!-- Visionneuse Lightbox -->
+  <div id="lightboxOverlay" class="lightbox-overlay" onclick="closeLightbox()">
+    <button class="lightbox-close">&times;</button>
+    <img id="lightboxImg" class="lightbox-img" src="" alt="Zoom photo">
+    <div style="margin-top: 12px; display: flex; gap: 10px;">
+      <a id="lightboxDownloadBtn" class="btn-action" style="background: #0284c7; color: #fff; border-color: #0284c7;" download="capture.jpg" onclick="event.stopPropagation()">📥 Télécharger</a>
+    </div>
+  </div>
+
   <main class="grid-container" id="grid"></main>
 
   <script>
     let models = JSON.parse(localStorage.getItem('cb_dashboard_models')) || [];
     let favorites = JSON.parse(localStorage.getItem('cb_dashboard_favs')) || [];
     let tags = JSON.parse(localStorage.getItem('cb_dashboard_tags')) || {};
+    let albums = JSON.parse(localStorage.getItem('cb_dashboard_albums')) || {}; // { username: [dataUrl1, dataUrl2, ...] }
     
     let currentLayout = parseInt(localStorage.getItem('cb_dashboard_layout_mode')) || 0; 
     let selectedTagFilter = '';
     let searchQuery = '';
     let targetTagUser = null;
+    let currentAlbumUser = null;
 
     const grid = document.getElementById('grid');
     const addModelForm = document.getElementById('addModelForm');
@@ -455,6 +543,15 @@
     const saveTagBtn = document.getElementById('saveTagBtn');
     const cancelTagBtn = document.getElementById('cancelTagBtn');
 
+    const albumModal = document.getElementById('albumModal');
+    const albumModalTitle = document.getElementById('albumModalTitle');
+    const albumGridContainer = document.getElementById('albumGridContainer');
+    const photoCaptureInput = document.getElementById('photoCaptureInput');
+
+    const lightboxOverlay = document.getElementById('lightboxOverlay');
+    const lightboxImg = document.getElementById('lightboxImg');
+    const lightboxDownloadBtn = document.getElementById('lightboxDownloadBtn');
+
     function getEmbedUrl(username) {
       return `https://chaturbate.com/embed/${encodeURIComponent(username)}/?embed_video_only=1&mute=1&scrolling=no`;
     }
@@ -463,10 +560,11 @@
       localStorage.setItem('cb_dashboard_models', JSON.stringify(models));
       localStorage.setItem('cb_dashboard_favs', JSON.stringify(favorites));
       localStorage.setItem('cb_dashboard_tags', JSON.stringify(tags));
+      localStorage.setItem('cb_dashboard_albums', JSON.stringify(albums));
     }
 
     exportBtn.addEventListener('click', () => {
-      const data = { models, favorites, tags, layoutMode: currentLayout };
+      const data = { models, favorites, tags, albums, layoutMode: currentLayout };
       const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(data, null, 2));
       const downloadAnchor = document.createElement('a');
       downloadAnchor.setAttribute("href", dataStr);
@@ -490,6 +588,7 @@
             models = importedData.models;
             favorites = Array.isArray(importedData.favorites) ? importedData.favorites : [];
             tags = (importedData.tags && typeof importedData.tags === 'object') ? importedData.tags : {};
+            albums = (importedData.albums && typeof importedData.albums === 'object') ? importedData.albums : {};
             if (typeof importedData.layoutMode === 'number') currentLayout = importedData.layoutMode;
             saveToLocalStorage();
             applyLayout();
@@ -545,6 +644,7 @@
           <div class="model-header">
             <div class="model-title-area"><span class="model-name">${username}</span></div>
             <div class="header-actions">
+              <button class="btn-icon-subtle" title="Album photos" onclick="event.stopPropagation(); openAlbumModal('${username}')">📸</button>
               <button class="btn-icon-subtle" title="Plein écran vidéo" onclick="event.stopPropagation(); toggleFullscreen('player-nf-${username}')">🖥️</button>
               <button class="btn-fav" title="Favori" onclick="toggleFavorite('${username}'); updateNonFavSidebarList();">&#9733;</button>
               <button class="btn-delete" title="Supprimer" onclick="removeModel('${username}'); updateNonFavSidebarList();">&times;</button>
@@ -595,13 +695,14 @@
       });
     }, { root: null, rootMargin: '100px', threshold: 0.05 });
 
-    function cleanUnusedTags() {
+    function cleanUnusedData() {
       let changed = false;
+      const modelKeys = models.map(m => m.toLowerCase());
       Object.keys(tags).forEach(modelKey => {
-        if (!models.map(m => m.toLowerCase()).includes(modelKey)) {
-          delete tags[modelKey];
-          changed = true;
-        }
+        if (!modelKeys.includes(modelKey)) { delete tags[modelKey]; changed = true; }
+      });
+      Object.keys(albums).forEach(modelKey => {
+        if (!modelKeys.includes(modelKey)) { delete albums[modelKey]; changed = true; }
       });
       if (selectedTagFilter && !getAllExistingTags().includes(selectedTagFilter)) {
         selectedTagFilter = '';
@@ -610,7 +711,7 @@
     }
 
     function getAllExistingTags() {
-      cleanUnusedTags();
+      cleanUnusedData();
       const set = new Set();
       Object.values(tags).forEach(list => list.forEach(t => set.add(t)));
       return Array.from(set).sort((a, b) => a.localeCompare(b, 'fr', { sensitivity: 'base' }));
@@ -652,6 +753,86 @@
       } else {
         document.exitFullscreen();
       }
+    };
+
+    // --- Gestion des Albums Photos ---
+    window.openAlbumModal = function(username) {
+      currentAlbumUser = username;
+      albumModalTitle.textContent = `Album de ${username}`;
+      renderAlbumPhotos();
+      albumModal.classList.add('show');
+    };
+
+    window.closeAlbumModal = function() {
+      albumModal.classList.remove('show');
+      currentAlbumUser = null;
+    };
+
+    window.triggerPhotoCapture = function() {
+      photoCaptureInput.click();
+    };
+
+    window.handlePhotoCaptureFile = function(event) {
+      const file = event.target.files[0];
+      if (!file || !currentAlbumUser) return;
+      
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        const base64Data = e.target.result;
+        const lower = currentAlbumUser.toLowerCase();
+        if (!albums[lower]) albums[lower] = [];
+        albums[lower].unshift(base64Data); // Ajoute la photo au début
+        saveToLocalStorage();
+        renderAlbumPhotos();
+        photoCaptureInput.value = '';
+      };
+      reader.readAsDataURL(file);
+    };
+
+    window.deletePhotoFromAlbum = function(index, event) {
+      event.stopPropagation();
+      if (!currentAlbumUser) return;
+      const lower = currentAlbumUser.toLowerCase();
+      if (albums[lower]) {
+        albums[lower].splice(index, 1);
+        if (albums[lower].length === 0) delete albums[lower];
+        saveToLocalStorage();
+        renderAlbumPhotos();
+      }
+    };
+
+    function renderAlbumPhotos() {
+      albumGridContainer.innerHTML = '';
+      if (!currentAlbumUser) return;
+      const lower = currentAlbumUser.toLowerCase();
+      const photos = albums[lower] || [];
+
+      if (photos.length === 0) {
+        albumGridContainer.innerHTML = '<div class="empty-message" style="grid-column: 1 / -1; padding: 30px;">Aucune photo dans cet album</div>';
+        return;
+      }
+
+      photos.forEach((src, idx) => {
+        const item = document.createElement('div');
+        item.className = 'album-item';
+        item.innerHTML = `
+          <img src="${src}" alt="Capture">
+          <button class="album-item-delete" title="Supprimer la photo" onclick="deletePhotoFromAlbum(${idx}, event)">&times;</button>
+        `;
+        item.onclick = () => openLightbox(src);
+        albumGridContainer.appendChild(item);
+      });
+    }
+
+    function openLightbox(src) {
+      lightboxImg.src = src;
+      lightboxDownloadBtn.href = src;
+      lightboxDownloadBtn.setAttribute('download', `capture_${currentAlbumUser}_${Date.now()}.jpg`);
+      lightboxOverlay.classList.add('show');
+    }
+
+    window.closeLightbox = function() {
+      lightboxOverlay.classList.remove('show');
     };
 
     window.openTagModal = function(username) {
@@ -709,7 +890,7 @@
       if (tags[lower]) {
         tags[lower] = tags[lower].filter(t => t !== tagToRemove);
         if (tags[lower].length === 0) delete tags[lower];
-        cleanUnusedTags();
+        cleanUnusedData();
         saveToLocalStorage();
         renderGrid();
       }
@@ -751,6 +932,7 @@
             <div class="tags-container">${tagsHtml}</div>
           </div>
           <div class="header-actions">
+            <button class="btn-icon-subtle" title="Album photos" onclick="event.stopPropagation(); openAlbumModal('${username}')">📸</button>
             <button class="btn-icon-subtle" title="Plein écran vidéo" onclick="event.stopPropagation(); toggleFullscreen('player-${username}')">🖥️</button>
             <button class="btn-icon-subtle" title="Ajouter un tag" onclick="event.stopPropagation(); openTagModal('${username}')">🏷</button>
             <button class="btn-fav ${isFav ? 'is-favorite' : ''}" title="Favori" onclick="event.stopPropagation(); toggleFavorite('${username}')">&#9733;</button>
@@ -787,7 +969,7 @@
       if (!nonFavSidebar.classList.contains('open')) {
         streamObserver.disconnect();
       }
-      cleanUnusedTags();
+      cleanUnusedData();
       grid.innerHTML = '';
       updateTagFilterOptions();
       
@@ -855,7 +1037,8 @@
       const lower = username.toLowerCase();
       models = models.filter(m => m.toLowerCase() !== lower);
       delete tags[lower];
-      cleanUnusedTags();
+      delete albums[lower];
+      cleanUnusedData();
       saveToLocalStorage();
       renderGrid();
     }
@@ -865,7 +1048,7 @@
       if (nonFavsCount === 0) { alert('Aucun modèle non-favori à supprimer.'); return; }
       if (confirm('Voulez-vous supprimer tous les modèles non-favoris ?')) {
         models = models.filter(m => favorites.includes(m.toLowerCase()));
-        cleanUnusedTags();
+        cleanUnusedData();
         saveToLocalStorage();
         renderGrid();
       }
