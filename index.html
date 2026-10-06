@@ -370,7 +370,7 @@
     .suggestion-tag-btn:hover { background: #0284c7; color: #fff; border-color: #0284c7; }
     .modal-actions { display: flex; justify-content: flex-end; gap: 8px; }
 
-    /* Styles spécifiques Album Photos (Dossiers par date) */
+    /* Styles spécifiques Album Photos (Gestion par dossier) */
     .album-modal-card {
       width: 95%;
       max-width: 650px;
@@ -395,6 +395,13 @@
       flex-direction: column;
       gap: 8px;
     }
+    .album-folder-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid #334155;
+      padding-bottom: 6px;
+    }
     .album-folder-title {
       font-size: 0.9rem;
       font-weight: 600;
@@ -402,9 +409,25 @@
       display: flex;
       align-items: center;
       gap: 6px;
-      border-bottom: 1px solid #334155;
-      padding-bottom: 6px;
     }
+    .album-folder-actions {
+      display: flex;
+      gap: 6px;
+      align-items: center;
+    }
+    .btn-folder-action {
+      background: transparent;
+      border: 1px solid #334155;
+      color: #94a3b8;
+      font-size: 0.75rem;
+      padding: 2px 6px;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    .btn-folder-action:hover { color: var(--text); background: #334155; }
+    .btn-folder-action.danger:hover { color: var(--danger); border-color: var(--danger); background: rgba(239, 68, 68, 0.1); }
+    .btn-folder-action.active { background: rgba(56, 189, 248, 0.15); border-color: var(--accent); color: var(--accent); }
+
     .album-grid {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
@@ -426,6 +449,26 @@
       transition: transform 0.2s;
     }
     .album-item:hover img { transform: scale(1.05); }
+    
+    .album-item-checkbox {
+      position: absolute;
+      top: 6px;
+      left: 6px;
+      width: 18px;
+      height: 18px;
+      accent-color: var(--accent);
+      cursor: pointer;
+      display: none;
+      z-index: 2;
+    }
+    .album-folder-section.select-mode .album-item-checkbox {
+      display: block;
+    }
+    .album-item.selected {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 2px rgba(56, 189, 248, 0.4);
+    }
+
     .album-item-delete {
       position: absolute;
       top: 4px;
@@ -443,100 +486,4 @@
       justify-content: center;
       opacity: 0;
       transition: opacity 0.2s;
-    }
-    .album-item:hover .album-item-delete { opacity: 1; }
-    .album-item-delete:hover { background: var(--danger); color: #fff; }
-
-    /* Visionneuse plein écran d'une photo */
-    .lightbox-overlay {
-      display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0, 0, 0, 0.95); z-index: 4000; justify-content: center; align-items: center; flex-direction: column; padding: 20px;
-    }
-    .lightbox-overlay.show { display: flex; }
-    .lightbox-img { max-width: 100%; max-height: 80vh; object-fit: contain; border-radius: 6px; }
-    .lightbox-close { position: absolute; top: 20px; right: 20px; background: transparent; border: none; color: #fff; font-size: 2rem; cursor: pointer; }
-  </style>
-</head>
-<body>
-  <header>
-    <div class="header-top-row">
-      <button id="nonFavSidebarBtn" class="btn-action btn-nonfav-toggle" title="Modèles hors favoris" style="width: auto; flex-shrink: 0; height: 36px;">📁 <span id="nonFavCount">(0)</span></button>
-
-      <form id="addModelForm" class="input-form" style="width: 85%;">
-        <input type="text" id="newModelInput" class="custom-input" placeholder="Ajouter un pseudo..." autocomplete="off" autocapitalize="none" spellcheck="false">
-        <button type="button" id="clearSearchBtn" class="clear-search-btn" title="Effacer la recherche">&times;</button>
-        <button type="submit" class="btn-add" title="Ajouter ce modèle">+</button>
-      </form>
-    </div>
-
-    <div class="header-bottom-row">
-      <select id="tagFilterSelect" class="select-tag" title="Filtrer par étiquette">
-        <option value="">🏷️ (Tous)</option>
-      </select>
-
-      <button id="layoutToggleBtn" class="btn-action btn-layout" title="Changer le mode d'affichage">⚏</button>
-      <button id="exportBtn" class="btn-action" title="Exporter la configuration (JSON)">📥</button>
-      <button id="importBtn" class="btn-action" title="Importer une configuration (JSON)">📤</button>
-      <input type="file" id="importFileInput" accept=".json" style="display: none;">
-      
-      <button id="resetBtn" class="btn-action btn-reset" title="Vider les non-favoris">🧹</button>
-    </div>
-  </header>
-
-  <!-- Volet Non-Favoris -->
-  <div id="nonFavSidebar" class="sidebar-container">
-    <div class="sidebar-header">
-      <span class="sidebar-title">Modèles hors favoris</span>
-      <button id="nonFavCloseBtn" class="sidebar-close-btn">&times;</button>
-    </div>
-    <div class="sidebar-body sidebar-list" id="nonFavListContainer"></div>
-  </div>
-
-  <!-- Modal Tags -->
-  <div id="tagModal" class="modal-overlay">
-    <div class="modal-card">
-      <div class="modal-title" id="tagModalTitle">Ajouter une étiquette</div>
-      <input type="text" id="modalTagInput" class="modal-input" placeholder="Ou saisir un nouveau tag...">
-      <div id="existingTagsSuggestions" class="existing-tags-suggestions"></div>
-      <div class="modal-actions">
-        <button class="btn-action" id="cancelTagBtn">Annuler</button>
-        <button class="btn-action" style="background: #0284c7; color: #fff; border-color: #0284c7;" id="saveTagBtn">Valider</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- Modal Album Photos -->
-  <div id="albumModal" class="modal-overlay">
-    <div class="modal-card album-modal-card">
-      <div style="display: flex; justify-content: space-between; align-items: center;">
-        <div class="modal-title" id="albumModalTitle">Album Photos</div>
-        <button class="sidebar-close-btn" onclick="closeAlbumModal()">&times;</button>
-      </div>
-      <div style="display: flex; gap: 8px; align-items: center;">
-        <button class="btn-action" style="background: #0284c7; color: #fff; border-color: #0284c7; flex: 1;" onclick="triggerPhotoCapture()">📸 Importer des photos (Multi-sélection)</button>
-        <input type="file" id="photoCaptureInput" accept="image/*" multiple style="display: none;" onchange="handlePhotoCaptureFiles(event)">
-      </div>
-      <div class="album-body" id="albumBodyContainer"></div>
-    </div>
-  </div>
-
-  <!-- Visionneuse Lightbox -->
-  <div id="lightboxOverlay" class="lightbox-overlay" onclick="closeLightbox()">
-    <button class="lightbox-close">&times;</button>
-    <img id="lightboxImg" class="lightbox-img" src="" alt="Zoom photo">
-    <div style="margin-top: 12px; display: flex; gap: 10px;">
-      <a id="lightboxDownloadBtn" class="btn-action" style="background: #0284c7; color: #fff; border-color: #0284c7;" download="capture.jpg" onclick="event.stopPropagation()">📥 Télécharger</a>
-    </div>
-  </div>
-
-  <main class="grid-container" id="grid"></main>
-
-  <script>
-    let models = JSON.parse(localStorage.getItem('cb_dashboard_models')) || [];
-    let favorites = JSON.parse(localStorage.getItem('cb_dashboard_favs')) || [];
-    let tags = JSON.parse(localStorage.getItem('cb_dashboard_tags')) || {};
-    let albums = JSON.parse(localStorage.getItem('cb_dashboard_albums')) || {}; // { username: { "DD/MM/YYYY": [dataUrl1, dataUrl2] } }
-    
-    let currentLayout = parseInt(localStorage.getItem('cb_dashboard_layout_mode')) || 0; 
-    let selectedTagFilter = '';
-    let searchQuery = '';
-    let targetTag
+      z-index: 2
