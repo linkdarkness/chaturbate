@@ -370,7 +370,7 @@
     .suggestion-tag-btn:hover { background: #0284c7; color: #fff; border-color: #0284c7; }
     .modal-actions { display: flex; justify-content: flex-end; gap: 8px; }
 
-    /* Styles spécifiques Album Photos */
+    /* Styles spécifiques Album Photos (Dossiers par date) */
     .album-modal-card {
       width: 95%;
       max-width: 650px;
@@ -378,13 +378,37 @@
       display: flex;
       flex-direction: column;
     }
+    .album-body {
+      overflow-y: auto;
+      max-height: 60vh;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      padding-right: 4px;
+    }
+    .album-folder-section {
+      background: #0f172a;
+      border: 1px solid #334155;
+      border-radius: 8px;
+      padding: 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .album-folder-title {
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: var(--accent);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      border-bottom: 1px solid #334155;
+      padding-bottom: 6px;
+    }
     .album-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
-      gap: 10px;
-      overflow-y: auto;
-      max-height: 50vh;
-      padding: 4px;
+      grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+      gap: 8px;
     }
     .album-item {
       position: relative;
@@ -410,9 +434,9 @@
       color: var(--danger);
       border: none;
       border-radius: 4px;
-      width: 24px;
-      height: 24px;
-      font-size: 1rem;
+      width: 22px;
+      height: 22px;
+      font-size: 0.9rem;
       cursor: pointer;
       display: flex;
       align-items: center;
@@ -488,10 +512,10 @@
         <button class="sidebar-close-btn" onclick="closeAlbumModal()">&times;</button>
       </div>
       <div style="display: flex; gap: 8px; align-items: center;">
-        <button class="btn-action" style="background: #0284c7; color: #fff; border-color: #0284c7; flex: 1;" onclick="triggerPhotoCapture()">📸 Prendre / Importer une photo</button>
-        <input type="file" id="photoCaptureInput" accept="image/*" style="display: none;" onchange="handlePhotoCaptureFile(event)">
+        <button class="btn-action" style="background: #0284c7; color: #fff; border-color: #0284c7; flex: 1;" onclick="triggerPhotoCapture()">📸 Importer des photos (Multi-sélection)</button>
+        <input type="file" id="photoCaptureInput" accept="image/*" multiple style="display: none;" onchange="handlePhotoCaptureFiles(event)">
       </div>
-      <div class="album-grid" id="albumGridContainer"></div>
+      <div class="album-body" id="albumBodyContainer"></div>
     </div>
   </div>
 
@@ -510,551 +534,9 @@
     let models = JSON.parse(localStorage.getItem('cb_dashboard_models')) || [];
     let favorites = JSON.parse(localStorage.getItem('cb_dashboard_favs')) || [];
     let tags = JSON.parse(localStorage.getItem('cb_dashboard_tags')) || {};
-    let albums = JSON.parse(localStorage.getItem('cb_dashboard_albums')) || {}; // { username: [dataUrl1, dataUrl2, ...] }
+    let albums = JSON.parse(localStorage.getItem('cb_dashboard_albums')) || {}; // { username: { "DD/MM/YYYY": [dataUrl1, dataUrl2] } }
     
     let currentLayout = parseInt(localStorage.getItem('cb_dashboard_layout_mode')) || 0; 
     let selectedTagFilter = '';
     let searchQuery = '';
-    let targetTagUser = null;
-    let currentAlbumUser = null;
-
-    const grid = document.getElementById('grid');
-    const addModelForm = document.getElementById('addModelForm');
-    const newModelInput = document.getElementById('newModelInput');
-    const clearSearchBtn = document.getElementById('clearSearchBtn');
-    const resetBtn = document.getElementById('resetBtn');
-    const layoutToggleBtn = document.getElementById('layoutToggleBtn');
-    const exportBtn = document.getElementById('exportBtn');
-    const importBtn = document.getElementById('importBtn');
-    const importFileInput = document.getElementById('importFileInput');
-    
-    const nonFavSidebarBtn = document.getElementById('nonFavSidebarBtn');
-    const nonFavSidebar = document.getElementById('nonFavSidebar');
-    const nonFavCloseBtn = document.getElementById('nonFavCloseBtn');
-    const nonFavListContainer = document.getElementById('nonFavListContainer');
-    const nonFavCount = document.getElementById('nonFavCount');
-
-    const tagFilterSelect = document.getElementById('tagFilterSelect');
-
-    const tagModal = document.getElementById('tagModal');
-    const modalTagInput = document.getElementById('modalTagInput');
-    const tagModalTitle = document.getElementById('tagModalTitle');
-    const existingTagsSuggestions = document.getElementById('existingTagsSuggestions');
-    const saveTagBtn = document.getElementById('saveTagBtn');
-    const cancelTagBtn = document.getElementById('cancelTagBtn');
-
-    const albumModal = document.getElementById('albumModal');
-    const albumModalTitle = document.getElementById('albumModalTitle');
-    const albumGridContainer = document.getElementById('albumGridContainer');
-    const photoCaptureInput = document.getElementById('photoCaptureInput');
-
-    const lightboxOverlay = document.getElementById('lightboxOverlay');
-    const lightboxImg = document.getElementById('lightboxImg');
-    const lightboxDownloadBtn = document.getElementById('lightboxDownloadBtn');
-
-    function getEmbedUrl(username) {
-      return `https://chaturbate.com/embed/${encodeURIComponent(username)}/?embed_video_only=1&mute=1&scrolling=no`;
-    }
-
-    function saveToLocalStorage() {
-      localStorage.setItem('cb_dashboard_models', JSON.stringify(models));
-      localStorage.setItem('cb_dashboard_favs', JSON.stringify(favorites));
-      localStorage.setItem('cb_dashboard_tags', JSON.stringify(tags));
-      localStorage.setItem('cb_dashboard_albums', JSON.stringify(albums));
-    }
-
-    exportBtn.addEventListener('click', () => {
-      const data = { models, favorites, tags, albums, layoutMode: currentLayout };
-      const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(data, null, 2));
-      const downloadAnchor = document.createElement('a');
-      downloadAnchor.setAttribute("href", dataStr);
-      downloadAnchor.setAttribute("download", `directs_live_backup_${new Date().toISOString().slice(0, 10)}.json`);
-      document.body.appendChild(downloadAnchor);
-      downloadAnchor.click();
-      downloadAnchor.remove();
-    });
-
-    importBtn.addEventListener('click', () => importFileInput.click());
-
-    importFileInput.addEventListener('change', (event) => {
-      const file = event.target.files[0];
-      if (!file) return;
-
-      const reader = new FileReader();
-      reader.onload = function(e) {
-        try {
-          const importedData = JSON.parse(e.target.result);
-          if (importedData && Array.isArray(importedData.models)) {
-            models = importedData.models;
-            favorites = Array.isArray(importedData.favorites) ? importedData.favorites : [];
-            tags = (importedData.tags && typeof importedData.tags === 'object') ? importedData.tags : {};
-            albums = (importedData.albums && typeof importedData.albums === 'object') ? importedData.albums : {};
-            if (typeof importedData.layoutMode === 'number') currentLayout = importedData.layoutMode;
-            saveToLocalStorage();
-            applyLayout();
-            if (nonFavSidebar.classList.contains('open')) updateNonFavSidebarList();
-            alert('Importation réussie avec succès !');
-          } else {
-            alert('Format de fichier JSON invalide.');
-          }
-        } catch (err) {
-          alert('Erreur lors de la lecture du fichier JSON : ' + err.message);
-        }
-        importFileInput.value = '';
-      };
-      reader.readAsText(file);
-    });
-
-    nonFavSidebarBtn.addEventListener('click', () => {
-      const isOpen = nonFavSidebar.classList.toggle('open');
-      nonFavSidebarBtn.classList.toggle('active', isOpen);
-      if (isOpen) updateNonFavSidebarList();
-      else streamObserver.disconnect();
-    });
-
-    nonFavCloseBtn.addEventListener('click', () => {
-      nonFavSidebar.classList.remove('open');
-      nonFavSidebarBtn.classList.remove('active');
-      streamObserver.disconnect();
-    });
-
-    function updateNonFavSidebarList() {
-      streamObserver.disconnect();
-      let nonFavs = models.filter(m => !favorites.includes(m.toLowerCase()));
-      if (selectedTagFilter) {
-        nonFavs = nonFavs.filter(m => (tags[m.toLowerCase()] || []).includes(selectedTagFilter));
-      }
-      nonFavs.sort((a, b) => a.localeCompare(b, 'fr', { sensitivity: 'base' }));
-
-      nonFavCount.textContent = `(${nonFavs.length})`;
-      nonFavListContainer.innerHTML = '';
-
-      if (nonFavs.length === 0) {
-        nonFavListContainer.innerHTML = '<div class="empty-message">Aucun modèle hors favoris</div>';
-        return;
-      }
-
-      nonFavs.forEach(username => {
-        const embedUrl = getEmbedUrl(username);
-        const item = document.createElement('div');
-        item.className = 'model-card';
-        item.id = `card-nf-${username}`;
-        item.dataset.username = username;
-        item.innerHTML = `
-          <div class="model-header">
-            <div class="model-title-area"><span class="model-name">${username}</span></div>
-            <div class="header-actions">
-              <button class="btn-icon-subtle" title="Album photos" onclick="event.stopPropagation(); openAlbumModal('${username}')">📸</button>
-              <button class="btn-icon-subtle" title="Plein écran vidéo" onclick="event.stopPropagation(); toggleFullscreen('player-nf-${username}')">🖥️</button>
-              <button class="btn-fav" title="Favori" onclick="toggleFavorite('${username}'); updateNonFavSidebarList();">&#9733;</button>
-              <button class="btn-delete" title="Supprimer" onclick="removeModel('${username}'); updateNonFavSidebarList();">&times;</button>
-            </div>
-          </div>
-          <div class="player-container" id="player-nf-${username}">
-            <iframe data-src="${embedUrl}" sandbox="allow-scripts allow-same-origin allow-presentation allow-forms" scrolling="no" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen" allowfullscreen></iframe>
-          </div>
-        `;
-        streamObserver.observe(item.querySelector('.player-container'));
-        nonFavListContainer.appendChild(item);
-      });
-    }
-
-    function applyLayout() {
-      grid.classList.remove('miniature-mode', 'list-mode');
-      layoutToggleBtn.classList.remove('active');
-
-      if (currentLayout === 1) {
-        grid.classList.add('miniature-mode');
-        layoutToggleBtn.classList.add('active');
-        layoutToggleBtn.textContent = '☩';
-        layoutToggleBtn.title = 'Mode Miniature 1/1 (Actif)';
-      } else if (currentLayout === 2) {
-        grid.classList.add('list-mode');
-        layoutToggleBtn.classList.add('active');
-        layoutToggleBtn.textContent = '☰';
-        layoutToggleBtn.title = 'Mode Liste Compacte (Actif)';
-      } else {
-        layoutToggleBtn.textContent = '⚏';
-        layoutToggleBtn.title = 'Mode Standard 16/9 (Actif)';
-      }
-      localStorage.setItem('cb_dashboard_layout_mode', currentLayout);
-      renderGrid();
-    }
-
-    const streamObserver = new IntersectionObserver((entries) => {
-      entries.forEach(entry => {
-        const container = entry.target;
-        const iframe = container.querySelector('iframe');
-        if (!iframe) return;
-        const targetSrc = iframe.dataset.src;
-        if (entry.isIntersecting) {
-          if (iframe.src !== targetSrc) iframe.src = targetSrc;
-        } else {
-          if (iframe.src && iframe.src !== 'about:blank') iframe.src = 'about:blank';
-        }
-      });
-    }, { root: null, rootMargin: '100px', threshold: 0.05 });
-
-    function cleanUnusedData() {
-      let changed = false;
-      const modelKeys = models.map(m => m.toLowerCase());
-      Object.keys(tags).forEach(modelKey => {
-        if (!modelKeys.includes(modelKey)) { delete tags[modelKey]; changed = true; }
-      });
-      Object.keys(albums).forEach(modelKey => {
-        if (!modelKeys.includes(modelKey)) { delete albums[modelKey]; changed = true; }
-      });
-      if (selectedTagFilter && !getAllExistingTags().includes(selectedTagFilter)) {
-        selectedTagFilter = '';
-      }
-      if (changed) saveToLocalStorage();
-    }
-
-    function getAllExistingTags() {
-      cleanUnusedData();
-      const set = new Set();
-      Object.values(tags).forEach(list => list.forEach(t => set.add(t)));
-      return Array.from(set).sort((a, b) => a.localeCompare(b, 'fr', { sensitivity: 'base' }));
-    }
-
-    function addModelToState(username) {
-      const lower = username.toLowerCase();
-      if (!models.map(m => m.toLowerCase()).includes(lower)) {
-        models.push(username);
-      }
-      if (!favorites.includes(lower)) {
-        favorites.push(lower);
-      }
-      searchQuery = '';
-      newModelInput.value = '';
-      clearSearchBtn.classList.remove('show');
-      saveToLocalStorage();
-      renderGrid();
-      if (nonFavSidebar.classList.contains('open')) updateNonFavSidebarList();
-    }
-
-    window.toggleFavorite = function(username) {
-      const lower = username.toLowerCase();
-      if (favorites.includes(lower)) {
-        favorites = favorites.filter(f => f !== lower);
-      } else {
-        favorites.push(lower);
-      }
-      saveToLocalStorage();
-      renderGrid();
-      if (nonFavSidebar.classList.contains('open')) updateNonFavSidebarList();
-    }
-
-    window.toggleFullscreen = function(elementId) {
-      const elem = document.getElementById(elementId);
-      if (!elem) return;
-      if (!document.fullscreenElement) {
-        elem.requestFullscreen().catch(err => alert(`Erreur plein écran: ${err.message}`));
-      } else {
-        document.exitFullscreen();
-      }
-    };
-
-    // --- Gestion des Albums Photos ---
-    window.openAlbumModal = function(username) {
-      currentAlbumUser = username;
-      albumModalTitle.textContent = `Album de ${username}`;
-      renderAlbumPhotos();
-      albumModal.classList.add('show');
-    };
-
-    window.closeAlbumModal = function() {
-      albumModal.classList.remove('show');
-      currentAlbumUser = null;
-    };
-
-    window.triggerPhotoCapture = function() {
-      photoCaptureInput.click();
-    };
-
-    window.handlePhotoCaptureFile = function(event) {
-      const file = event.target.files[0];
-      if (!file || !currentAlbumUser) return;
-      
-      const reader = new FileReader();
-      reader.onload = function(e) {
-        const base64Data = e.target.result;
-        const lower = currentAlbumUser.toLowerCase();
-        if (!albums[lower]) albums[lower] = [];
-        albums[lower].unshift(base64Data); // Ajoute la photo au début
-        saveToLocalStorage();
-        renderAlbumPhotos();
-        photoCaptureInput.value = '';
-      };
-      reader.readAsDataURL(file);
-    };
-
-    window.deletePhotoFromAlbum = function(index, event) {
-      event.stopPropagation();
-      if (!currentAlbumUser) return;
-      const lower = currentAlbumUser.toLowerCase();
-      if (albums[lower]) {
-        albums[lower].splice(index, 1);
-        if (albums[lower].length === 0) delete albums[lower];
-        saveToLocalStorage();
-        renderAlbumPhotos();
-      }
-    };
-
-    function renderAlbumPhotos() {
-      albumGridContainer.innerHTML = '';
-      if (!currentAlbumUser) return;
-      const lower = currentAlbumUser.toLowerCase();
-      const photos = albums[lower] || [];
-
-      if (photos.length === 0) {
-        albumGridContainer.innerHTML = '<div class="empty-message" style="grid-column: 1 / -1; padding: 30px;">Aucune photo dans cet album</div>';
-        return;
-      }
-
-      photos.forEach((src, idx) => {
-        const item = document.createElement('div');
-        item.className = 'album-item';
-        item.innerHTML = `
-          <img src="${src}" alt="Capture">
-          <button class="album-item-delete" title="Supprimer la photo" onclick="deletePhotoFromAlbum(${idx}, event)">&times;</button>
-        `;
-        item.onclick = () => openLightbox(src);
-        albumGridContainer.appendChild(item);
-      });
-    }
-
-    function openLightbox(src) {
-      lightboxImg.src = src;
-      lightboxDownloadBtn.href = src;
-      lightboxDownloadBtn.setAttribute('download', `capture_${currentAlbumUser}_${Date.now()}.jpg`);
-      lightboxOverlay.classList.add('show');
-    }
-
-    window.closeLightbox = function() {
-      lightboxOverlay.classList.remove('show');
-    };
-
-    window.openTagModal = function(username) {
-      targetTagUser = username;
-      tagModalTitle.textContent = `Ajouter un tag pour ${username}`;
-      modalTagInput.value = '';
-      existingTagsSuggestions.innerHTML = '';
-      const allTags = getAllExistingTags();
-      
-      if (allTags.length === 0) {
-        existingTagsSuggestions.innerHTML = '<span style="font-size: 0.8rem; color: #64748b;">Aucun tag existant.</span>';
-      } else {
-        allTags.forEach(t => {
-          const btn = document.createElement('button');
-          btn.type = 'button';
-          btn.className = 'suggestion-tag-btn';
-          btn.textContent = t;
-          btn.onclick = () => applyTagToTarget(t);
-          existingTagsSuggestions.appendChild(btn);
-        });
-      }
-      tagModal.classList.add('show');
-      setTimeout(() => modalTagInput.focus(), 50);
-    };
-
-    function closeTagModal() {
-      tagModal.classList.remove('show');
-      targetTagUser = null;
-    }
-
-    function applyTagToTarget(tagName) {
-      if (!targetTagUser) return;
-      const val = tagName.trim();
-      if (val) {
-        const lower = targetTagUser.toLowerCase();
-        const current = tags[lower] || [];
-        if (!current.includes(val)) {
-          tags[lower] = [...current, val];
-          saveToLocalStorage();
-          renderGrid();
-        }
-      }
-      closeTagModal();
-    }
-
-    saveTagBtn.addEventListener('click', () => {
-      const val = modalTagInput.value.trim();
-      if (val) applyTagToTarget(val);
-      else closeTagModal();
-    });
-    cancelTagBtn.addEventListener('click', closeTagModal);
-
-    window.removeTag = function(username, tagToRemove) {
-      const lower = username.toLowerCase();
-      if (tags[lower]) {
-        tags[lower] = tags[lower].filter(t => t !== tagToRemove);
-        if (tags[lower].length === 0) delete tags[lower];
-        cleanUnusedData();
-        saveToLocalStorage();
-        renderGrid();
-      }
-    };
-
-    function updateTagFilterOptions() {
-      const existingTags = getAllExistingTags();
-      tagFilterSelect.innerHTML = `<option value="">🏷️ (${models.length})</option>`;
-      existingTags.forEach(t => {
-        const count = models.filter(m => (tags[m.toLowerCase()] || []).includes(t)).length;
-        const opt = document.createElement('option');
-        opt.value = t;
-        opt.textContent = `🏷️ ${t} (${count})`;
-        if (t === selectedTagFilter) opt.selected = true;
-        tagFilterSelect.appendChild(opt);
-      });
-    }
-
-    function createCard(username) {
-      const lower = username.toLowerCase();
-      const isFav = favorites.includes(lower);
-      const modelTags = (tags[lower] || []).sort((a, b) => a.localeCompare(b, 'fr', { sensitivity: 'base' }));
-
-      const card = document.createElement('div');
-      card.className = `model-card`;
-      card.id = `card-${username}`;
-      card.dataset.username = username;
-
-      const tagsHtml = modelTags.map(t => 
-        `<span class="tag-badge" onclick="event.stopPropagation(); removeTag('${username}', '${t}')">${t} &times;</span>`
-      ).join('');
-
-      const embedUrl = getEmbedUrl(username);
-
-      card.innerHTML = `
-        <div class="model-header" id="header-${username}">
-          <div class="model-title-area">
-            <span class="model-name">${username}</span>
-            <div class="tags-container">${tagsHtml}</div>
-          </div>
-          <div class="header-actions">
-            <button class="btn-icon-subtle" title="Album photos" onclick="event.stopPropagation(); openAlbumModal('${username}')">📸</button>
-            <button class="btn-icon-subtle" title="Plein écran vidéo" onclick="event.stopPropagation(); toggleFullscreen('player-${username}')">🖥️</button>
-            <button class="btn-icon-subtle" title="Ajouter un tag" onclick="event.stopPropagation(); openTagModal('${username}')">🏷</button>
-            <button class="btn-fav ${isFav ? 'is-favorite' : ''}" title="Favori" onclick="event.stopPropagation(); toggleFavorite('${username}')">&#9733;</button>
-            <button class="btn-delete" title="Supprimer" onclick="event.stopPropagation(); removeModel('${username}')">&times;</button>
-          </div>
-        </div>
-        <div class="player-container" id="player-${username}">
-          <iframe data-src="${embedUrl}" sandbox="allow-scripts allow-same-origin allow-presentation allow-forms" scrolling="no" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen" allowfullscreen></iframe>
-        </div>
-      `;
-
-      const headerElem = card.querySelector(`#header-${username}`);
-      const playerContainerElem = card.querySelector('.player-container');
-
-      headerElem.addEventListener('click', () => {
-        if (currentLayout === 2) {
-          const isExpanded = card.classList.toggle('expanded');
-          if (isExpanded) {
-            const iframe = playerContainerElem.querySelector('iframe');
-            if (iframe && iframe.src !== iframe.dataset.src) {
-              iframe.src = iframe.dataset.src;
-            }
-          }
-        }
-      });
-
-      if (currentLayout !== 2) {
-        streamObserver.observe(playerContainerElem);
-      }
-      return card;
-    }
-
-    function renderGrid() {
-      if (!nonFavSidebar.classList.contains('open')) {
-        streamObserver.disconnect();
-      }
-      cleanUnusedData();
-      grid.innerHTML = '';
-      updateTagFilterOptions();
-      
-      let nonFavsForCount = models.filter(m => !favorites.includes(m.toLowerCase()));
-      if (selectedTagFilter) {
-        nonFavsForCount = nonFavsForCount.filter(m => (tags[m.toLowerCase()] || []).includes(selectedTagFilter));
-      }
-      nonFavCount.textContent = `(${nonFavsForCount.length})`;
-
-      if (nonFavSidebar.classList.contains('open')) {
-        updateNonFavSidebarList();
-        return;
-      }
-      
-      let displayModels = [...models];
-      if (searchQuery) {
-        displayModels = displayModels.filter(m => m.toLowerCase().includes(searchQuery.toLowerCase()));
-      }
-      displayModels = displayModels.filter(m => favorites.includes(m.toLowerCase()));
-      if (selectedTagFilter) {
-        displayModels = displayModels.filter(m => (tags[m.toLowerCase()] || []).includes(selectedTagFilter));
-      }
-      displayModels.sort((a, b) => a.localeCompare(b, 'fr', { sensitivity: 'base' }));
-
-      if (displayModels.length === 0) {
-        grid.innerHTML = `<div class="empty-message">Aucun modèle favori à afficher pour le moment.</div>`;
-        return;
-      }
-      displayModels.forEach(username => {
-        grid.appendChild(createCard(username));
-      });
-    }
-
-    newModelInput.addEventListener('input', (e) => {
-      searchQuery = e.target.value.trim();
-      clearSearchBtn.classList.toggle('show', searchQuery.length > 0);
-      renderGrid();
-    });
-
-    clearSearchBtn.addEventListener('click', () => {
-      newModelInput.value = '';
-      searchQuery = '';
-      clearSearchBtn.classList.remove('show');
-      renderGrid();
-      newModelInput.focus();
-    });
-
-    layoutToggleBtn.addEventListener('click', () => {
-      currentLayout = (currentLayout + 1) % 3;
-      applyLayout();
-    });
-
-    tagFilterSelect.addEventListener('change', (e) => {
-      selectedTagFilter = e.target.value;
-      renderGrid();
-    });
-
-    addModelForm.addEventListener('submit', (e) => {
-      e.preventDefault();
-      const username = newModelInput.value.trim();
-      if (username) addModelToState(username);
-    });
-
-    window.removeModel = function(username) {
-      const lower = username.toLowerCase();
-      models = models.filter(m => m.toLowerCase() !== lower);
-      delete tags[lower];
-      delete albums[lower];
-      cleanUnusedData();
-      saveToLocalStorage();
-      renderGrid();
-    }
-
-    resetBtn.addEventListener('click', () => {
-      const nonFavsCount = models.filter(m => !favorites.includes(m.toLowerCase())).length;
-      if (nonFavsCount === 0) { alert('Aucun modèle non-favori à supprimer.'); return; }
-      if (confirm('Voulez-vous supprimer tous les modèles non-favoris ?')) {
-        models = models.filter(m => favorites.includes(m.toLowerCase()));
-        cleanUnusedData();
-        saveToLocalStorage();
-        renderGrid();
-      }
-    });
-
-    applyLayout();
-  </script>
-</body>
-</html>
+    let targetTag
