@@ -570,7 +570,6 @@
       </div>
       <div style="display: flex; gap: 8px; align-items: center;">
         <button class="btn-action" style="background: #0284c7; color: #fff; border-color: #0284c7; flex: 1;" onclick="triggerPhotoCapture()">📸 Importer des photos (Illimité)</button>
-        <!-- L'attribut multiple et pas de limite imposée pour permettre la sélection en masse -->
         <input type="file" id="photoCaptureInput" accept="image/*" multiple style="display: none;" onchange="handlePhotoCaptureFiles(event)">
       </div>
       <div class="album-body" id="albumBodyContainer"></div>
@@ -645,7 +644,7 @@
         localStorage.setItem('cb_dashboard_tags', JSON.stringify(tags));
         localStorage.setItem('cb_dashboard_albums', JSON.stringify(albums));
       } catch (e) {
-        alert('Attention : Stockage plein (localStorage saturé par la taille des photos). Pensez à exporter vos données ou à supprimer quelques photos.');
+        alert('Attention : Stockage plein (localStorage saturé par la taille des photos). Pensez à exporter vos données.');
       }
     }
 
@@ -841,7 +840,7 @@
       }
     };
 
-    // --- Gestion Avancée des Albums Photos & Dossiers (Illimité & Compression) ---
+    // --- Gestion des Albums Photos ---
     window.openAlbumModal = function(username) {
       currentAlbumUser = username;
       albumModalTitle.textContent = `Album de ${username}`;
@@ -879,7 +878,6 @@
         reader.onload = function(e) {
           const img = new Image();
           img.onload = function() {
-            // Compression optionnelle pour éviter la saturation du stockage du navigateur
             const canvas = document.createElement('canvas');
             const MAX_WIDTH = 1280;
             const MAX_HEIGHT = 1280;
@@ -903,7 +901,6 @@
             const ctx = canvas.getContext('2d');
             ctx.drawImage(img, 0, 0, width, height);
 
-            // Conversion en JPEG compressé (qualité 0.8) pour stocker beaucoup plus de photos sans saturer le localStorage
             const dataUrl = canvas.toDataURL('image/jpeg', 0.8);
             albums[lower][dateFolderName].unshift(dataUrl);
 
@@ -911,7 +908,7 @@
             if (processedCount === totalFiles) {
               saveToLocalStorage();
               renderAlbumPhotos();
-              photoCaptureInput.value = ''; // Réinitialisation de l'input pour pouvoir ré-importer les mêmes fichiers si besoin
+              photoCaptureInput.value = '';
             }
           };
           img.src = e.target.result;
@@ -1230,7 +1227,7 @@
       }
       
       let displayModels = [...models];
-      if, (searchQuery) {
+      if (searchQuery) {
         displayModels = displayModels.filter(m => m.toLowerCase().includes(searchQuery.toLowerCase()));
       }
       displayModels = displayModels.filter(m => favorites.includes(m.toLowerCase()));
