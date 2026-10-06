@@ -566,18 +566,18 @@
     <div class="modal-card album-modal-card">
       <div style="display: flex; justify-content: space-between; align-items: center;">
         <div class="modal-title" id="albumModalTitle">Album Photos</div>
-        <button class="sidebar-close-btn" onclick="closeAlbumModal()">&times;</button>
+        <button class="sidebar-close-btn" onclick="window.closeAlbumModal()">&times;</button>
       </div>
       <div style="display: flex; gap: 8px; align-items: center;">
-        <button class="btn-action" style="background: #0284c7; color: #fff; border-color: #0284c7; flex: 1;" onclick="triggerPhotoCapture()">📸 Importer des photos (Multi-sélection)</button>
-        <input type="file" id="photoCaptureInput" accept="image/*" multiple style="display: none;" onchange="handlePhotoCaptureFiles(event)">
+        <button type="button" class="btn-action" style="background: #0284c7; color: #fff; border-color: #0284c7; flex: 1;" onclick="window.triggerPhotoCapture()">📸 Importer des photos (Multi-sélection)</button>
+        <input type="file" id="photoCaptureInput" accept="image/*" multiple style="display: none;">
       </div>
       <div class="album-body" id="albumBodyContainer"></div>
     </div>
   </div>
 
   <!-- Visionneuse Lightbox -->
-  <div id="lightboxOverlay" class="lightbox-overlay" onclick="closeLightbox()">
+  <div id="lightboxOverlay" class="lightbox-overlay" onclick="window.closeLightbox()">
     <button class="lightbox-close">&times;</button>
     <img id="lightboxImg" class="lightbox-img" src="" alt="Zoom photo">
     <div style="margin-top: 12px; display: flex; gap: 10px;">
@@ -725,10 +725,10 @@
           <div class="model-header">
             <div class="model-title-area"><span class="model-name">${username}</span></div>
             <div class="header-actions">
-              <button class="btn-icon-subtle" title="Album photos" onclick="event.stopPropagation(); window.openAlbumModal('${username}')">📸</button>
-              <button class="btn-icon-subtle" title="Plein écran vidéo" onclick="event.stopPropagation(); toggleFullscreen('player-nf-${username}')">🖥️</button>
-              <button class="btn-fav" title="Favori" onclick="toggleFavorite('${username}'); updateNonFavSidebarList();">&#9733;</button>
-              <button class="btn-delete" title="Supprimer" onclick="removeModel('${username}'); updateNonFavSidebarList();">&times;</button>
+              <button type="button" class="btn-icon-subtle" title="Album photos" onclick="event.stopPropagation(); window.openAlbumModal('${username}')">📸</button>
+              <button type="button" class="btn-icon-subtle" title="Plein écran vidéo" onclick="event.stopPropagation(); window.toggleFullscreen('player-nf-${username}')">🖥️</button>
+              <button type="button" class="btn-fav" title="Favori" onclick="window.toggleFavorite('${username}'); updateNonFavSidebarList();">&#9733;</button>
+              <button type="button" class="btn-delete" title="Supprimer" onclick="window.removeModel('${username}'); updateNonFavSidebarList();">&times;</button>
             </div>
           </div>
           <div class="player-container" id="player-nf-${username}">
@@ -836,7 +836,7 @@
       }
     };
 
-    // --- Gestion Avancée des Albums Photos & Dossiers (Exposée globalement) ---
+    // --- Gestion des Albums Photos & Captures rattachée explicitement à window ---
     window.openAlbumModal = function(username) {
       currentAlbumUser = username;
       albumModalTitle.textContent = `Album de ${username}`;
@@ -853,7 +853,7 @@
       photoCaptureInput.click();
     };
 
-    window.handlePhotoCaptureFiles = function(event) {
+    photoCaptureInput.addEventListener('change', (event) => {
       const files = event.target.files;
       if (!files || files.length === 0 || !currentAlbumUser) return;
       
@@ -880,10 +880,10 @@
         };
         reader.readAsDataURL(file);
       });
-    };
+    });
 
     window.deletePhotoFromAlbum = function(dateFolder, index, event) {
-      event.stopPropagation();
+      if (event) event.stopPropagation();
       if (!currentAlbumUser) return;
       const lower = currentAlbumUser.toLowerCase();
       if (albums[lower] && albums[lower][dateFolder]) {
@@ -1005,10 +1005,10 @@
         let gridHtml = '';
         photos.forEach((src, idx) => {
           gridHtml += `
-            <div class="album-item" onclick="handlePhotoItemClick('${dateFolder}', ${idx}, event, this)">
+            <div class="album-item" onclick="window.handlePhotoItemClick('${dateFolder}', ${idx}, event, this)">
               <input type="checkbox" class="album-item-checkbox" onclick="event.stopPropagation()">
               <img src="${src}" alt="Capture">
-              <button class="album-item-delete" title="Supprimer la photo" onclick="deletePhotoFromAlbum('${dateFolder}', ${idx}, event)">&times;</button>
+              <button type="button" class="album-item-delete" title="Supprimer la photo" onclick="window.deletePhotoFromAlbum('${dateFolder}', ${idx}, event)">&times;</button>
             </div>
           `;
         });
@@ -1017,13 +1017,13 @@
           <div class="album-folder-header">
             <div class="album-folder-title">📁 ${dateFolder} (${photos.length})</div>
             <div class="album-folder-actions">
-              <button class="btn-folder-action btn-select-toggle" onclick="toggleFolderSelectMode('${dateFolder}')">Sélectionner</button>
-              <button class="btn-folder-action danger" title="Supprimer tout le dossier" onclick="deleteAllPhotosInFolder('${dateFolder}')">🗑️ Vider</button>
+              <button type="button" class="btn-folder-action btn-select-toggle" onclick="window.toggleFolderSelectMode('${dateFolder}')">Sélectionner</button>
+              <button type="button" class="btn-folder-action danger" title="Supprimer tout le dossier" onclick="window.deleteAllPhotosInFolder('${dateFolder}')">🗑️ Vider</button>
             </div>
           </div>
           <div class="folder-bulk-bar">
             <span style="font-size:0.75rem; color:#94a3b8;">Gestion par sélection :</span>
-            <button class="btn-folder-action danger" onclick="deleteSelectedPhotosInFolder('${dateFolder}')">Supprimer la sélection</button>
+            <button type="button" class="btn-folder-action danger" onclick="window.deleteSelectedPhotosInFolder('${dateFolder}')">Supprimer la sélection</button>
           </div>
           <div class="album-grid">${gridHtml}</div>
         `;
@@ -1127,7 +1127,7 @@
       card.dataset.username = username;
 
       const tagsHtml = modelTags.map(t => 
-        `<span class="tag-badge" onclick="event.stopPropagation(); removeTag('${username}', '${t}')">${t} &times;</span>`
+        `<span class="tag-badge" onclick="event.stopPropagation(); window.removeTag('${username}', '${t}')">${t} &times;</span>`
       ).join('');
 
       const embedUrl = getEmbedUrl(username);
@@ -1139,11 +1139,11 @@
             <div class="tags-container">${tagsHtml}</div>
           </div>
           <div class="header-actions">
-            <button class="btn-icon-subtle" title="Album photos" onclick="event.stopPropagation(); window.openAlbumModal('${username}')">📸</button>
-            <button class="btn-icon-subtle" title="Plein écran vidéo" onclick="event.stopPropagation(); toggleFullscreen('player-${username}')">🖥️️</button>
-            <button class="btn-icon-subtle" title="Ajouter un tag" onclick="event.stopPropagation(); openTagModal('${username}')">🏷</button>
-            <button class="btn-fav ${isFav ? 'is-favorite' : ''}" title="Favori" onclick="event.stopPropagation(); toggleFavorite('${username}')">&#9733;</button>
-            <button class="btn-delete" title="Supprimer" onclick="event.stopPropagation(); removeModel('${username}')">&times;</button>
+            <button type="button" class="btn-icon-subtle" title="Album photos" onclick="event.stopPropagation(); window.openAlbumModal('${username}')">📸</button>
+            <button type="button" class="btn-icon-subtle" title="Plein écran vidéo" onclick="event.stopPropagation(); window.toggleFullscreen('player-${username}')">🖥</button>
+            <button type="button" class="btn-icon-subtle" title="Ajouter un tag" onclick="event.stopPropagation(); window.openTagModal('${username}')">🏷</button>
+            <button type="button" class="btn-fav ${isFav ? 'is-favorite' : ''}" title="Favori" onclick="event.stopPropagation(); window.toggleFavorite('${username}')">&#9733;</button>
+            <button type="button" class="btn-delete" title="Supprimer" onclick="event.stopPropagation(); window.removeModel('${username}')">&times;</button>
           </div>
         </div>
         <div class="player-container" id="player-${username}">
