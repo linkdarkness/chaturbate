@@ -326,19 +326,8 @@
     .tag-badge:hover { background: rgba(239, 68, 68, 0.2); color: var(--danger); }
 
     .header-actions { display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
-    .btn-icon-subtle { 
-      background: transparent; 
-      border: 1px solid #334155; 
-      color: #94a3b8; 
-      font-size: 0.7rem; 
-      font-weight: 700;
-      cursor: pointer; 
-      padding: 2px 5px; 
-      border-radius: 4px;
-      letter-spacing: 0.5px;
-    }
-    .btn-icon-subtle:hover { color: var(--text); background: #334155; border-color: var(--accent); }
-    
+    .btn-icon-subtle { background: transparent; border: none; color: #64748b; font-size: 1rem; cursor: pointer; padding: 2px 4px; }
+    .btn-icon-subtle:hover { color: var(--text); }
     .btn-fav { background: transparent; border: none; color: #64748b; font-size: 1.1rem; cursor: pointer; }
     .btn-fav:hover, .btn-fav.is-favorite { color: var(--star); }
     .btn-delete { background: transparent; border: none; color: #64748b; font-size: 1.2rem; cursor: pointer; padding: 2px 4px; }
@@ -593,7 +582,7 @@
           <div class="model-header">
             <div class="model-title-area"><span class="model-name">${username}</span></div>
             <div class="header-actions">
-              <button class="btn-icon-subtle" title="Lien HLS" onclick="event.stopPropagation(); window.openHlsModal('${username}')">HLS</button>
+              <button class="btn-icon-subtle" title="Lien HLS" onclick="event.stopPropagation(); window.openHlsModal('${username}')">🔗</button>
               <button class="btn-icon-subtle" title="Plein écran vidéo" onclick="event.stopPropagation(); toggleFullscreen('player-nf-${username}')">🖥️</button>
               <button class="btn-fav" title="Favori" onclick="toggleFavorite('${username}'); updateNonFavSidebarList();">&#9733;</button>
               <button class="btn-delete" title="Supprimer" onclick="removeModel('${username}'); updateNonFavSidebarList();">&times;</button>
@@ -821,7 +810,7 @@
             <div class="tags-container">${tagsHtml}</div>
           </div>
           <div class="header-actions">
-            <button class="btn-icon-subtle" title="Lien HLS" onclick="event.stopPropagation(); window.openHlsModal('${username}')">HLS</button>
+            <button class="btn-icon-subtle" title="Lien HLS" onclick="event.stopPropagation(); window.openHlsModal('${username}')">🔗</button>
             <button class="btn-icon-subtle" title="Plein écran vidéo" onclick="event.stopPropagation(); toggleFullscreen('player-${username}')">🖥</button>
             <button class="btn-icon-subtle" title="Ajouter un tag" onclick="event.stopPropagation(); openTagModal('${username}')">🏷</button>
             <button class="btn-fav ${isFav ? 'is-favorite' : ''}" title="Favori" onclick="event.stopPropagation(); toggleFavorite('${username}')">&#9733;</button>
