@@ -381,8 +381,8 @@
     .suggestion-tag-btn:hover { background: #0284c7; color: #fff; border-color: #0284c7; }
     .modal-actions { display: flex; justify-content: flex-end; gap: 8px; }
 
-    /* Utility m3u8 Box */
-    .m3u8-box {
+    /* Utility hls Box */
+    .hls-box {
       background: #0f172a;
       border: 1px solid #334155;
       border-radius: 6px;
@@ -443,15 +443,15 @@
     </div>
   </div>
 
-  <!-- Modal M3U8 -->
-  <div id="m3u8Modal" class="modal-overlay">
+  <!-- Modal HLS -->
+  <div id="hlsModal" class="modal-overlay">
     <div class="modal-card">
-      <div class="modal-title" id="m3u8ModalTitle">Lien HLS (.m3u8)</div>
-      <p style="font-size: 0.8rem; color: #94a3b8;">Copiez le lien direct du flux pour l'ouvrir dans VLC, MPV ou un autre lecteur externe :</p>
-      <div id="m3u8UrlBox" class="m3u8-box"></div>
+      <div class="modal-title" id="hlsModalTitle">Lien HLS</div>
+      <p style="font-size: 0.8rem; color: #94a3b8;">Copiez le lien direct du flux HLS pour l'ouvrir dans un lecteur externe :</p>
+      <div id="hlsUrlBox" class="hls-box"></div>
       <div class="modal-actions">
-        <button class="btn-action" onclick="closeM3u8Modal()">Fermer</button>
-        <button class="btn-action" style="background: #0284c7; color: #fff; border-color: #0284c7;" id="copyM3u8Btn" onclick="copyM3u8ToClipboard()">📋 Copier le lien</button>
+        <button class="btn-action" onclick="closeHlsModal()">Fermer</button>
+        <button class="btn-action" style="background: #0284c7; color: #fff; border-color: #0284c7;" id="copyHlsBtn" onclick="copyHlsToClipboard()">📋 Copier le lien</button>
       </div>
     </div>
   </div>
@@ -467,7 +467,7 @@
     let selectedTagFilter = '';
     let searchQuery = '';
     let targetTagUser = null;
-    let currentM3u8Url = '';
+    let currentHlsUrl = '';
 
     const grid = document.getElementById('grid');
     const addModelForm = document.getElementById('addModelForm');
@@ -494,16 +494,16 @@
     const saveTagBtn = document.getElementById('saveTagBtn');
     const cancelTagBtn = document.getElementById('cancelTagBtn');
 
-    const m3u8Modal = document.getElementById('m3u8Modal');
-    const m3u8ModalTitle = document.getElementById('m3u8ModalTitle');
-    const m3u8UrlBox = document.getElementById('m3u8UrlBox');
-    const copyM3u8Btn = document.getElementById('copyM3u8Btn');
+    const hlsModal = document.getElementById('hlsModal');
+    const hlsModalTitle = document.getElementById('hlsModalTitle');
+    const hlsUrlBox = document.getElementById('hlsUrlBox');
+    const copyHlsBtn = document.getElementById('copyHlsBtn');
 
     function getEmbedUrl(username) {
       return `https://chaturbate.com/embed/${encodeURIComponent(username)}/?embed_video_only=1&mute=1&scrolling=no`;
     }
 
-    function getM3u8Url(username) {
+    function getHlsUrl(username) {
       return `https://edge-hls.chaturbate.com/live-hls/playlist/${encodeURIComponent(username.toLowerCase())}/playlist.m3u8`;
     }
 
@@ -593,7 +593,7 @@
           <div class="model-header">
             <div class="model-title-area"><span class="model-name">${username}</span></div>
             <div class="header-actions">
-              <button class="btn-icon-subtle" title="Lien HLS (.m3u8)" onclick="event.stopPropagation(); window.openM3u8Modal('${username}')">HLS</button>
+              <button class="btn-icon-subtle" title="Lien HLS" onclick="event.stopPropagation(); window.openHlsModal('${username}')">HLS</button>
               <button class="btn-icon-subtle" title="Plein écran vidéo" onclick="event.stopPropagation(); toggleFullscreen('player-nf-${username}')">🖥️</button>
               <button class="btn-fav" title="Favori" onclick="toggleFavorite('${username}'); updateNonFavSidebarList();">&#9733;</button>
               <button class="btn-delete" title="Supprimer" onclick="removeModel('${username}'); updateNonFavSidebarList();">&times;</button>
@@ -701,24 +701,24 @@
       }
     };
 
-    // --- Modal Lien M3U8 ---
-    window.openM3u8Modal = function(username) {
-      currentM3u8Url = getM3u8Url(username);
-      m3u8ModalTitle.textContent = `Lien HLS - ${username}`;
-      m3u8UrlBox.textContent = currentM3u8Url;
-      copyM3u8Btn.textContent = '📋 Copier le lien';
-      m3u8Modal.classList.add('show');
+    // --- Modal Lien HLS ---
+    window.openHlsModal = function(username) {
+      currentHlsUrl = getHlsUrl(username);
+      hlsModalTitle.textContent = `Lien HLS - ${username}`;
+      hlsUrlBox.textContent = currentHlsUrl;
+      copyHlsBtn.textContent = '📋 Copier le lien';
+      hlsModal.classList.add('show');
     };
 
-    window.closeM3u8Modal = function() {
-      m3u8Modal.classList.remove('show');
+    window.closeHlsModal = function() {
+      hlsModal.classList.remove('show');
     };
 
-    window.copyM3u8ToClipboard = function() {
-      if (!currentM3u8Url) return;
-      navigator.clipboard.writeText(currentM3u8Url).then(() => {
-        copyM3u8Btn.textContent = '✅ Copié !';
-        setTimeout(() => { copyM3u8Btn.textContent = '📋 Copier le lien'; }, 2000);
+    window.copyHlsToClipboard = function() {
+      if (!currentHlsUrl) return;
+      navigator.clipboard.writeText(currentHlsUrl).then(() => {
+        copyHlsBtn.textContent = '✅ Copié !';
+        setTimeout(() => { copyHlsBtn.textContent = '📋 Copier le lien'; }, 2000);
       }).catch(err => {
         alert('Erreur lors de la copie : ' + err);
       });
@@ -821,7 +821,7 @@
             <div class="tags-container">${tagsHtml}</div>
           </div>
           <div class="header-actions">
-            <button class="btn-icon-subtle" title="Lien HLS (.m3u8)" onclick="event.stopPropagation(); window.openM3u8Modal('${username}')">HLS</button>
+            <button class="btn-icon-subtle" title="Lien HLS" onclick="event.stopPropagation(); window.openHlsModal('${username}')">HLS</button>
             <button class="btn-icon-subtle" title="Plein écran vidéo" onclick="event.stopPropagation(); toggleFullscreen('player-${username}')">🖥</button>
             <button class="btn-icon-subtle" title="Ajouter un tag" onclick="event.stopPropagation(); openTagModal('${username}')">🏷</button>
             <button class="btn-fav ${isFav ? 'is-favorite' : ''}" title="Favori" onclick="event.stopPropagation(); toggleFavorite('${username}')">&#9733;</button>
