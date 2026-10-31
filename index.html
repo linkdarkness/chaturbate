@@ -363,7 +363,7 @@
     </div>
 
     <div class="header-bottom-row">
-      <select id="tagFilterSelect" class="select-tag" title="Filtrer par étiquette">
+      <select id="tagFilterSelect" class="select-tag" title="Filtrer par étiquette ou favoris">
         <option value="">🏷️ (Tous)</option>
       </select>
 
@@ -537,14 +537,16 @@
       Object.keys(tags).forEach(modelKey => {
         if (!modelKeys.includes(modelKey)) { delete tags[modelKey]; changed = true; }
       });
-      if (selectedTagFilter && !getAllExistingTags().includes(selectedTagFilter)) {
+      favorites = favorites.filter(f => modelKeys.includes(f));
+      
+      const allTags = getAllExistingTags();
+      if (selectedTagFilter && selectedTagFilter !== '__FAV_FILTER__' && !allTags.includes(selectedTagFilter)) {
         selectedTagFilter = '';
       }
       if (changed) saveToLocalStorage();
     }
 
     function getAllExistingTags() {
-      cleanUnusedData();
       const set = new Set();
       Object.values(tags).forEach(list => list.forEach(t => set.add(t)));
       return Array.from(set).sort((a, b) => a.localeCompare(b, 'fr', { sensitivity: 'base' }));
@@ -692,7 +694,17 @@
 
     function updateTagFilterOptions() {
       const existingTags = getAllExistingTags();
+      const favCount = models.filter(m => favorites.includes(m.toLowerCase())).length;
+
       tagFilterSelect.innerHTML = `<option value="">🏷️ (${models.length})</option>`;
+      
+      // Option spéciale Favoris dans le select
+      const favOpt = document.createElement('option');
+      favOpt.value = '__FAV_FILTER__';
+      favOpt.textContent = `★ Favoris (${favCount})`;
+      if (selectedTagFilter === '__FAV_FILTER__') favOpt.selected = true;
+      tagFilterSelect.appendChild(favOpt);
+
       existingTags.forEach(t => {
         const count = models.filter(m => (tags[m.toLowerCase()] || []).includes(t)).length;
         const opt = document.createElement('option');
@@ -769,7 +781,9 @@
       if (searchQuery) {
         displayModels = displayModels.filter(m => m.toLowerCase().includes(searchQuery.toLowerCase()));
       }
-      if (selectedTagFilter) {
+      if (selectedTagFilter === '__FAV_FILTER__') {
+        displayModels = displayModels.filter(m => favorites.includes(m.toLowerCase()));
+      } else if (selectedTagFilter) {
         displayModels = displayModels.filter(m => (tags[m.toLowerCase()] || []).includes(selectedTagFilter));
       }
       displayModels.sort((a, b) => a.localeCompare(b, 'fr', { sensitivity: 'base' }));
