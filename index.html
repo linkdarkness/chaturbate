@@ -185,22 +185,6 @@
       transform: none !important;
     }
 
-    /* PLEIN ÉCRAN GLOBAL DE TOUTE LA PAGE */
-    body:fullscreen {
-      background: #000;
-      overflow-y: auto !important;
-    }
-    body:-webkit-full-screen {
-      background: #000;
-      overflow-y: auto !important;
-    }
-    body:fullscreen header {
-      display: none !important;
-    }
-    body:-webkit-full-screen header {
-      display: none !important;
-    }
-
     /* Grille principale */
     .grid-container {
       display: grid;
@@ -345,27 +329,7 @@
     .suggestion-tag-btn:hover { background: #0284c7; color: #fff; border-color: #0284c7; }
     .modal-actions { display: flex; justify-content: flex-end; gap: 8px; }
 
-    /* Utility hls Box & Player */
-    .hls-box {
-      background: #0f172a;
-      border: 1px solid #334155;
-      border-radius: 6px;
-      padding: 6px 10px;
-      font-family: monospace;
-      font-size: 0.75rem;
-      color: var(--accent);
-      word-break: break-all;
-      user-select: all;
-    }
-    .hls-video-player {
-      width: 100%;
-      aspect-ratio: 16 / 9;
-      background: #000;
-      border-radius: 6px;
-      outline: none;
-    }
-
-    /* Style de la galerie photo dans la modale */
+    /* Galerie photo */
     .gallery-grid {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
@@ -407,8 +371,6 @@
     }
     .gallery-item-delete:hover { background: var(--danger); }
   </style>
-  <!-- Inclusion de HLS.js pour le lecteur intégré -->
-  <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
 </head>
 <body>
   <header>
@@ -426,7 +388,6 @@
       </select>
 
       <button id="layoutToggleBtn" class="btn-action btn-layout" title="Changer le mode d'affichage">⚏</button>
-      <button id="fullscreenGlobalBtn" class="btn-action" title="Plein écran global (Toutes les vidéos)">🖥 🖥</button>
       <button id="exportBtn" class="btn-action" title="Exporter la configuration (JSON)">📥</button>
       <button id="importBtn" class="btn-action" title="Importer une configuration (JSON)">📤</button>
       <input type="file" id="importFileInput" accept=".json" style="display: none;">
@@ -463,19 +424,6 @@
     </div>
   </div>
 
-  <!-- Modal HLS & Lecteur Intégré -->
-  <div id="hlsModal" class="modal-overlay">
-    <div class="modal-card">
-      <div class="modal-title" id="hlsModalTitle">Lecteur HLS</div>
-      <video id="hlsVideoPlayer" class="hls-video-player" controls autoplay playsinline></video>
-      <div id="hlsUrlBox" class="hls-box"></div>
-      <div class="modal-actions">
-        <button class="btn-action" onclick="closeHlsModal()">Fermer</button>
-        <button class="btn-action" style="background: #0284c7; color: #fff; border-color: #0284c7;" id="copyHlsBtn" onclick="copyHlsToClipboard()">📋 Copier le lien</button>
-      </div>
-    </div>
-  </div>
-
   <main class="grid-container" id="grid"></main>
 
   <script>
@@ -489,8 +437,6 @@
     let searchQuery = '';
     let targetTagUser = null;
     let targetGalleryUser = null;
-    let currentHlsUrl = '';
-    let hlsInstance = null;
 
     const grid = document.getElementById('grid');
     const addModelForm = document.getElementById('addModelForm');
@@ -498,7 +444,6 @@
     const clearSearchBtn = document.getElementById('clearSearchBtn');
     const resetBtn = document.getElementById('resetBtn');
     const layoutToggleBtn = document.getElementById('layoutToggleBtn');
-    const fullscreenGlobalBtn = document.getElementById('fullscreenGlobalBtn');
     const exportBtn = document.getElementById('exportBtn');
     const importBtn = document.getElementById('importBtn');
     const importFileInput = document.getElementById('importFileInput');
@@ -518,18 +463,8 @@
     const modalPhotoInput = document.getElementById('modalPhotoInput');
     const addPhotoBtn = document.getElementById('addPhotoBtn');
 
-    const hlsModal = document.getElementById('hlsModal');
-    const hlsModalTitle = document.getElementById('hlsModalTitle');
-    const hlsUrlBox = document.getElementById('hlsUrlBox');
-    const copyHlsBtn = document.getElementById('copyHlsBtn');
-    const hlsVideoPlayer = document.getElementById('hlsVideoPlayer');
-
     function getEmbedUrl(username) {
       return `https://chaturbate.com/embed/${encodeURIComponent(username)}/?embed_video_only=1&mute=1&scrolling=no`;
-    }
-
-    function getHlsUrl(username) {
-      return `https://edge-hls.chaturbate.com/live-hls/playlist/${encodeURIComponent(username.toLowerCase())}/playlist.m3u8`;
     }
 
     function saveToLocalStorage() {
@@ -673,14 +608,6 @@
       }
     };
 
-    fullscreenGlobalBtn.addEventListener('click', () => {
-      if (!document.fullscreenElement) {
-        document.documentElement.requestFullscreen().catch(err => alert(`Erreur plein écran: ${err.message}`));
-      } else {
-        document.exitFullscreen();
-      }
-    });
-
     // --- Modal Galerie Photo ---
     window.openGalleryModal = function(username) {
       targetGalleryUser = username;
@@ -737,52 +664,6 @@
         saveToLocalStorage();
         renderGalleryGrid();
       }
-    };
-
-    // --- Modal HLS & Lecteur Intégré ---
-    window.openHlsModal = function(username) {
-      currentHlsUrl = getHlsUrl(username);
-      hlsModalTitle.textContent = `Lecteur HLS - ${username}`;
-      hlsUrlBox.textContent = currentHlsUrl;
-      copyHlsBtn.textContent = '📋 Copier le lien';
-      hlsModal.classList.add('show');
-
-      if (Hls.isSupported()) {
-        if (hlsInstance) {
-          hlsInstance.destroy();
-        }
-        hlsInstance = new Hls();
-        hlsInstance.loadSource(currentHlsUrl);
-        hlsInstance.attachMedia(hlsVideoPlayer);
-        hlsInstance.on(Hls.Events.MANIFEST_PARSED, () => {
-          hlsVideoPlayer.play().catch(() => {});
-        });
-      } else if (hlsVideoPlayer.canPlayType('application/vnd.apple.mpegurl')) {
-        hlsVideoPlayer.src = currentHlsUrl;
-        hlsVideoPlayer.addEventListener('loadedmetadata', () => {
-          hlsVideoPlayer.play().catch(() => {});
-        });
-      }
-    };
-
-    window.closeHlsModal = function() {
-      hlsModal.classList.remove('show');
-      hlsVideoPlayer.pause();
-      hlsVideoPlayer.src = '';
-      if (hlsInstance) {
-        hlsInstance.destroy();
-        hlsInstance = null;
-      }
-    };
-
-    window.copyHlsToClipboard = function() {
-      if (!currentHlsUrl) return;
-      navigator.clipboard.writeText(currentHlsUrl).then(() => {
-        copyHlsBtn.textContent = '✅ Copié !';
-        setTimeout(() => { copyHlsBtn.textContent = '📋 Copier le lien'; }, 2000);
-      }).catch(err => {
-        alert('Erreur lors de la copie : ' + err);
-      });
     };
 
     window.openTagModal = function(username) {
@@ -891,7 +772,6 @@
             <div class="tags-container">${tagsHtml}</div>
           </div>
           <div class="header-actions">
-            <button class="btn-icon-subtle" title="Lecteur HLS" onclick="event.stopPropagation(); window.openHlsModal('${username}')">🔗</button>
             <button class="btn-icon-subtle" title="Galerie photo" onclick="event.stopPropagation(); window.openGalleryModal('${username}')">🖼️</button>
             <button class="btn-icon-subtle" title="Plein écran vidéo" onclick="event.stopPropagation(); toggleFullscreen('player-${username}')">🖥</button>
             <button class="btn-icon-subtle" title="Ajouter un tag" onclick="event.stopPropagation(); openTagModal('${username}')">🏷</button>
