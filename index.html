@@ -364,6 +364,48 @@
       border-radius: 6px;
       outline: none;
     }
+
+    /* Style de la galerie photo dans la modale */
+    .gallery-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+      gap: 8px;
+      max-height: 240px;
+      overflow-y: auto;
+      padding: 4px;
+      background: #0f172a;
+      border: 1px solid #334155;
+      border-radius: 6px;
+    }
+    .gallery-item {
+      position: relative;
+      aspect-ratio: 1;
+      border-radius: 4px;
+      overflow: hidden;
+      background: #000;
+    }
+    .gallery-item img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    .gallery-item-delete {
+      position: absolute;
+      top: 2px;
+      right: 2px;
+      background: rgba(239, 68, 68, 0.8);
+      color: #fff;
+      border: none;
+      border-radius: 50%;
+      width: 20px;
+      height: 20px;
+      font-size: 0.75rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .gallery-item-delete:hover { background: var(--danger); }
   </style>
   <!-- Inclusion de HLS.js pour le lecteur intégré -->
   <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
@@ -406,6 +448,21 @@
     </div>
   </div>
 
+  <!-- Modal Galerie Photo -->
+  <div id="galleryModal" class="modal-overlay">
+    <div class="modal-card">
+      <div class="modal-title" id="galleryModalTitle">Galerie photo</div>
+      <div id="galleryGrid" class="gallery-grid"></div>
+      <div style="display: flex; gap: 6px;">
+        <input type="url" id="modalPhotoInput" class="modal-input" placeholder="Coller l'URL d'une image (https://...)">
+        <button class="btn-action" style="background: #0284c7; color: #fff; border-color: #0284c7; white-space: nowrap;" id="addPhotoBtn">Ajouter</button>
+      </div>
+      <div class="modal-actions">
+        <button class="btn-action" onclick="closeGalleryModal()">Fermer</button>
+      </div>
+    </div>
+  </div>
+
   <!-- Modal HLS & Lecteur Intégré -->
   <div id="hlsModal" class="modal-overlay">
     <div class="modal-card">
@@ -425,11 +482,13 @@
     let models = JSON.parse(localStorage.getItem('cb_dashboard_models')) || [];
     let favorites = JSON.parse(localStorage.getItem('cb_dashboard_favs')) || [];
     let tags = JSON.parse(localStorage.getItem('cb_dashboard_tags')) || {};
+    let photos = JSON.parse(localStorage.getItem('cb_dashboard_photos')) || {};
     
     let currentLayout = parseInt(localStorage.getItem('cb_dashboard_layout_mode')) || 0; 
     let selectedTagFilter = '';
     let searchQuery = '';
     let targetTagUser = null;
+    let targetGalleryUser = null;
     let currentHlsUrl = '';
     let hlsInstance = null;
 
@@ -453,6 +512,12 @@
     const saveTagBtn = document.getElementById('saveTagBtn');
     const cancelTagBtn = document.getElementById('cancelTagBtn');
 
+    const galleryModal = document.getElementById('galleryModal');
+    const galleryModalTitle = document.getElementById('galleryModalTitle');
+    const galleryGrid = document.getElementById('galleryGrid');
+    const modalPhotoInput = document.getElementById('modalPhotoInput');
+    const addPhotoBtn = document.getElementById('addPhotoBtn');
+
     const hlsModal = document.getElementById('hlsModal');
     const hlsModalTitle = document.getElementById('hlsModalTitle');
     const hlsUrlBox = document.getElementById('hlsUrlBox');
@@ -471,10 +536,11 @@
       localStorage.setItem('cb_dashboard_models', JSON.stringify(models));
       localStorage.setItem('cb_dashboard_favs', JSON.stringify(favorites));
       localStorage.setItem('cb_dashboard_tags', JSON.stringify(tags));
+      localStorage.setItem('cb_dashboard_photos', JSON.stringify(photos));
     }
 
     exportBtn.addEventListener('click', () => {
-      const data = { models, favorites, tags, layoutMode: currentLayout };
+      const data = { models, favorites, tags, photos, layoutMode: currentLayout };
       const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(data, null, 2));
       const downloadAnchor = document.createElement('a');
       downloadAnchor.setAttribute("href", dataStr);
@@ -498,6 +564,7 @@
             models = importedData.models;
             favorites = Array.isArray(importedData.favorites) ? importedData.favorites : [];
             tags = (importedData.tags && typeof importedData.tags === 'object') ? importedData.tags : {};
+            photos = (importedData.photos && typeof importedData.photos === 'object') ? importedData.photos : {};
             if (typeof importedData.layoutMode === 'number') currentLayout = importedData.layoutMode;
             saveToLocalStorage();
             applyLayout();
@@ -555,6 +622,9 @@
       Object.keys(tags).forEach(modelKey => {
         if (!modelKeys.includes(modelKey)) { delete tags[modelKey]; changed = true; }
       });
+      Object.keys(photos).forEach(modelKey => {
+        if (!modelKeys.includes(modelKey)) { delete photos[modelKey]; changed = true; }
+      });
       favorites = favorites.filter(f => modelKeys.includes(f));
       
       const allTags = getAllExistingTags();
@@ -603,7 +673,6 @@
       }
     };
 
-    // Plein écran global de toute la page
     fullscreenGlobalBtn.addEventListener('click', () => {
       if (!document.fullscreenElement) {
         document.documentElement.requestFullscreen().catch(err => alert(`Erreur plein écran: ${err.message}`));
@@ -611,6 +680,64 @@
         document.exitFullscreen();
       }
     });
+
+    // --- Modal Galerie Photo ---
+    window.openGalleryModal = function(username) {
+      targetGalleryUser = username;
+      galleryModalTitle.textContent = `Galerie photo - ${username}`;
+      modalPhotoInput.value = '';
+      renderGalleryGrid();
+      galleryModal.classList.add('show');
+    };
+
+    window.closeGalleryModal = function() {
+      galleryModal.classList.remove('show');
+      targetGalleryUser = null;
+    };
+
+    function renderGalleryGrid() {
+      if (!targetGalleryUser) return;
+      const lower = targetGalleryUser.toLowerCase();
+      const userPhotos = photos[lower] || [];
+      galleryGrid.innerHTML = '';
+
+      if (userPhotos.length === 0) {
+        galleryGrid.innerHTML = '<div class="empty-message" style="grid-column: 1 / -1; padding: 20px;">Aucune photo dans la galerie</div>';
+        return;
+      }
+
+      userPhotos.forEach((url, index) => {
+        const item = document.createElement('div');
+        item.className = 'gallery-item';
+        item.innerHTML = `
+          <img src="${url}" alt="Photo ${index + 1}" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'100\' height=\'100\'><rect width=\'100\' height=\'100\' fill=\'%23334155\'/><text x=\'50%\' y=\'50%\' fill=\'%2394a3b8\' font-size=\'12\' dominant-baseline=\'middle\' text-anchor=\'middle\'>Erreur</text></svg>'">
+          <button class="gallery-item-delete" title="Supprimer" onclick="removePhoto('${targetGalleryUser}', ${index})">&times;</button>
+        `;
+        galleryGrid.appendChild(item);
+      });
+    }
+
+    addPhotoBtn.addEventListener('click', () => {
+      if (!targetGalleryUser) return;
+      const url = modalPhotoInput.value.trim();
+      if (!url) return;
+      const lower = targetGalleryUser.toLowerCase();
+      if (!photos[lower]) photos[lower] = [];
+      photos[lower].push(url);
+      saveToLocalStorage();
+      modalPhotoInput.value = '';
+      renderGalleryGrid();
+    });
+
+    window.removePhoto = function(username, index) {
+      const lower = username.toLowerCase();
+      if (photos[lower]) {
+        photos[lower].splice(index, 1);
+        if (photos[lower].length === 0) delete photos[lower];
+        saveToLocalStorage();
+        renderGalleryGrid();
+      }
+    };
 
     // --- Modal HLS & Lecteur Intégré ---
     window.openHlsModal = function(username) {
@@ -765,6 +892,7 @@
           </div>
           <div class="header-actions">
             <button class="btn-icon-subtle" title="Lecteur HLS" onclick="event.stopPropagation(); window.openHlsModal('${username}')">🔗</button>
+            <button class="btn-icon-subtle" title="Galerie photo" onclick="event.stopPropagation(); window.openGalleryModal('${username}')">🖼️</button>
             <button class="btn-icon-subtle" title="Plein écran vidéo" onclick="event.stopPropagation(); toggleFullscreen('player-${username}')">🖥</button>
             <button class="btn-icon-subtle" title="Ajouter un tag" onclick="event.stopPropagation(); openTagModal('${username}')">🏷</button>
             <button class="btn-fav ${isFav ? 'is-favorite' : ''}" title="Favori" onclick="event.stopPropagation(); toggleFavorite('${username}')">&#9733;</button>
@@ -858,6 +986,7 @@
       models = models.filter(m => m.toLowerCase() !== lower);
       favorites = favorites.filter(f => f !== lower);
       delete tags[lower];
+      delete photos[lower];
       cleanUnusedData();
       saveToLocalStorage();
       renderGrid();
@@ -869,6 +998,7 @@
         models = [];
         favorites = [];
         tags = {};
+        photos = {};
         cleanUnusedData();
         saveToLocalStorage();
         renderGrid();
