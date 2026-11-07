@@ -143,46 +143,56 @@
     .btn-reset:hover { color: var(--danger); border-color: var(--danger); background: rgba(239, 68, 68, 0.1); }
     .btn-layout.active { background: rgba(56, 189, 248, 0.15); border-color: var(--accent); color: var(--accent); }
 
-    /* PLEIN ÉCRAN INDIVIDUEL ADAPTÉ AUX RATIOS */
+    /* PLEIN ÉCRAN INTÉGRAL (OCCUPE 100% DE L'ÉCRAN SANS ESPACE VIDE) */
     .player-container:fullscreen {
       width: 100vw !important;
       height: 100vh !important;
+      max-width: none !important;
+      max-height: none !important;
       background: #000;
       display: flex;
       align-items: center;
       justify-content: center;
-      overflow: auto !important;
+      margin: 0 !important;
+      padding: 0 !important;
+      overflow: hidden !important;
     }
     .player-container:fullscreen iframe {
-      width: 100% !important;
-      height: 100% !important;
-      max-width: 100vw !important;
-      max-height: 100vh !important;
-      object-fit: contain !important;
-      position: relative !important;
-      top: auto !important;
-      left: auto !important;
+      width: 100vw !important;
+      height: 100vh !important;
+      max-width: none !important;
+      max-height: none !important;
+      object-fit: cover !important;
+      position: absolute !important;
+      top: 0 !important;
+      left: 0 !important;
       transform: none !important;
+      border: 0 !important;
     }
     .player-container:-webkit-full-screen {
       width: 100vw !important;
       height: 100vh !important;
+      max-width: none !important;
+      max-height: none !important;
       background: #000;
       display: flex;
       align-items: center;
       justify-content: center;
-      overflow: auto !important;
+      margin: 0 !important;
+      padding: 0 !important;
+      overflow: hidden !important;
     }
     .player-container:-webkit-full-screen iframe {
-      width: 100% !important;
-      height: 100% !important;
-      max-width: 100vw !important;
-      max-height: 100vh !important;
-      object-fit: contain !important;
-      position: relative !important;
-      top: auto !important;
-      left: auto !important;
+      width: 100vw !important;
+      height: 100vh !important;
+      max-width: none !important;
+      max-height: none !important;
+      object-fit: cover !important;
+      position: absolute !important;
+      top: 0 !important;
+      left: 0 !important;
       transform: none !important;
+      border: 0 !important;
     }
 
     /* Grille principale */
@@ -415,8 +425,8 @@
       <div class="modal-title" id="galleryModalTitle">Galerie photo</div>
       <div id="galleryGrid" class="gallery-grid"></div>
       <div style="display: flex; gap: 6px;">
-        <input type="url" id="modalPhotoInput" class="modal-input" placeholder="Coller l'URL d'une image (https://...)">
-        <button class="btn-action" style="background: #0284c7; color: #fff; border-color: #0284c7; white-space: nowrap;" id="addPhotoBtn">Ajouter</button>
+        <input type="file" id="modalPhotoFileInput" accept="image/*" multiple style="display: none;">
+        <button class="btn-action" style="background: #0284c7; color: #fff; border-color: #0284c7; width: 100%;" onclick="document.getElementById('modalPhotoFileInput').click()">📁 Importer des images locales</button>
       </div>
       <div class="modal-actions">
         <button class="btn-action" onclick="closeGalleryModal()">Fermer</button>
@@ -460,8 +470,7 @@
     const galleryModal = document.getElementById('galleryModal');
     const galleryModalTitle = document.getElementById('galleryModalTitle');
     const galleryGrid = document.getElementById('galleryGrid');
-    const modalPhotoInput = document.getElementById('modalPhotoInput');
-    const addPhotoBtn = document.getElementById('addPhotoBtn');
+    const modalPhotoFileInput = document.getElementById('modalPhotoFileInput');
 
     function getEmbedUrl(username) {
       return `https://chaturbate.com/embed/${encodeURIComponent(username)}/?embed_video_only=1&mute=1&scrolling=no`;
@@ -612,7 +621,7 @@
     window.openGalleryModal = function(username) {
       targetGalleryUser = username;
       galleryModalTitle.textContent = `Galerie photo - ${username}`;
-      modalPhotoInput.value = '';
+      modalPhotoFileInput.value = '';
       renderGalleryGrid();
       galleryModal.classList.add('show');
     };
@@ -637,23 +646,35 @@
         const item = document.createElement('div');
         item.className = 'gallery-item';
         item.innerHTML = `
-          <img src="${url}" alt="Photo ${index + 1}" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'100\' height=\'100\'><rect width=\'100\' height=\'100\' fill=\'%23334155\'/><text x=\'50%\' y=\'50%\' fill=\'%2394a3b8\' font-size=\'12\' dominant-baseline=\'middle\' text-anchor=\'middle\'>Erreur</text></svg>'">
+          <img src="${url}" alt="Photo ${index + 1}">
           <button class="gallery-item-delete" title="Supprimer" onclick="removePhoto('${targetGalleryUser}', ${index})">&times;</button>
         `;
         galleryGrid.appendChild(item);
       });
     }
 
-    addPhotoBtn.addEventListener('click', () => {
+    modalPhotoFileInput.addEventListener('change', (e) => {
       if (!targetGalleryUser) return;
-      const url = modalPhotoInput.value.trim();
-      if (!url) return;
+      const files = e.target.files;
+      if (!files || files.length === 0) return;
+
       const lower = targetGalleryUser.toLowerCase();
       if (!photos[lower]) photos[lower] = [];
-      photos[lower].push(url);
-      saveToLocalStorage();
-      modalPhotoInput.value = '';
-      renderGalleryGrid();
+
+      let processedCount = 0;
+      Array.from(files).forEach(file => {
+        const reader = new FileReader();
+        reader.onload = function(uploadEvent) {
+          photos[lower].push(uploadEvent.target.result);
+          processedCount++;
+          if (processedCount === files.length) {
+            saveToLocalStorage();
+            renderGalleryGrid();
+            modalPhotoFileInput.value = '';
+          }
+        };
+        reader.readAsDataURL(file);
+      });
     });
 
     window.removePhoto = function(username, index) {
