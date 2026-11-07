@@ -344,12 +344,12 @@
     .suggestion-tag-btn:hover { background: #0284c7; color: #fff; border-color: #0284c7; }
     .modal-actions { display: flex; justify-content: flex-end; gap: 8px; }
 
-    /* Galerie photo */
+    /* Galerie photo et vidéo */
     .gallery-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+      grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
       gap: 8px;
-      max-height: 240px;
+      max-height: 300px;
       overflow-y: auto;
       padding: 4px;
       background: #0f172a;
@@ -363,7 +363,7 @@
       overflow: hidden;
       background: #000;
     }
-    .gallery-item img {
+    .gallery-item img, .gallery-item video {
       width: 100%;
       height: 100%;
       object-fit: cover;
@@ -376,13 +376,14 @@
       color: #fff;
       border: none;
       border-radius: 50%;
-      width: 20px;
-      height: 20px;
-      font-size: 0.75rem;
+      width: 22px;
+      height: 22px;
+      font-size: 0.85rem;
       cursor: pointer;
       display: flex;
       align-items: center;
       justify-content: center;
+      z-index: 10;
     }
     .gallery-item-delete:hover { background: var(--danger); }
   </style>
@@ -424,14 +425,14 @@
     </div>
   </div>
 
-  <!-- Modal Galerie Photo -->
+  <!-- Modal Galerie Photo & Vidéo -->
   <div id="galleryModal" class="modal-overlay">
     <div class="modal-card">
-      <div class="modal-title" id="galleryModalTitle">Galerie photo</div>
+      <div class="modal-title" id="galleryModalTitle">Galerie médias</div>
       <div id="galleryGrid" class="gallery-grid"></div>
       <div style="display: flex; gap: 6px;">
-        <input type="file" id="modalPhotoFileInput" accept="image/*" multiple style="display: none;">
-        <button class="btn-action" style="background: #0284c7; color: #fff; border-color: #0284c7; width: 100%;" onclick="document.getElementById('modalPhotoFileInput').click()">📁 Importer des images locales</button>
+        <input type="file" id="modalMediaFileInput" accept="image/*,video/*" multiple style="display: none;">
+        <button class="btn-action" style="background: #0284c7; color: #fff; border-color: #0284c7; width: 100%;" onclick="document.getElementById('modalMediaFileInput').click()">📁 Importer des images ou vidéos locales</button>
       </div>
       <div class="modal-actions">
         <button class="btn-action" onclick="closeGalleryModal()">Fermer</button>
@@ -475,7 +476,7 @@
     const galleryModal = document.getElementById('galleryModal');
     const galleryModalTitle = document.getElementById('galleryModalTitle');
     const galleryGrid = document.getElementById('galleryGrid');
-    const modalPhotoFileInput = document.getElementById('modalPhotoFileInput');
+    const modalMediaFileInput = document.getElementById('modalMediaFileInput');
 
     function getEmbedUrl(username) {
       return `https://chaturbate.com/embed/${encodeURIComponent(username)}/?embed_video_only=1&mute=1&scrolling=no`;
@@ -622,11 +623,11 @@
       }
     };
 
-    // --- Modal Galerie Photo ---
+    // --- Modal Galerie Photo & Vidéo ---
     window.openGalleryModal = function(username) {
       targetGalleryUser = username;
-      galleryModalTitle.textContent = `Galerie photo - ${username}`;
-      modalPhotoFileInput.value = '';
+      galleryModalTitle.textContent = `Galerie médias - ${username}`;
+      modalMediaFileInput.value = '';
       renderGalleryGrid();
       galleryModal.classList.add('show');
     };
@@ -639,26 +640,38 @@
     function renderGalleryGrid() {
       if (!targetGalleryUser) return;
       const lower = targetGalleryUser.toLowerCase();
-      const userPhotos = photos[lower] || [];
+      const userMedias = photos[lower] || [];
       galleryGrid.innerHTML = '';
 
-      if (userPhotos.length === 0) {
-        galleryGrid.innerHTML = '<div class="empty-message" style="grid-column: 1 / -1; padding: 20px;">Aucune photo dans la galerie</div>';
+      if (userMedias.length === 0) {
+        galleryGrid.innerHTML = '<div class="empty-message" style="grid-column: 1 / -1; padding: 20px;">Aucun média dans la galerie</div>';
         return;
       }
 
-      userPhotos.forEach((url, index) => {
+      userMedias.forEach((media, index) => {
         const item = document.createElement('div');
         item.className = 'gallery-item';
-        item.innerHTML = `
-          <img src="${url}" alt="Photo ${index + 1}">
-          <button class="gallery-item-delete" title="Supprimer" onclick="removePhoto('${targetGalleryUser}', ${index})">&times;</button>
-        `;
+        
+        const isVideo = typeof media === 'object' ? media.type === 'video' : media.startsWith('data:video/');
+
+        if (isVideo) {
+          const videoUrl = typeof media === 'object' ? media.url : media;
+          item.innerHTML = `
+            <video src="${videoUrl}" controls playsinline></video>
+            <button class="gallery-item-delete" title="Supprimer" onclick="removePhoto('${targetGalleryUser}', ${index})">&times;</button>
+          `;
+        } else {
+          const imgUrl = typeof media === 'object' ? media.url : media;
+          item.innerHTML = `
+            <img src="${imgUrl}" alt="Média ${index + 1}">
+            <button class="gallery-item-delete" title="Supprimer" onclick="removePhoto('${targetGalleryUser}', ${index})">&times;</button>
+          `;
+        }
         galleryGrid.appendChild(item);
       });
     }
 
-    modalPhotoFileInput.addEventListener('change', (e) => {
+    modalMediaFileInput.addEventListener('change', (e) => {
       if (!targetGalleryUser) return;
       const files = e.target.files;
       if (!files || files.length === 0) return;
@@ -669,13 +682,17 @@
       let processedCount = 0;
       Array.from(files).forEach(file => {
         const reader = new FileReader();
+        const isVideoFile = file.type.startsWith('video/');
         reader.onload = function(uploadEvent) {
-          photos[lower].push(uploadEvent.target.result);
+          photos[lower].push({
+            type: isVideoFile ? 'video' : 'image',
+            url: uploadEvent.target.result
+          });
           processedCount++;
           if (processedCount === files.length) {
             saveToLocalStorage();
             renderGalleryGrid();
-            modalPhotoFileInput.value = '';
+            modalMediaFileInput.value = '';
           }
         };
         reader.readAsDataURL(file);
@@ -798,7 +815,7 @@
             <div class="tags-container">${tagsHtml}</div>
           </div>
           <div class="header-actions">
-            <button class="btn-icon-subtle" title="Galerie photo" onclick="event.stopPropagation(); window.openGalleryModal('${username}')">🖼️</button>
+            <button class="btn-icon-subtle" title="Galerie médias" onclick="event.stopPropagation(); window.openGalleryModal('${username}')">🖼️</button>
             <button class="btn-icon-subtle" title="Plein écran vidéo" onclick="event.stopPropagation(); toggleFullscreen('player-${username}')">🖥</button>
             <button class="btn-icon-subtle" title="Ajouter un tag" onclick="event.stopPropagation(); openTagModal('${username}')">🏷</button>
             <button class="btn-fav ${isFav ? 'is-favorite' : ''}" title="Favori" onclick="event.stopPropagation(); toggleFavorite('${username}')">&#9733;</button>
