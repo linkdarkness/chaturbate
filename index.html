@@ -465,7 +465,6 @@
     let favorites = JSON.parse(localStorage.getItem('cb_dashboard_favs')) || [];
     let tags = JSON.parse(localStorage.getItem('cb_dashboard_tags')) || {};
     let photos = JSON.parse(localStorage.getItem('cb_dashboard_photos')) || {};
-    let mutedStates = JSON.parse(localStorage.getItem('cb_dashboard_muted')) || {};
     
     let currentLayout = parseInt(localStorage.getItem('cb_dashboard_layout_mode')) || 0; 
     let selectedTagFilter = '';
@@ -497,9 +496,8 @@
     const galleryGrid = document.getElementById('galleryGrid');
     const modalMediaFileInput = document.getElementById('modalMediaFileInput');
 
-    function getEmbedUrl(username, isMuted) {
-      const muteVal = isMuted ? 1 : 0;
-      return `https://chaturbate.com/embed/${encodeURIComponent(username)}/?embed_video_only=1&mute=${muteVal}&scrolling=no`;
+    function getEmbedUrl(username) {
+      return `https://chaturbate.com/embed/${encodeURIComponent(username)}/?embed_video_only=1&mute=1&scrolling=no`;
     }
 
     function saveToLocalStorage() {
@@ -507,11 +505,10 @@
       localStorage.setItem('cb_dashboard_favs', JSON.stringify(favorites));
       localStorage.setItem('cb_dashboard_tags', JSON.stringify(tags));
       localStorage.setItem('cb_dashboard_photos', JSON.stringify(photos));
-      localStorage.setItem('cb_dashboard_muted', JSON.stringify(mutedStates));
     }
 
     exportBtn.addEventListener('click', () => {
-      const data = { models, favorites, tags, photos, mutedStates, layoutMode: currentLayout };
+      const data = { models, favorites, tags, photos, layoutMode: currentLayout };
       const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(data, null, 2));
       const downloadAnchor = document.createElement('a');
       downloadAnchor.setAttribute("href", dataStr);
@@ -536,7 +533,6 @@
             favorites = Array.isArray(importedData.favorites) ? importedData.favorites : [];
             tags = (importedData.tags && typeof importedData.tags === 'object') ? importedData.tags : {};
             photos = (importedData.photos && typeof importedData.photos === 'object') ? importedData.photos : {};
-            mutedStates = (importedData.mutedStates && typeof importedData.mutedStates === 'object') ? importedData.mutedStates : {};
             if (typeof importedData.layoutMode === 'number') currentLayout = importedData.layoutMode;
             saveToLocalStorage();
             applyLayout();
@@ -597,9 +593,6 @@
       Object.keys(photos).forEach(modelKey => {
         if (!modelKeys.includes(modelKey)) { delete photos[modelKey]; changed = true; }
       });
-      Object.keys(mutedStates).forEach(modelKey => {
-        if (!modelKeys.includes(modelKey)) { delete mutedStates[modelKey]; changed = true; }
-      });
       favorites = favorites.filter(f => modelKeys.includes(f));
       
       const allTags = getAllExistingTags();
@@ -619,7 +612,6 @@
       const lower = username.toLowerCase();
       if (!models.map(m => m.toLowerCase()).includes(lower)) {
         models.push(username);
-        mutedStates[lower] = true;
       }
       searchQuery = '';
       newModelInput.value = '';
@@ -637,32 +629,6 @@
       }
       saveToLocalStorage();
       renderGrid();
-    }
-
-    window.toggleMute = function(username) {
-      const lower = username.toLowerCase();
-      const currentMute = mutedStates[lower] !== false;
-      mutedStates[lower] = !currentMute;
-      saveToLocalStorage();
-
-      const card = document.getElementById(`card-${username}`);
-      if (card) {
-        const iframe = card.querySelector('iframe');
-        const muteBtn = card.querySelector('.btn-mute');
-        const newMuted = mutedStates[lower];
-        const newUrl = getEmbedUrl(username, newMuted);
-        
-        iframe.dataset.src = newUrl;
-        iframe.src = newUrl;
-        
-        if (newMuted) {
-          muteBtn.textContent = '🔇';
-          muteBtn.title = 'Activer le son';
-        } else {
-          muteBtn.textContent = '🔊';
-          muteBtn.title = 'Couper le son';
-        }
-      }
     }
 
     window.toggleFullscreen = function(elementId) {
@@ -847,7 +813,6 @@
     function createCard(username) {
       const lower = username.toLowerCase();
       const isFav = favorites.includes(lower);
-      const isMuted = mutedStates[lower] !== false;
       const modelTags = (tags[lower] || []).sort((a, b) => a.localeCompare(b, 'fr', { sensitivity: 'base' }));
 
       const card = document.createElement('div');
@@ -859,7 +824,7 @@
         `<span class="tag-badge" onclick="event.stopPropagation(); removeTag('${username}', '${t}')">${t} &times;</span>`
       ).join('');
 
-      const embedUrl = getEmbedUrl(username, isMuted);
+      const embedUrl = getEmbedUrl(username);
 
       card.innerHTML = `
         <div class="model-header" id="header-${username}">
@@ -868,7 +833,6 @@
               <span class="model-name">${username}</span>
             </div>
             <div class="header-actions">
-              <button class="btn-icon-subtle btn-mute" title="${isMuted ? 'Activer le son' : 'Couper le son'}" onclick="event.stopPropagation(); window.toggleMute('${username}')">${isMuted ? '🔇' : '🔊'}</button>
               <button class="btn-icon-subtle" title="Galerie médias" onclick="event.stopPropagation(); window.openGalleryModal('${username}')">🖼️</button>
               <button class="btn-icon-subtle" title="Plein écran vidéo" onclick="event.stopPropagation(); toggleFullscreen('player-${username}')">🖥</button>
               <button class="btn-icon-subtle" title="Ajouter un tag" onclick="event.stopPropagation(); openTagModal('${username}')">🏷</button>
@@ -966,7 +930,6 @@
       favorites = favorites.filter(f => f !== lower);
       delete tags[lower];
       delete photos[lower];
-      delete mutedStates[lower];
       cleanUnusedData();
       saveToLocalStorage();
       renderGrid();
@@ -979,7 +942,6 @@
         favorites = [];
         tags = {};
         photos = {};
-        mutedStates = {};
         cleanUnusedData();
         saveToLocalStorage();
         renderGrid();
