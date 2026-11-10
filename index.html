@@ -23,10 +23,10 @@
       display: flex;
       flex-direction: column;
       overflow-x: hidden;
-      padding-top: 10px; /* Petit espace pour laisser respirer la grille */
+      padding-top: 10px;
     }
     
-    /* VOLET DU HAUT MASQUÉ ET AFFICHÉ AU SURVOL */
+    /* VOLET DU HAUT MASQUÉ PAR DÉFAUT (GÉRÉ EN JS) */
     header {
       position: fixed;
       top: 0;
@@ -46,20 +46,18 @@
       box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5);
     }
 
-    /* Déclencheur au survol du haut de la page */
-    body::before {
-      content: '';
+    header.visible {
+      transform: translateY(0);
+    }
+
+    /* Déclencheur invisible sur le haut de l'écran */
+    .top-hover-zone {
       position: fixed;
       top: 0;
       left: 0;
       width: 100%;
-      height: 15px;
+      height: 20px;
       z-index: 99;
-    }
-
-    body:hover header,
-    header:hover {
-      transform: translateY(0);
     }
 
     /* Petite languette visuelle discrète en haut de l'écran */
@@ -76,8 +74,8 @@
       pointer-events: none;
       transition: opacity 0.2s ease;
     }
-    body:hover .header-trigger-pill,
-    header:hover ~ .header-trigger-pill {
+    header.visible ~ .header-trigger-pill,
+    .top-hover-zone:hover ~ .header-trigger-pill {
       opacity: 0;
     }
 
@@ -452,9 +450,10 @@
   </style>
 </head>
 <body>
+  <div class="top-hover-zone" id="topHoverZone"></div>
   <div class="header-trigger-pill" title="Survolez le haut pour afficher le menu"></div>
 
-  <header>
+  <header id="mainHeader">
     <div class="header-top-row">
       <form id="addModelForm" class="input-form">
         <input type="text" id="newModelInput" class="custom-input" placeholder="Ajouter un pseudo..." autocomplete="off" autocapitalize="none" spellcheck="false">
@@ -528,6 +527,29 @@
     const exportBtn = document.getElementById('exportBtn');
     const importBtn = document.getElementById('importBtn');
     const importFileInput = document.getElementById('importFileInput');
+    const mainHeader = document.getElementById('mainHeader');
+    const topHoverZone = document.getElementById('topHoverZone');
+
+    let hideHeaderTimer = null;
+
+    function showHeader() {
+      clearTimeout(hideHeaderTimer);
+      mainHeader.classList.add('visible');
+    }
+
+    function scheduleHideHeader() {
+      clearTimeout(hideHeaderTimer);
+      hideHeaderTimer = setTimeout(() => {
+        // Ne se masque pas si une modale est ouverte ou si la souris est de nouveau sur le header
+        if (!tagModal.classList.contains('show') && !galleryModal.classList.contains('show')) {
+          mainHeader.classList.remove('visible');
+        }
+      }, 3000);
+    }
+
+    topHoverZone.addEventListener('mouseenter', showHeader);
+    mainHeader.addEventListener('mouseenter', showHeader);
+    mainHeader.addEventListener('mouseleave', scheduleHideHeader);
 
     const tagFilterSelect = document.getElementById('tagFilterSelect');
 
@@ -695,11 +717,13 @@
       modalMediaFileInput.value = '';
       renderGalleryGrid();
       galleryModal.classList.add('show');
+      showHeader(); // Garder le header affiché si modale ouverte
     };
 
     window.closeGalleryModal = function() {
       galleryModal.classList.remove('show');
       targetGalleryUser = null;
+      scheduleHideHeader();
     };
 
     function renderGalleryGrid() {
@@ -794,12 +818,14 @@
         });
       }
       tagModal.classList.add('show');
+      showHeader();
       setTimeout(() => modalTagInput.focus(), 50);
     };
 
     function closeTagModal() {
       tagModal.classList.remove('show');
       targetTagUser = null;
+      scheduleHideHeader();
     }
 
     function applyTagToTarget(tagName) {
