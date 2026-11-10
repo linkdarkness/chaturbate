@@ -387,6 +387,69 @@
       display: block; 
     }
 
+    /* OVERLAY MODE CINÉMA / FOCUS */
+    .cinema-overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: rgba(10, 15, 26, 0.95);
+      backdrop-filter: blur(8px);
+      z-index: 2500;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    .cinema-overlay.show {
+      display: flex;
+    }
+    .cinema-container {
+      width: 100%;
+      max-width: 1100px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .cinema-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      width: 100%;
+      padding: 0 4px;
+    }
+    .cinema-title {
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: var(--accent);
+    }
+    .cinema-close-btn {
+      background: transparent;
+      border: none;
+      color: #94a3b8;
+      font-size: 1.8rem;
+      cursor: pointer;
+      line-height: 1;
+      padding: 0 8px;
+    }
+    .cinema-close-btn:hover { color: var(--danger); }
+    .cinema-player {
+      width: 100%;
+      aspect-ratio: 16 / 9;
+      background: #000;
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.8);
+      border: 1px solid #334155;
+    }
+    .cinema-player iframe {
+      width: 100%;
+      height: 100%;
+      border: 0;
+    }
+
     /* Modal générique & Modals */
     .modal-overlay {
       display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(15, 23, 42, 0.85); backdrop-filter: blur(4px); z-index: 3000; justify-content: center; align-items: center;
@@ -476,6 +539,17 @@
     </div>
   </header>
 
+  <!-- Overlay Mode Cinéma -->
+  <div id="cinemaOverlay" class="cinema-overlay">
+    <div class="cinema-container">
+      <div class="cinema-header">
+        <span class="cinema-title" id="cinemaTitle">Mode Cinéma</span>
+        <button class="cinema-close-btn" title="Fermer (Esc)" onclick="closeCinemaMode()">&times;</button>
+      </div>
+      <div class="cinema-player" id="cinemaPlayerContainer"></div>
+    </div>
+  </div>
+
   <!-- Modal Tags -->
   <div id="tagModal" class="modal-overlay">
     <div class="modal-card">
@@ -530,6 +604,10 @@
     const mainHeader = document.getElementById('mainHeader');
     const topHoverZone = document.getElementById('topHoverZone');
 
+    const cinemaOverlay = document.getElementById('cinemaOverlay');
+    const cinemaTitle = document.getElementById('cinemaTitle');
+    const cinemaPlayerContainer = document.getElementById('cinemaPlayerContainer');
+
     let hideHeaderTimer = null;
 
     function showHeader() {
@@ -540,8 +618,7 @@
     function scheduleHideHeader() {
       clearTimeout(hideHeaderTimer);
       hideHeaderTimer = setTimeout(() => {
-        // Ne se masque pas si une modale est ouverte ou si la souris est de nouveau sur le header
-        if (!tagModal.classList.contains('show') && !galleryModal.classList.contains('show')) {
+        if (!tagModal.classList.contains('show') && !galleryModal.classList.contains('show') && !cinemaOverlay.classList.contains('show')) {
           mainHeader.classList.remove('visible');
         }
       }, 3000);
@@ -710,6 +787,28 @@
       }
     };
 
+    // --- Mode Cinéma / Focus ---
+    window.openCinemaMode = function(username) {
+      cinemaTitle.textContent = `Mode Cinéma - ${username}`;
+      const embedUrl = getEmbedUrl(username);
+      cinemaPlayerContainer.innerHTML = `
+        <iframe src="${embedUrl}" sandbox="allow-scripts allow-same-origin allow-presentation allow-forms" scrolling="no" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen" allowfullscreen></iframe>
+      `;
+      cinemaOverlay.classList.add('show');
+    };
+
+    window.closeCinemaMode = function() {
+      cinemaOverlay.classList.remove('show');
+      cinemaPlayerContainer.innerHTML = '';
+      scheduleHideHeader();
+    };
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && cinemaOverlay.classList.contains('show')) {
+        closeCinemaMode();
+      }
+    });
+
     // --- Modal Galerie Photo & Vidéo ---
     window.openGalleryModal = function(username) {
       targetGalleryUser = username;
@@ -717,7 +816,7 @@
       modalMediaFileInput.value = '';
       renderGalleryGrid();
       galleryModal.classList.add('show');
-      showHeader(); // Garder le header affiché si modale ouverte
+      showHeader();
     };
 
     window.closeGalleryModal = function() {
@@ -914,6 +1013,7 @@
               <span class="model-name">${username}</span>
             </div>
             <div class="header-actions">
+              <button class="btn-icon-subtle" title="Mode Cinéma / Focus" onclick="event.stopPropagation(); window.openCinemaMode('${username}')">🎬</button>
               <button class="btn-icon-subtle" title="Galerie médias" onclick="event.stopPropagation(); window.openGalleryModal('${username}')">🖼️</button>
               <button class="btn-icon-subtle" title="Plein écran vidéo" onclick="event.stopPropagation(); toggleFullscreen('player-${username}')">🖥</button>
               <button class="btn-icon-subtle" title="Ajouter un tag" onclick="event.stopPropagation(); openTagModal('${username}')">🏷</button>
