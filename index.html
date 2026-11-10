@@ -595,7 +595,7 @@
       favorites = favorites.filter(f => modelKeys.includes(f));
       
       const allTags = getAllExistingTags();
-      if (selectedTagFilter && selectedTagFilter !== '__FAV_FILTER__' && !allTags.includes(selectedTagFilter)) {
+      if (selectedTagFilter && selectedTagFilter !== '__FAV_FILTER__' && selectedTagFilter !== '__NO_TAG__' && !allTags.includes(selectedTagFilter)) {
         selectedTagFilter = '';
       }
       if (changed) saveToLocalStorage();
@@ -648,7 +648,6 @@
       if (!iframe) return;
 
       try {
-        // Tentative d'utiliser l'élément vidéo interne si accessible, sinon ouverture d'une fenêtre PiP ou popup
         const videoElem = iframe.contentDocument ? iframe.contentDocument.querySelector('video') : null;
         if (videoElem && document.pictureInPictureEnabled) {
           if (document.pictureInPictureElement) {
@@ -657,12 +656,10 @@
             await videoElem.requestPictureInPicture();
           }
         } else {
-          // Alternative : Ouvrir une mini fenêtre pop-up de PiP si l'iframe restreint l'accès direct au DOM
           const embedUrl = getEmbedUrl(username);
           window.open(embedUrl, `pip_${username}`, 'width=450,height=280,resizable=yes,scrollbars=no');
         }
       } catch (err) {
-        // Fallback popup si les restrictions de sécurité bloquent le PiP direct sur l'iframe
         const embedUrl = getEmbedUrl(username);
         window.open(embedUrl, `pip_${username}`, 'width=450,height=280,resizable=yes,scrollbars=no');
       }
@@ -818,6 +815,7 @@
     function updateTagFilterOptions() {
       const existingTags = getAllExistingTags();
       const favCount = models.filter(m => favorites.includes(m.toLowerCase())).length;
+      const noTagCount = models.filter(m => (!tags[m.toLowerCase()] || tags[m.toLowerCase()].length === 0)).length;
 
       tagFilterSelect.innerHTML = `<option value="">🏷️ (${models.length})</option>`;
       
@@ -826,6 +824,12 @@
       favOpt.textContent = `★ Favoris (${favCount})`;
       if (selectedTagFilter === '__FAV_FILTER__') favOpt.selected = true;
       tagFilterSelect.appendChild(favOpt);
+
+      const noTagOpt = document.createElement('option');
+      noTagOpt.value = '__NO_TAG__';
+      noTagOpt.textContent = `🏷️ Sans tag (${noTagCount})`;
+      if (selectedTagFilter === '__NO_TAG__') noTagOpt.selected = true;
+      tagFilterSelect.appendChild(noTagOpt);
 
       existingTags.forEach(t => {
         const count = models.filter(m => (tags[m.toLowerCase()] || []).includes(t)).length;
@@ -908,6 +912,8 @@
       }
       if (selectedTagFilter === '__FAV_FILTER__') {
         displayModels = displayModels.filter(m => favorites.includes(m.toLowerCase()));
+      } else if (selectedTagFilter === '__NO_TAG__') {
+        displayModels = displayModels.filter(m => (!tags[m.toLowerCase()] || tags[m.toLowerCase()].length === 0));
       } else if (selectedTagFilter) {
         displayModels = displayModels.filter(m => (tags[m.toLowerCase()] || []).includes(selectedTagFilter));
       }
