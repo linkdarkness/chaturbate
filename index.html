@@ -300,7 +300,6 @@
     .model-title-area { display: flex; align-items: center; gap: 8px; overflow: hidden; flex: 1; }
     .model-name { font-weight: 600; font-size: 0.9rem; white-space: nowrap; }
     
-    /* SECONDE LIGNE POUR LES TAGS */
     .tags-container { 
       display: flex; 
       gap: 4px; 
@@ -641,6 +640,34 @@
       }
     };
 
+    // --- Fonction Mode PiP (Picture-in-Picture) ---
+    window.togglePip = async function(username) {
+      const card = document.getElementById(`card-${username}`);
+      if (!card) return;
+      const iframe = card.querySelector('iframe');
+      if (!iframe) return;
+
+      try {
+        // Tentative d'utiliser l'élément vidéo interne si accessible, sinon ouverture d'une fenêtre PiP ou popup
+        const videoElem = iframe.contentDocument ? iframe.contentDocument.querySelector('video') : null;
+        if (videoElem && document.pictureInPictureEnabled) {
+          if (document.pictureInPictureElement) {
+            await document.exitPictureInPicture();
+          } else {
+            await videoElem.requestPictureInPicture();
+          }
+        } else {
+          // Alternative : Ouvrir une mini fenêtre pop-up de PiP si l'iframe restreint l'accès direct au DOM
+          const embedUrl = getEmbedUrl(username);
+          window.open(embedUrl, `pip_${username}`, 'width=450,height=280,resizable=yes,scrollbars=no');
+        }
+      } catch (err) {
+        // Fallback popup si les restrictions de sécurité bloquent le PiP direct sur l'iframe
+        const embedUrl = getEmbedUrl(username);
+        window.open(embedUrl, `pip_${username}`, 'width=450,height=280,resizable=yes,scrollbars=no');
+      }
+    };
+
     // --- Modal Galerie Photo & Vidéo ---
     window.openGalleryModal = function(username) {
       targetGalleryUser = username;
@@ -833,6 +860,7 @@
               <span class="model-name">${username}</span>
             </div>
             <div class="header-actions">
+              <button class="btn-icon-subtle" title="Mode PiP (Picture-in-Picture)" onclick="event.stopPropagation(); window.togglePip('${username}')">📌</button>
               <button class="btn-icon-subtle" title="Galerie médias" onclick="event.stopPropagation(); window.openGalleryModal('${username}')">🖼️</button>
               <button class="btn-icon-subtle" title="Plein écran vidéo" onclick="event.stopPropagation(); toggleFullscreen('player-${username}')">🖥</button>
               <button class="btn-icon-subtle" title="Ajouter un tag" onclick="event.stopPropagation(); openTagModal('${username}')">🏷</button>
